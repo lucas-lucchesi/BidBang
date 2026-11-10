@@ -1,14 +1,13 @@
 extends RefCounted
 ## Petits utilitaires d'interface (UI construite en code). Usage : const UI = preload("res://scripts/ui.gd")
 
+const Background = preload("res://scripts/background.gd")
 const BG_COLOR := Color(0.06, 0.07, 0.12, 1)
 
 
 ## Fond + marges + colonne de défilement. Retourne la VBoxContainer où ajouter le contenu.
 static func page(root: Control) -> VBoxContainer:
-	var bg := ColorRect.new()
-	bg.color = BG_COLOR
-	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	var bg: Control = Background.new()
 	root.add_child(bg)
 	var margin := MarginContainer.new()
 	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
