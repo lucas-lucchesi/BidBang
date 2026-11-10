@@ -11,15 +11,10 @@ var _error: Label
 
 func _ready() -> void:
 	var box: VBoxContainer = UI.page(self)
-	var logo := TextureRect.new()
-	logo.texture = load("res://assets/icone_transparent.png")
-	logo.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	logo.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	logo.custom_minimum_size = Vector2(0, 340)
-	box.add_child(logo)
+	UI.label(box, "BidBang", "TitleLabel").horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	UI.label(box, T.t("Enchérissez. Construisez. Survivez."), "MutedLabel").horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	var gap := Control.new()
-	gap.custom_minimum_size = Vector2(0, 30)
+	gap.custom_minimum_size = Vector2(0, 140)
 	box.add_child(gap)
 	_pseudo = UI.field(box, T.t("Pseudo"), Session.pseudo, 16)
 	_pseudo.placeholder_text = T.t("Votre pseudo")
