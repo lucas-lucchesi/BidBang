@@ -148,7 +148,7 @@ def test_fold_twice_rejected(make_game):
 
 
 def test_game_finishes_after_last_item(make_game):
-    g = make_game(item_count=6)
+    g = make_game(n=2, item_count=6)
     for _ in range(6):
         g.on_timeout(g.version)
     assert g.phase == "finished" and g.results is not None

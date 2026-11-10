@@ -91,6 +91,8 @@ class Game:
         self.auction: dict | None = None
         self.last_result: dict | None = None
         self.results: list[dict] | None = None
+        self.votes: dict[str, str] = {}
+        self.vote_deadline: float | None = None
         self.next_item()
 
     # ------------------------------------------------------------ enchères
@@ -195,6 +197,30 @@ class Game:
 
     # ------------------------------------------------------- fin d'enchères
     def finish_auctions(self) -> None:
+        if self.mode == "construction" and len(self.players) >= 3:
+            self.phase = "voting"
+            self.vote_deadline = self.clock() + VOTE_DURATION
+            self._bump()
+        else:
+            self.finish()
+
+    # --------------------------------------------------------------- votes
+    def vote(self, pid: str, target) -> None:
+        if self.phase != "voting":
+            raise GameError("Le vote n'est pas ouvert.")
+        if pid not in self.players:
+            raise GameError("Joueur inconnu.")
+        if target not in self.players:
+            raise GameError("Joueur ciblé inconnu.")
+        if target == pid:
+            raise GameError("Vous ne pouvez pas voter pour vous-même.")
+        self.votes[pid] = target
+        self._bump()
+        if len(self.votes) == len(self.players):
+            self.finish_voting()
+
+    def finish_voting(self) -> None:
+        self.vote_deadline = None
         self.finish()
 
     def finish(self) -> None:
@@ -220,7 +246,7 @@ class Game:
         return out
 
     def votes_received(self, pid: str) -> int:
-        return 0
+        return sum(1 for t in self.votes.values() if t == pid)
 
     def compute_results(self) -> list[dict]:
         rows = []
@@ -258,6 +284,8 @@ class Game:
         a = self.auction
         if self.phase == "auction" and a:
             return a["deadline"]
+        if self.phase == "voting":
+            return self.vote_deadline
         return None
 
     def snapshot(self, viewer_id: str | None = None) -> dict:
@@ -269,6 +297,11 @@ class Game:
                        "required_bid": self.required_bid(),
                        "folded": sorted(a["folded"]),
                        "seconds_left": self.seconds_left()}
+        vote = None
+        if self.phase == "voting":
+            vote = {"seconds_left": max(0.0, self.vote_deadline - self.clock()),
+                    "voted_ids": sorted(self.votes),
+                    "your_vote": self.votes.get(viewer_id)}
         players = []
         for pid in self.order:
             p = self.players[pid]
@@ -282,6 +315,6 @@ class Game:
                 "scenario": self.location["survival"] if self.mode == "survie" else None,
                 "item_index": min(self.index + 1, len(self.items)),
                 "item_total": len(self.items),
-                "auction": auction, "players": players,
+                "auction": auction, "vote": vote, "players": players,
                 "last_result": self.last_result, "results": self.results,
                 "you": viewer_id}
