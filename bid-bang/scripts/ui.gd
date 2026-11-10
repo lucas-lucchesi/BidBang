@@ -49,6 +49,8 @@ static func field(parent: Node, caption: String, value: String = "", max_len: in
 	e.text = value
 	if max_len > 0:
 		e.max_length = max_len
+	e.caret_blink = true
+	e.caret_blink_interval = 0.5
 	parent.add_child(e)
 	return e
 
