@@ -17,7 +17,7 @@ var player_id: String = ""
 var token: String = ""
 var room: Dictionary = {}
 var game: Dictionary = {}
-var net: Node = null
+var net: NetClient = null
 var _leaving: bool = false
 
 

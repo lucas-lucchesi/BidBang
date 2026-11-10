@@ -36,9 +36,9 @@ scripts/game.gd            écran de partie (enchères, vote, résultats), UI co
 scripts/item_card.gd       carte d'objet (texte), fonctions statiques
 theme/main_theme.tres      thème commun (variations : PrimaryButton, TitleLabel, MutedLabel, ErrorLabel, InfoLabel, FieldLabel, HeadingLabel, BackButton)
 server/app/                main.py (routes, WebSocket), rooms.py (salons), game.py (moteur), catalog.py, models.py, errors.py
-server/data/catalog.json   6 lieux, 72 cartes, événements de survie (généré depuis le prototype web)
-server/tests/              25 tests pytest
-jeu_encheres_sans_ia.html  prototype web de référence (gameplay)
+server/data/catalog.json   6 lieux, 72 cartes, épreuves de survie (généré par tools/gen_catalog.py)
+server/tests/              43 tests pytest
+server/tools/gen_catalog.py  génère data/catalog.json (le prototype web de référence n'est pas dans le dépôt)
 ```
 
 ## Lancer et tester
@@ -81,7 +81,7 @@ Jeu : ouvrir le dossier dans Godot 4.7, F5. Pour jouer seul : Déboguer → Pers
 
 ## État actuel
 
-Fait : menu, créer / rejoindre un salon privé, salon d'attente temps réel, catalogue, enchères temps réel, votes, scores, classement, 25 tests serveur.
+Fait : menu, créer / rejoindre un salon privé, salon d'attente temps réel, catalogue, enchères temps réel, votes, scores, classement, 43 tests serveur.
 
 Non vérifié : **la partie Godot n'a jamais été exécutée dans le moteur** (écrite sans accès à Godot). Dernier problème signalé : l'écran de partie « charge en boucle » après « Lancer la partie », avec une erreur autour d'une fonction d'aide de `scripts/item_card.gd`. Les fonctions ont été renommées (`make_label`, `format_money`) et le salon affiche un message si la scène ne s'ouvre pas, mais la cause exacte reste à confirmer avec le message d'erreur de la sortie Godot. **Première tâche : lancer le jeu, lire les erreurs, corriger.**
 
