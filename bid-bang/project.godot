@@ -13,11 +13,23 @@ config_version=5
 config/name="BidBang"
 config/features=PackedStringArray("4.7", "Mobile")
 config/icon="res://icon.svg"
+run/main_scene="res://menu.tscn"
+
+[autoload]
+
+Session="*res://scripts/session.gd"
 
 [display]
 
+window/size/viewport_width=720
+window/size/viewport_height=1280
+window/handheld/orientation=1
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
+
+[gui]
+
+theme/custom="res://theme/main_theme.tres"
 
 [physics]
 
