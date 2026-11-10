@@ -42,6 +42,14 @@ server/tests/              56 tests pytest
 server/tools/gen_catalog.py  génère data/catalog.json (le prototype web de référence n'est pas dans le dépôt)
 ```
 
+## Direction artistique (réaliste, depuis le pixel art)
+
+Style « salle des ventes de luxe » : bois sombre, liserés or, velours bordeaux, polices Cinzel (titres) et Lato (texte). Écran 720x1280 (stretch `canvas_items`, filtre de texture par défaut), fenêtre de bureau 450x800.
+
+- Boutons, panneaux, champs : textures 9-patch générées par `tools/gen_ui_textures.py` (dans `assets/ui_real/`), assemblées en thème par `tools/gen_theme.py` (écrit `theme/main_theme.tres`). Modifier le style = modifier ces scripts, puis les relancer avec `python3` (Pillow requis, hors du venv du serveur).
+- Images réelles à venir (déposer simplement les fichiers, le code les détecte) : `assets/backgrounds/main.png` et `assets/backgrounds/<id du lieu>.png` (fond), `assets/items/<id de la carte>.png` (illustration). Sans image : fond et médaillons dessinés en code. Voir les `README.txt` de ces dossiers.
+- `assets/legacy_pixel/` : ancienne version pixel art (police Press Start 2P, sprites, fond), non utilisée, conservée au cas où.
+
 ## Lancer et tester
 
 ```bash

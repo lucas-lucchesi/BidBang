@@ -1,17 +1,18 @@
 extends Control
-## Illustration d'une carte dessinée en code : halo, rayons tournants, médaillon
-## avec monogramme et étoiles de rareté. La teinte dépend du premier tag.
+## Illustration d'une carte. Si assets/items/<id>.png (ou .jpg / .webp) existe, il est affiché ;
+## sinon un médaillon dessiné en code : halo, anneau, initiale en Cinzel et gemmes de rareté.
 
-const FONT = preload("res://assets/fonts/PressStart2P-Regular.ttf")
-const VS := 2.0
+const FONT = preload("res://assets/fonts/Cinzel.ttf")
+const EXTENSIONS := ["png", "jpg", "webp"]
 const RARITY_COLORS := [
-	Color(0.7, 0.72, 0.8, 1), Color(0.4, 0.7, 1, 1),
-	Color(0.75, 0.5, 1, 1), Color(1, 0.75, 0.25, 1),
+	Color(0.78, 0.78, 0.84, 1), Color(0.4, 0.7, 1, 1),
+	Color(0.75, 0.5, 1, 1), Color(1, 0.78, 0.3, 1),
 ]
 
 var rarity: int = 0
 var title: String = "?"
 var tag: String = ""
+var _tex: Texture2D = null
 var _t: float = 0.0
 
 
@@ -20,8 +21,14 @@ func setup(item: Dictionary) -> void:
 	title = str(item.get("name", "?"))
 	var tags: Array = item.get("tags", [])
 	tag = str(tags[0]) if tags.size() > 0 else ""
-	custom_minimum_size = Vector2(0, 85)
+	custom_minimum_size = Vector2(0, 260)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	for ext in EXTENSIONS:
+		var path: String = "res://assets/items/%s.%s" % [str(item.get("id", "")), ext]
+		if ResourceLoader.exists(path):
+			_tex = load(path)
+			break
+	set_process(_tex == null)
 
 
 func _process(delta: float) -> void:
@@ -31,56 +38,56 @@ func _process(delta: float) -> void:
 
 func _tint() -> Color:
 	var h: float = float(posmod(hash(tag), 360)) / 360.0
-	return Color.from_hsv(h, 0.55, 0.45)
+	return Color.from_hsv(h, 0.45, 0.38)
 
 
-func _star(center: Vector2, r: float, col: Color) -> void:
-	var pts := PackedVector2Array()
-	for i in 10:
-		var rad: float = r if i % 2 == 0 else r * 0.45
-		var a: float = -PI / 2.0 + i * PI / 5.0
-		pts.append(center + Vector2(cos(a), sin(a)) * rad)
-	draw_colored_polygon(pts, col)
+func _gem(center: Vector2, r: float, col: Color) -> void:
+	draw_colored_polygon(PackedVector2Array([center + Vector2(0, -r), center + Vector2(r * 0.8, 0), center + Vector2(0, r), center + Vector2(-r * 0.8, 0)]), col)
+	draw_colored_polygon(PackedVector2Array([center + Vector2(0, -r), center + Vector2(r * 0.8, 0), center]), col.lightened(0.35))
 
 
 func _draw() -> void:
-	var w: float = size.x * VS
-	var h: float = size.y * VS
-	var unit := Vector2(1.0 / VS, 1.0 / VS)
-	draw_set_transform(Vector2.ZERO, 0.0, unit)
-	var center := Vector2(w / 2.0, h / 2.0 - 8.0)
-	var tint: Color = _tint()
+	var w: float = size.x
+	var h: float = size.y
 	var accent: Color = RARITY_COLORS[rarity]
-	draw_rect(Rect2(0, 0, w, h), tint.darkened(0.55))
-	draw_rect(Rect2(0, 0, w, h), Color(0, 0, 0, 0.4), false, 6.0)
-	for k in 7:
-		var f: float = 1.0 - k * 0.12
-		draw_circle(center, h * 0.52 * f, Color(tint.r, tint.g, tint.b, 0.12))
-	var rays: int = 10
-	for i in rays:
-		var a0: float = _t * 0.25 + i * TAU / rays
-		var a1: float = a0 + TAU / rays * 0.4
-		var rr: float = h * 0.5
-		draw_colored_polygon(PackedVector2Array([
-			center, center + Vector2(cos(a0), sin(a0)) * rr, center + Vector2(cos(a1), sin(a1)) * rr,
-		]), Color(accent.r, accent.g, accent.b, 0.07))
+	if _tex != null:
+		var ts: Vector2 = _tex.get_size()
+		var k: float = maxf(w / ts.x, h / ts.y)
+		var dest: Vector2 = ts * k
+		draw_texture_rect_region(_tex, Rect2(Vector2.ZERO, Vector2(w, h)), Rect2((ts - Vector2(w, h) / k) / 2.0, Vector2(w, h) / k))
+		draw_rect(Rect2(0, 0, w, h), accent, false, 3.0)
+		return
+	var tint: Color = _tint()
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = tint.darkened(0.5)
+	sb.set_corner_radius_all(14)
+	sb.border_width_left = 2
+	sb.border_width_top = 2
+	sb.border_width_right = 2
+	sb.border_width_bottom = 2
+	sb.border_color = accent.darkened(0.35)
+	draw_style_box(sb, Rect2(0, 0, w, h))
+	var c := Vector2(w / 2.0, h / 2.0 - 12.0)
+	for i in 8:
+		draw_circle(c, h * 0.52 * (1.0 - i * 0.1), Color(tint.r, tint.g, tint.b, 0.14))
+	for i in 10:
+		var a0: float = _t * 0.2 + i * TAU / 10.0
+		var a1: float = a0 + TAU / 10.0 * 0.35
+		draw_colored_polygon(PackedVector2Array([c, c + Vector2(cos(a0), sin(a0)) * h * 0.55, c + Vector2(cos(a1), sin(a1)) * h * 0.55]), Color(accent.r, accent.g, accent.b, 0.06))
 	var pulse: float = 1.0 + sin(_t * 2.0) * 0.02
-	draw_circle(center, 50.0 * pulse + 6.0, Color(accent.r, accent.g, accent.b, 0.25))
-	draw_circle(center, 50.0 * pulse, Color(0.08, 0.09, 0.15, 1))
-	draw_arc(center, 50.0 * pulse, 0.0, TAU, 48, accent, 5.0, false)
-	draw_arc(center, 41.0 * pulse, 0.0, TAU, 48, Color(accent.r, accent.g, accent.b, 0.35), 2.0, false)
+	var radius: float = 84.0 * pulse
+	draw_circle(c, radius + 10.0, Color(accent.r, accent.g, accent.b, 0.22))
+	draw_circle(c, radius, Color(0.1, 0.05, 0.07, 1))
+	draw_arc(c, radius, 0.0, TAU, 64, accent, 6.0, true)
+	draw_arc(c, radius - 14.0, 0.0, TAU, 64, Color(accent.r, accent.g, accent.b, 0.35), 2.0, true)
 	var letter: String = title.substr(0, 1).to_upper()
-	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-	var rc: Vector2 = center / VS
-	draw_string(FONT, Vector2(rc.x - 20.0, rc.y + 12.0), letter, HORIZONTAL_ALIGNMENT_CENTER, 40.0, 32, accent)
-	draw_set_transform(Vector2.ZERO, 0.0, unit)
+	draw_string(FONT, Vector2(c.x - 50.0, c.y + 28.0), letter, HORIZONTAL_ALIGNMENT_CENTER, 100.0, 84, accent)
 	var n: int = rarity + 1
 	for i in n:
-		var sx: float = center.x + (i - (n - 1) / 2.0) * 24.0
-		_star(Vector2(sx, h - 18.0), 9.0, accent)
+		_gem(Vector2(c.x + (i - (n - 1) / 2.0) * 38.0, h - 30.0), 13.0, accent)
 	if rarity >= 2:
 		for i in 4:
 			var ph: float = _t * 1.3 + i * 1.7
-			var sp := Vector2(w * (0.15 + 0.7 * fmod(i * 0.37 + 0.1, 1.0)), h * (0.2 + 0.5 * fmod(i * 0.53 + 0.2, 1.0)))
+			var sp := Vector2(w * (0.12 + 0.76 * fmod(i * 0.37 + 0.1, 1.0)), h * (0.18 + 0.55 * fmod(i * 0.53 + 0.2, 1.0)))
 			var al: float = maxf(0.0, sin(ph))
-			_star(sp, 5.0 + 4.0 * al, Color(1, 1, 1, 0.8 * al))
+			draw_circle(sp, 3.0 + 4.0 * al, Color(1, 0.95, 0.8, 0.8 * al))
