@@ -8,7 +8,7 @@ FastAPI, salons et parties en mémoire. Le serveur fait autorité : le client en
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements-dev.txt
 python -m pytest
-python -m uvicorn app.main:app --host 0.0.0.0 --port 8000
+python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload   # en dev : relance seul quand le code change
 ```
 
 ## HTTP

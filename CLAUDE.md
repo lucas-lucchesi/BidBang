@@ -49,7 +49,7 @@ cd server
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements-dev.txt
 python -m pytest                                              # tests
-python -m uvicorn app.main:app --host 0.0.0.0 --port 8000     # serveur
+python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload   # serveur (--reload : relance seul quand le code change)
 ```
 
 Utilise `python -m uvicorn` (et non `uvicorn` seul : il peut pointer vers l'installation du système).
