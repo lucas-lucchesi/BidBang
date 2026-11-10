@@ -13,7 +13,9 @@ config_version=5
 config/name="BidBang"
 run/main_scene="res://menu.tscn"
 config/features=PackedStringArray("4.7", "Mobile")
-config/icon="res://icon.svg"
+config/icon="res://assets/icone_transparent.png"
+boot_splash/bg_color=Color(0.06, 0.03, 0.05, 1)
+boot_splash/image="res://assets/icone_transparent.png"
 
 [autoload]
 
