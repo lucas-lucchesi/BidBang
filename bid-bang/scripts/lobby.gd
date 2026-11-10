@@ -11,6 +11,8 @@ var _info: Label
 var _error: Label
 var _start: Button
 var _opening_game: bool = false
+var _copy_hint: Label
+var _copy_tween: Tween
 
 
 func _ready() -> void:
@@ -19,9 +21,14 @@ func _ready() -> void:
 		return
 	_box = UI.page(self, "", 0.5)
 	UI.label(_box, T.t("Salon"), "MutedLabel")
-	var code_label: Label = UI.label(_box, Session.code, "TitleLabel")
-	code_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	UI.label(_box, T.t("Partagez ce code avec vos amis."), "MutedLabel").horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var code_button: Button = UI.button(_box, Session.code, "BackButton")
+	code_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	code_button.add_theme_font_size_override("font_size", 32)
+	code_button.add_theme_color_override("font_color", Color(1, 0.78, 0.3, 1))
+	code_button.add_theme_color_override("font_hover_color", Color(1, 0.9, 0.6, 1))
+	code_button.pressed.connect(_on_copy_code)
+	_copy_hint = UI.label(_box, T.t("Touchez le code pour le copier."), "MutedLabel")
+	_copy_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_info = UI.label(_box, "", "MutedLabel")
 	UI.label(_box, T.t("Joueurs"), "HeadingLabel")
 	_players_box = VBoxContainer.new()
@@ -30,6 +37,7 @@ func _ready() -> void:
 	_error = UI.label(_box, "", "ErrorLabel")
 	_start = UI.button(_box, T.t("Lancer la partie"), "PrimaryButton")
 	_start.pressed.connect(_on_start)
+	UI.settings_button(_box, self)
 	var leave: Button = UI.button(_box, T.t("Quitter le salon"))
 	leave.pressed.connect(_on_leave)
 	Session.room_updated.connect(_refresh)
@@ -78,6 +86,22 @@ func _on_error(message: String) -> void:
 
 func _on_connection_lost() -> void:
 	_error.text = T.t("Connexion perdue avec le serveur.")
+
+
+func _on_copy_code() -> void:
+	DisplayServer.clipboard_set(Session.code)
+	_copy_hint.text = T.t("Code copié !")
+	_copy_hint.theme_type_variation = "InfoLabel"
+	if _copy_tween != null:
+		_copy_tween.kill()
+	_copy_tween = create_tween()
+	_copy_tween.tween_interval(2.0)
+	_copy_tween.tween_callback(_reset_copy_hint)
+
+
+func _reset_copy_hint() -> void:
+	_copy_hint.text = T.t("Touchez le code pour le copier.")
+	_copy_hint.theme_type_variation = "MutedLabel"
 
 
 func _on_start() -> void:
