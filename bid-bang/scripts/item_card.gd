@@ -51,7 +51,7 @@ static func make_card(item: Dictionary, show_price: bool = true, with_art: bool 
 	card.add_child(box)
 	var rarity: int = clampi(int(item.get("rarity", 0)), 0, 3)
 	var sb := StyleBoxFlat.new()
-	sb.bg_color = Color(0.13, 0.15, 0.23, 1)
+	sb.bg_color = Color(0.02, 0.03, 0.06, 0.62)
 	sb.set_corner_radius_all(18)
 	sb.border_width_left = 10
 	sb.border_color = RARITY_COLORS[rarity]
