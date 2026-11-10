@@ -25,6 +25,17 @@ static func pop(node: Control, strength: float = 1.18) -> void:
 	tw.tween_property(node, "scale", Vector2.ONE, 0.3).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 
+## Effet "bouton enfoncé" : léger rétrécissement tant qu'on appuie.
+static func squish(b: BaseButton) -> void:
+	b.resized.connect(func() -> void: b.pivot_offset = b.size / 2.0)
+	b.button_down.connect(func() -> void:
+		var tw: Tween = b.create_tween()
+		tw.tween_property(b, "scale", Vector2(0.94, 0.94), 0.06))
+	b.button_up.connect(func() -> void:
+		var tw: Tween = b.create_tween()
+		tw.tween_property(b, "scale", Vector2.ONE, 0.12).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT))
+
+
 ## Pulsation d'opacité en boucle (alerte).
 static func pulse(node: CanvasItem, low: float = 0.55, period: float = 0.5) -> void:
 	var tw: Tween = node.create_tween().set_loops()

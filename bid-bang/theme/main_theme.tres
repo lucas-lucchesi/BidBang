@@ -1,119 +1,122 @@
 [gd_resource type="Theme" load_steps=40 format=3]
 
 [ext_resource type="Texture2D" path="res://assets/ui/ClassicalButtons.png" id="classical"]
+[ext_resource type="Texture2D" path="res://assets/ui/LongButtons2.png" id="long2"]
 [ext_resource type="FontFile" path="res://assets/fonts/PressStart2P-Regular.ttf" id="font"]
 
 [sub_resource type="StyleBoxTexture" id="btn_normal"]
-texture = ExtResource("classical")
-region_rect = Rect2(0, 16, 16, 16)
+texture = ExtResource("long2")
+region_rect = Rect2(1, 19, 14, 10)
 texture_margin_left = 5.0
-texture_margin_top = 5.0
+texture_margin_top = 4.0
 texture_margin_right = 5.0
-texture_margin_bottom = 7.0
-content_margin_left = 8.0
+texture_margin_bottom = 5.0
+content_margin_left = 10.0
 content_margin_top = 6.0
-content_margin_right = 8.0
-content_margin_bottom = 9.0
+content_margin_right = 10.0
+content_margin_bottom = 8.0
 
 [sub_resource type="StyleBoxTexture" id="btn_hover"]
-texture = ExtResource("classical")
-region_rect = Rect2(0, 32, 16, 16)
+texture = ExtResource("long2")
+region_rect = Rect2(1, 35, 14, 10)
 texture_margin_left = 5.0
-texture_margin_top = 5.0
+texture_margin_top = 4.0
 texture_margin_right = 5.0
-texture_margin_bottom = 7.0
-content_margin_left = 8.0
+texture_margin_bottom = 5.0
+content_margin_left = 10.0
 content_margin_top = 6.0
-content_margin_right = 8.0
-content_margin_bottom = 9.0
+content_margin_right = 10.0
+content_margin_bottom = 8.0
 
 [sub_resource type="StyleBoxTexture" id="btn_pressed"]
-texture = ExtResource("classical")
-region_rect = Rect2(16, 16, 16, 16)
+texture = ExtResource("long2")
+region_rect = Rect2(17, 19, 14, 10)
 texture_margin_left = 5.0
-texture_margin_top = 5.0
+texture_margin_top = 4.0
 texture_margin_right = 5.0
-texture_margin_bottom = 7.0
-content_margin_left = 8.0
+texture_margin_bottom = 5.0
+content_margin_left = 10.0
 content_margin_top = 8.0
-content_margin_right = 8.0
-content_margin_bottom = 7.0
+content_margin_right = 10.0
+content_margin_bottom = 6.0
 
 [sub_resource type="StyleBoxTexture" id="btn_disabled"]
-texture = ExtResource("classical")
-region_rect = Rect2(0, 0, 16, 16)
+texture = ExtResource("long2")
+region_rect = Rect2(1, 3, 14, 10)
 texture_margin_left = 5.0
-texture_margin_top = 5.0
+texture_margin_top = 4.0
 texture_margin_right = 5.0
-texture_margin_bottom = 7.0
-content_margin_left = 8.0
+texture_margin_bottom = 5.0
+content_margin_left = 10.0
 content_margin_top = 6.0
-content_margin_right = 8.0
-content_margin_bottom = 9.0
+content_margin_right = 10.0
+content_margin_bottom = 8.0
 modulate_color = Color(1, 1, 1, 0.6)
 
 [sub_resource type="StyleBoxTexture" id="primary_normal"]
-texture = ExtResource("classical")
-region_rect = Rect2(32, 0, 16, 16)
+texture = ExtResource("long2")
+region_rect = Rect2(33, 3, 14, 10)
 texture_margin_left = 5.0
-texture_margin_top = 5.0
+texture_margin_top = 4.0
 texture_margin_right = 5.0
-texture_margin_bottom = 7.0
-content_margin_left = 10.0
+texture_margin_bottom = 5.0
+content_margin_left = 14.0
 content_margin_top = 8.0
-content_margin_right = 10.0
+content_margin_right = 14.0
 content_margin_bottom = 11.0
+modulate_color = Color(1.45, 1.2, 0.55, 1)
 
 [sub_resource type="StyleBoxTexture" id="primary_hover"]
-texture = ExtResource("classical")
-region_rect = Rect2(32, 0, 16, 16)
+texture = ExtResource("long2")
+region_rect = Rect2(33, 3, 14, 10)
 texture_margin_left = 5.0
-texture_margin_top = 5.0
+texture_margin_top = 4.0
 texture_margin_right = 5.0
-texture_margin_bottom = 7.0
-content_margin_left = 10.0
+texture_margin_bottom = 5.0
+content_margin_left = 14.0
 content_margin_top = 8.0
-content_margin_right = 10.0
+content_margin_right = 14.0
 content_margin_bottom = 11.0
-modulate_color = Color(1.12, 1.08, 1.0, 1)
+modulate_color = Color(1.6, 1.38, 0.72, 1)
 
 [sub_resource type="StyleBoxTexture" id="primary_pressed"]
-texture = ExtResource("classical")
-region_rect = Rect2(48, 0, 16, 16)
+texture = ExtResource("long2")
+region_rect = Rect2(49, 3, 14, 10)
 texture_margin_left = 5.0
-texture_margin_top = 5.0
+texture_margin_top = 4.0
 texture_margin_right = 5.0
-texture_margin_bottom = 7.0
-content_margin_left = 10.0
+texture_margin_bottom = 5.0
+content_margin_left = 14.0
 content_margin_top = 10.0
-content_margin_right = 10.0
+content_margin_right = 14.0
 content_margin_bottom = 9.0
+modulate_color = Color(1.45, 1.2, 0.55, 1)
 
 [sub_resource type="StyleBoxTexture" id="danger_normal"]
-texture = ExtResource("classical")
-region_rect = Rect2(32, 32, 16, 16)
+texture = ExtResource("long2")
+region_rect = Rect2(33, 35, 14, 10)
 texture_margin_left = 5.0
-texture_margin_top = 5.0
+texture_margin_top = 4.0
 texture_margin_right = 5.0
-texture_margin_bottom = 7.0
-content_margin_left = 8.0
+texture_margin_bottom = 5.0
+content_margin_left = 10.0
 content_margin_top = 6.0
-content_margin_right = 8.0
-content_margin_bottom = 9.0
-modulate_color = Color(1.3, 0.75, 0.75, 1)
+content_margin_right = 10.0
+content_margin_bottom = 8.0
+modulate_color = Color(1.5, 0.7, 0.7, 1)
 
 [sub_resource type="StyleBoxTexture" id="danger_pressed"]
-texture = ExtResource("classical")
-region_rect = Rect2(48, 32, 16, 16)
+texture = ExtResource("long2")
+region_rect = Rect2(49, 35, 14, 10)
 texture_margin_left = 5.0
-texture_margin_top = 5.0
+texture_margin_top = 4.0
 texture_margin_right = 5.0
-texture_margin_bottom = 7.0
-content_margin_left = 8.0
+texture_margin_bottom = 5.0
+content_margin_left = 10.0
 content_margin_top = 8.0
-content_margin_right = 8.0
-content_margin_bottom = 7.0
-modulate_color = Color(1.3, 0.75, 0.75, 1)
+content_margin_right = 10.0
+content_margin_bottom = 6.0
+modulate_color = Color(1.5, 0.7, 0.7, 1)
 
 [sub_resource type="StyleBoxTexture" id="card"]
 texture = ExtResource("classical")

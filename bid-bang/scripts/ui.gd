@@ -2,13 +2,15 @@ extends RefCounted
 ## Petits utilitaires d'interface (UI construite en code). Usage : const UI = preload("res://scripts/ui.gd")
 
 const Background = preload("res://scripts/background.gd")
+const Fx = preload("res://scripts/fx.gd")
 const BG_COLOR := Color(0.06, 0.07, 0.12, 1)
 
 
 ## Fond + marges + colonne de défilement. Retourne la VBoxContainer où ajouter le contenu.
-static func page(root: Control, scene_id: String = "") -> VBoxContainer:
+static func page(root: Control, scene_id: String = "", dim: float = 0.0) -> VBoxContainer:
 	var bg: Control = Background.new()
 	bg.set("scene_id", scene_id)
+	bg.set("dim", dim)
 	root.add_child(bg)
 	root.set_meta("background", bg)
 	var margin := MarginContainer.new()
@@ -41,6 +43,8 @@ static func button(parent: Node, content: String, variation: String = "") -> But
 	b.text = content
 	if variation != "":
 		b.theme_type_variation = variation
+	b.custom_minimum_size = Vector2(0, 24)
+	Fx.squish(b)
 	parent.add_child(b)
 	return b
 
@@ -137,5 +141,6 @@ static func icon_button(parent: Node, icon: Vector2i) -> TextureButton:
 	b.ignore_texture_size = true
 	b.stretch_mode = TextureButton.STRETCH_SCALE
 	b.custom_minimum_size = Vector2(32, 32)
+	Fx.squish(b)
 	parent.add_child(b)
 	return b
