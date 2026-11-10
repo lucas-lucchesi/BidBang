@@ -6,9 +6,11 @@ const BG_COLOR := Color(0.06, 0.07, 0.12, 1)
 
 
 ## Fond + marges + colonne de défilement. Retourne la VBoxContainer où ajouter le contenu.
-static func page(root: Control) -> VBoxContainer:
+static func page(root: Control, scene_id: String = "") -> VBoxContainer:
 	var bg: Control = Background.new()
+	bg.set("scene_id", scene_id)
 	root.add_child(bg)
+	root.set_meta("background", bg)
 	var margin := MarginContainer.new()
 	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
 	for side in ["left", "right", "top", "bottom"]:

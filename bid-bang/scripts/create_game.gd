@@ -51,11 +51,18 @@ func _build_form(locations: Array) -> void:
 		ids.append(str(d["id"]))
 	_mode = UI.option(_box, "Mode", ["Construction", "Survie"], ["construction", "survie"], "construction")
 	_theme = UI.option(_box, "Lieu", names, ids, ids[0] if ids.size() > 0 else "")
+	_theme.item_selected.connect(_on_theme_selected)
+	_on_theme_selected(_theme.selected)
 	_budget = UI.option(_box, "Budget", ["1 200 €", "2 200 €", "3 500 €"], [1200, 2200, 3500], 2200)
 	_items = UI.option(_box, "Nombre d'objets", ["6", "8", "10"], [6, 8, 10], 8)
 	_timer = UI.option(_box, "Chrono d'enchère", ["10 s", "15 s", "20 s", "30 s"], [10, 15, 20, 30], 15)
 	_create = UI.button(_box, "Créer le salon", "PrimaryButton")
 	_create.pressed.connect(_on_create)
+
+
+func _on_theme_selected(index: int) -> void:
+	var bg: Control = get_meta("background")
+	bg.call("set_scene", str(_theme.get_item_metadata(index)))
 
 
 func _selected(o: OptionButton) -> Variant:
