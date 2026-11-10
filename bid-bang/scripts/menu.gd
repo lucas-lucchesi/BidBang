@@ -27,6 +27,7 @@ func _ready() -> void:
 	var join: Button = UI.button(box, T.t("Rejoindre avec un code"))
 	join.pressed.connect(_on_join)
 	_build_server_option(box)
+	UI.settings_button(box, self)
 	Fx.stagger_in(box, 0.07)
 	if _pseudo.text == "":
 		_pseudo.grab_focus()

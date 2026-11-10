@@ -116,6 +116,7 @@ func _render(game: Dictionary) -> void:
 			_render_results(game)
 	if phase != "finished":
 		_render_players(game)
+	UI.settings_button(_box, self)
 	var key: String = "%s_%d" % [phase, int(game.get("item_index", 0))]
 	if key != _anim_key:
 		_anim_key = key
