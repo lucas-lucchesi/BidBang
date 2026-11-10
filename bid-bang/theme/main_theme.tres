@@ -111,6 +111,95 @@ content_margin_top = 14.0
 content_margin_right = 16.0
 content_margin_bottom = 14.0
 
+[sub_resource type="StyleBoxFlat" id="card"]
+bg_color = Color(0.13, 0.15, 0.23, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.22, 0.25, 0.36, 1)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+shadow_color = Color(0, 0, 0, 0.35)
+shadow_size = 8
+shadow_offset = Vector2(0, 3)
+content_margin_left = 18.0
+content_margin_top = 16.0
+content_margin_right = 18.0
+content_margin_bottom = 16.0
+
+[sub_resource type="StyleBoxFlat" id="hero"]
+bg_color = Color(0.16, 0.14, 0.12, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.96, 0.62, 0.12, 1)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+shadow_color = Color(0.96, 0.62, 0.12, 0.18)
+shadow_size = 14
+content_margin_left = 20.0
+content_margin_top = 18.0
+content_margin_right = 20.0
+content_margin_bottom = 18.0
+
+[sub_resource type="StyleBoxFlat" id="chip"]
+bg_color = Color(0.2, 0.23, 0.33, 1)
+corner_radius_top_left = 30
+corner_radius_top_right = 30
+corner_radius_bottom_right = 30
+corner_radius_bottom_left = 30
+content_margin_left = 16.0
+content_margin_top = 6.0
+content_margin_right = 16.0
+content_margin_bottom = 6.0
+
+[sub_resource type="StyleBoxFlat" id="chip_money"]
+bg_color = Color(0.1, 0.3, 0.28, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.25, 0.8, 0.68, 1)
+corner_radius_top_left = 30
+corner_radius_top_right = 30
+corner_radius_bottom_right = 30
+corner_radius_bottom_left = 30
+content_margin_left = 18.0
+content_margin_top = 8.0
+content_margin_right = 18.0
+content_margin_bottom = 8.0
+
+[sub_resource type="StyleBoxFlat" id="bar_bg"]
+bg_color = Color(0.12, 0.14, 0.21, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="bar_fill"]
+bg_color = Color(0.25, 0.8, 0.68, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="danger_normal"]
+bg_color = Color(0.35, 0.14, 0.17, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+content_margin_left = 18.0
+content_margin_top = 14.0
+content_margin_right = 18.0
+content_margin_bottom = 14.0
+
 [resource]
 default_font_size = 24
 Label/colors/font_color = Color(0.93, 0.94, 0.97, 1)
@@ -128,7 +217,26 @@ LineEdit/styles/focus = SubResource("field")
 OptionButton/styles/normal = SubResource("btn_normal")
 OptionButton/styles/hover = SubResource("btn_hover")
 OptionButton/styles/pressed = SubResource("btn_pressed")
-PanelContainer/styles/panel = SubResource("panel")
+PanelContainer/styles/panel = SubResource("card")
+HeroPanel/base_type = &"PanelContainer"
+HeroPanel/styles/panel = SubResource("hero")
+ChipPanel/base_type = &"PanelContainer"
+ChipPanel/styles/panel = SubResource("chip")
+MoneyChip/base_type = &"PanelContainer"
+MoneyChip/styles/panel = SubResource("chip_money")
+ProgressBar/styles/background = SubResource("bar_bg")
+ProgressBar/styles/fill = SubResource("bar_fill")
+DangerButton/base_type = &"Button"
+DangerButton/colors/font_color = Color(1, 0.62, 0.62, 1)
+DangerButton/styles/normal = SubResource("danger_normal")
+DangerButton/styles/hover = SubResource("danger_normal")
+DangerButton/styles/pressed = SubResource("danger_normal")
+MoneyLabel/base_type = &"Label"
+MoneyLabel/colors/font_color = Color(0.45, 0.95, 0.82, 1)
+MoneyLabel/font_sizes/font_size = 30
+BigMoneyLabel/base_type = &"Label"
+BigMoneyLabel/colors/font_color = Color(1, 0.78, 0.3, 1)
+BigMoneyLabel/font_sizes/font_size = 52
 PrimaryButton/base_type = &"Button"
 PrimaryButton/colors/font_color = Color(0.1, 0.08, 0.02, 1)
 PrimaryButton/colors/font_hover_color = Color(0.1, 0.08, 0.02, 1)

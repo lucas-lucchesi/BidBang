@@ -1,7 +1,7 @@
 extends RefCounted
 ## Petits utilitaires d'interface (UI construite en code). Usage : const UI = preload("res://scripts/ui.gd")
 
-const BG_COLOR := Color(0.09, 0.1, 0.16, 1)
+const BG_COLOR := Color(0.06, 0.07, 0.12, 1)
 
 
 ## Fond + marges + colonne de défilement. Retourne la VBoxContainer où ajouter le contenu.
@@ -69,3 +69,42 @@ static func option(parent: Node, caption: String, labels: Array, values: Array, 
 static func goto(node: Node, path: String) -> bool:
 	var err: int = node.get_tree().change_scene_to_file(path)
 	return err == OK
+
+
+## Pastille arrondie (variation : "ChipPanel" ou "MoneyChip"). Retourne le Label interne.
+static func chip(parent: Node, content: String, variation: String = "ChipPanel", label_variation: String = "") -> Label:
+	var p := PanelContainer.new()
+	p.theme_type_variation = variation
+	p.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	parent.add_child(p)
+	var l := Label.new()
+	l.text = content
+	if label_variation != "":
+		l.theme_type_variation = label_variation
+	p.add_child(l)
+	return l
+
+
+## Barre de progression colorée (vert -> orange -> rouge selon la fraction restante).
+static func timer_bar(parent: Node) -> ProgressBar:
+	var b := ProgressBar.new()
+	b.show_percentage = false
+	b.min_value = 0.0
+	b.max_value = 1.0
+	b.value = 1.0
+	b.custom_minimum_size = Vector2(0, 16)
+	parent.add_child(b)
+	return b
+
+
+static func set_bar_fraction(bar: ProgressBar, fraction: float) -> void:
+	bar.value = clampf(fraction, 0.0, 1.0)
+	var fill := StyleBoxFlat.new()
+	fill.set_corner_radius_all(8)
+	if fraction > 0.5:
+		fill.bg_color = Color(0.25, 0.8, 0.68, 1)
+	elif fraction > 0.25:
+		fill.bg_color = Color(0.96, 0.62, 0.12, 1)
+	else:
+		fill.bg_color = Color(1, 0.4, 0.4, 1)
+	bar.add_theme_stylebox_override("fill", fill)
