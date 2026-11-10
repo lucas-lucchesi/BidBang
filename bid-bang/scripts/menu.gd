@@ -2,6 +2,8 @@ extends Control
 ## Menu : pseudo, adresse du serveur, créer / rejoindre un salon.
 
 const UI = preload("res://scripts/ui.gd")
+const Logo = preload("res://scripts/logo.gd")
+const Fx = preload("res://scripts/fx.gd")
 
 var _pseudo: LineEdit
 var _server: LineEdit
@@ -10,7 +12,7 @@ var _error: Label
 
 func _ready() -> void:
 	var box: VBoxContainer = UI.page(self)
-	box.add_spacer(false)
+	box.add_child(Logo.new())
 	UI.label(box, "BidBang", "TitleLabel").horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	UI.label(box, "Enchérissez. Construisez. Survivez.", "MutedLabel").horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	var gap := Control.new()
@@ -24,6 +26,7 @@ func _ready() -> void:
 	create.pressed.connect(_on_create)
 	var join: Button = UI.button(box, "Rejoindre avec un code")
 	join.pressed.connect(_on_join)
+	Fx.stagger_in(box, 0.07)
 
 
 func _validate() -> bool:

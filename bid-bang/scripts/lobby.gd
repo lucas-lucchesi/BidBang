@@ -2,6 +2,7 @@ extends Control
 ## Salon d'attente temps réel.
 
 const UI = preload("res://scripts/ui.gd")
+const Fx = preload("res://scripts/fx.gd")
 
 var _box: VBoxContainer
 var _players_box: VBoxContainer
@@ -35,6 +36,7 @@ func _ready() -> void:
 	Session.error_received.connect(_on_error)
 	Session.connection_lost.connect(_on_connection_lost)
 	_refresh(Session.room)
+	Fx.stagger_in(_box, 0.06)
 	if not Session.game.is_empty():
 		_on_game(Session.game)
 
