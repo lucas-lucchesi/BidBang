@@ -6,7 +6,10 @@ const ORB_COUNT := 8
 const FPS_STEP := 1.0 / 30.0
 const VS := 2.0  # les paysages sont dessinés pour 720x1280, puis réduits (jeu en 360x640)
 
+const HALL = preload("res://assets/ui/fond_360.png")
+
 var scene_id: String = ""
+var dim: float = 0.0  # assombrissement du fond image (0 = aucun)
 var _orbs: Array[Dictionary] = []
 var _t: float = 0.0
 var _acc: float = 0.0
@@ -150,9 +153,22 @@ func _draw() -> void:
 			_draw_city(Color(0.04, 0.2, 0.28), Color(0.55, 0.78, 0.72), Color(0.7, 0.95, 1, 0.7), Color(0.1, 0.3, 0.38), Color(0.04, 0.14, 0.2), true)
 		"station":
 			_draw_station()
-		_:
+		"orbes":
 			_draw_default()
+		_:
+			_draw_hall()
+			return
 	draw_rect(Rect2(Vector2.ZERO, _vs), Color(0, 0, 0, 0.22))
+
+
+func _draw_hall() -> void:
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	var tex_size: Vector2 = HALL.get_size()
+	var k: float = maxf(size.x / tex_size.x, size.y / tex_size.y)
+	var dest: Vector2 = tex_size * k
+	draw_texture_rect(HALL, Rect2((size - dest) / 2.0, dest), false)
+	if dim > 0.0:
+		draw_rect(Rect2(Vector2.ZERO, size), Color(0.03, 0.01, 0.02, dim))
 
 
 func _draw_default() -> void:

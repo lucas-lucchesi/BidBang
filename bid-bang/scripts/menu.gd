@@ -2,7 +2,6 @@ extends Control
 ## Menu : pseudo, adresse du serveur, créer / rejoindre un salon.
 
 const UI = preload("res://scripts/ui.gd")
-const Logo = preload("res://scripts/logo.gd")
 const Fx = preload("res://scripts/fx.gd")
 
 var _pseudo: LineEdit
@@ -14,11 +13,10 @@ var _server_panel: VBoxContainer
 
 func _ready() -> void:
 	var box: VBoxContainer = UI.page(self)
-	box.add_child(Logo.new())
 	UI.label(box, "BidBang", "TitleLabel").horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	UI.label(box, "Enchérissez. Construisez. Survivez.", "MutedLabel").horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	var gap := Control.new()
-	gap.custom_minimum_size = Vector2(0, 12)
+	var gap := Control.new()  # laisse voir l'enseigne du fond
+	gap.custom_minimum_size = Vector2(0, 215)
 	box.add_child(gap)
 	_pseudo = UI.field(box, "Pseudo", Session.pseudo, 16)
 	_pseudo.placeholder_text = "Votre pseudo"

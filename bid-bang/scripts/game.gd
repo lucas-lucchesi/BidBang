@@ -26,7 +26,7 @@ func _ready() -> void:
 	if not Session.in_room() or Session.game.is_empty():
 		UI.goto(self, "res://menu.tscn")
 		return
-	_box = UI.page(self, str(Session.game.get("location", {}).get("id", "")))
+	_box = UI.page(self, "", 0.55)
 	Session.game_updated.connect(_render)
 	Session.error_received.connect(_on_error)
 	Session.connection_lost.connect(_on_connection_lost)

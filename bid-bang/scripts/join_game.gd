@@ -9,7 +9,7 @@ var _join: Button
 
 
 func _ready() -> void:
-	var box: VBoxContainer = UI.page(self)
+	var box: VBoxContainer = UI.page(self, "", 0.5)
 	var back: Button = UI.button(box, "< Retour", "BackButton")
 	back.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	back.pressed.connect(func() -> void: UI.goto(self, "res://menu.tscn"))

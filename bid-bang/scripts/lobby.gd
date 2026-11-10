@@ -16,7 +16,7 @@ func _ready() -> void:
 	if not Session.in_room():
 		UI.goto(self, "res://menu.tscn")
 		return
-	_box = UI.page(self, str(Session.room.get("settings", {}).get("theme_id", "")))
+	_box = UI.page(self, "", 0.5)
 	UI.label(_box, "Salon", "MutedLabel")
 	var code_label: Label = UI.label(_box, Session.code, "TitleLabel")
 	code_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
