@@ -118,3 +118,16 @@ def test_survival_threshold_scales_with_item_count(make_game):
 def test_construction_has_no_trials(make_game):
     g = make_game(n=2, mode="construction")
     assert g.trial_results("p1") == []
+
+
+def test_results_list_purchases(make_game):
+    g = make_game(n=2, mode="survie", item_count=6)
+    first = g.auction["item"]
+    g.bid("p1", 50)
+    g.on_timeout(g.version)
+    while g.phase == "auction":
+        g.on_timeout(g.version)
+    row = next(r for r in g.results if r["player_id"] == "p1")
+    assert row["purchases"] == [{"item": first, "price": 50}]
+    assert row["spent"] == 50 and row["budget"] == 2200 - 50
+    assert next(r for r in g.results if r["player_id"] == "p2")["spent"] == 0

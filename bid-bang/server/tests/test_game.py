@@ -1,7 +1,8 @@
 import pytest
 
 from app.errors import GameError
-from app.game import Game, item_points, min_step, synergy_points, validate_settings
+from app.game import (OPENING_MIN, Game, item_points, min_step, synergy_points,
+                      validate_settings)
 
 
 def test_min_step():
@@ -29,21 +30,28 @@ def test_starting_state(make_game):
     g = make_game(item_count=6)
     assert g.phase == "auction" and len(g.items) == 6
     assert g.auction["bid"] is None
-    assert g.required_bid() == g.auction["price"]
+    assert g.required_bid() == OPENING_MIN
 
 
-def test_first_bid_at_least_start_price(make_game):
+def test_opening_bid_is_free(make_game):
     g = make_game()
     price = g.auction["price"]
+    assert price > OPENING_MIN
     with pytest.raises(GameError):
-        g.bid("p1", price - 1)
-    g.bid("p1", price)
-    assert g.auction["leader"] == "p1"
+        g.bid("p1", OPENING_MIN - 1)
+    g.bid("p1", OPENING_MIN)  # bien en dessous du prix de l'objet
+    assert g.auction["leader"] == "p1" and g.auction["bid"] == OPENING_MIN
+
+
+def test_opening_bid_can_exceed_price(make_game):
+    g = make_game()
+    g.bid("p1", g.auction["price"] * 2)
+    assert g.auction["bid"] == g.auction["price"] * 2
 
 
 def test_outbid_needs_step(make_game):
     g = make_game()
-    price, step = g.auction["price"], g.auction["step"]
+    price, step = 100, g.auction["step"]
     g.bid("p1", price)
     with pytest.raises(GameError):
         g.bid("p2", price + step - 1)
@@ -86,6 +94,7 @@ def test_timeout_awards_leader(make_game, clock):
     assert g.on_timeout(g.version)
     assert g.players["p1"]["budget"] == 2200 - price
     assert g.players["p1"]["items"] == [item]
+    assert g.players["p1"]["purchases"] == [{"item": item, "price": price}]
     assert g.last_result["winner_id"] == "p1"
     assert g.index == 1
 
@@ -125,19 +134,29 @@ def test_round_ends_when_nobody_can_outbid(make_game):
 
 def test_round_ends_when_challengers_too_poor(make_game):
     g = make_game(n=2, budget=1200)
-    g.players["p2"]["budget"] = g.auction["price"]  # peut miser le prix, pas surenchérir
-    g.bid("p1", g.auction["price"])
+    g.players["p2"]["budget"] = 100  # peut miser 100, pas surenchérir
+    g.bid("p1", 100)
     assert g.index == 1 and g.last_result["winner_id"] == "p1"
 
 
-def test_cannot_afford_start_price_is_folded(make_game):
+def test_cannot_afford_minimum_is_folded(make_game):
     g = make_game(n=3)
-    g.players["p3"]["budget"] = 0
+    g.players["p3"]["budget"] = OPENING_MIN - 1
     g.index = -1
     g.next_item()
     assert "p3" in g.auction["folded"]
     with pytest.raises(GameError):
-        g.bid("p3", g.auction["price"])
+        g.bid("p3", OPENING_MIN)
+
+
+def test_poor_player_can_still_open_below_price(make_game):
+    g = make_game(n=2)
+    g.players["p2"]["budget"] = 30
+    g.index = -1
+    g.next_item()
+    assert "p2" not in g.auction["folded"]
+    g.bid("p2", 30)
+    assert g.auction["leader"] == "p2"
 
 
 def test_fold_twice_rejected(make_game):

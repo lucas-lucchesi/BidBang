@@ -11,9 +11,9 @@ config_version=5
 [application]
 
 config/name="BidBang"
+run/main_scene="res://menu.tscn"
 config/features=PackedStringArray("4.7", "Mobile")
 config/icon="res://icon.svg"
-run/main_scene="res://menu.tscn"
 
 [autoload]
 
@@ -23,9 +23,9 @@ Session="*res://scripts/session.gd"
 
 window/size/viewport_width=720
 window/size/viewport_height=1280
-window/handheld/orientation=1
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
+window/handheld/orientation=1
 
 [gui]
 

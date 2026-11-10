@@ -32,8 +32,10 @@ Serveur vers client : `room_state` {room}, `game_state` {game} (état complet à
 
 Client vers serveur : `start_game` (hôte), `bid` {amount}, `fold`, `vote` {target}, `leave`, `ping`.
 
-`game_state.game` : `phase` (`auction` / `voting` / `finished`), `mode`, `settings`, `location`, `scenario`, `item_index`, `item_total`, `auction` {item, start_price, step, current_bid, leader_id, required_bid, folded, seconds_left}, `vote` {seconds_left, voted_ids, your_vote}, `players` [{id, pseudo, budget, items, folded}], `last_result`, `results`, `you`.
+`game_state.game` : `phase` (`auction` / `voting` / `finished`), `mode`, `settings`, `location`, `scenario`, `item_index`, `item_total`, `auction` {item, start_price (indicatif), opening_min, step, current_bid, leader_id, required_bid, folded, seconds_left}, `vote` {seconds_left, voted_ids, your_vote}, `players` [{id, pseudo, budget, items, folded}], `last_result`, `results`, `you`.
 
 ## Règles
 
-Voir `app/game.py` (constantes en tête de fichier). Seuils de survie donnés pour 6 objets, mis à l'échelle selon `item_count`. Le catalogue est généré par `python tools/gen_catalog.py`.
+Voir `app/game.py` (constantes en tête de fichier). Mise d'ouverture libre (`opening_min` = 10 € minimum), puis surenchère d'au moins `step`. `players[].purchases` et `results[].purchases` listent `{item, price}` ; `results[].spent` donne le total dépensé.
+
+Seuils de survie donnés pour 6 objets, mis à l'échelle selon `item_count`. Le catalogue est généré par `python tools/gen_catalog.py`.

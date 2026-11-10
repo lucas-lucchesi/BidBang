@@ -12,6 +12,7 @@ from .errors import GameError
 
 RARITY_BONUS = [0, 2, 4, 7]  # Construction seulement
 RARITY_NAMES = ["Commun", "Rare", "Épique", "Légendaire"]
+OPENING_MIN = 10  # mise d'ouverture libre, à partir de ce minimum
 SYNERGY_POINTS = 3
 VOTE_POINTS = 8
 TRIAL_SUCCESS_POINTS = 18
@@ -81,7 +82,7 @@ class Game:
         self.items = self.rng.sample(pool, self.settings["item_count"])
         self.players: dict[str, dict] = {
             pid: {"id": pid, "pseudo": pseudo, "budget": self.settings["budget"],
-                  "items": []}
+                  "items": [], "purchases": []}
             for pid, pseudo in players
         }
         self.order = [pid for pid, _ in players]
@@ -109,8 +110,8 @@ class Game:
         a = {"item": item, "price": item["price"], "step": min_step(item["price"]),
              "bid": None, "leader": None, "folded": set(), "deadline": None}
         for pid, p in self.players.items():
-            if p["budget"] < item["price"]:
-                a["folded"].add(pid)  # ne peut pas payer le prix de départ
+            if p["budget"] < OPENING_MIN:
+                a["folded"].add(pid)  # ne peut pas payer la mise minimale
         self.auction = a
         self._bump()
         if not self._active_challengers():
@@ -120,7 +121,7 @@ class Game:
 
     def required_bid(self) -> int:
         a = self.auction
-        return a["price"] if a["bid"] is None else a["bid"] + a["step"]
+        return OPENING_MIN if a["bid"] is None else a["bid"] + a["step"]
 
     def _active_challengers(self) -> list[str]:
         """Joueurs encore en lice qui pourraient surenchérir (hors meneur)."""
@@ -176,6 +177,7 @@ class Game:
             winner = self.players[a["leader"]]
             winner["budget"] -= a["bid"]
             winner["items"].append(item)
+            winner["purchases"].append({"item": item, "price": a["bid"]})
             self.last_result = {"item": item, "winner_id": a["leader"],
                                 "winner": winner["pseudo"], "price": a["bid"]}
         else:
@@ -261,6 +263,8 @@ class Game:
             rows.append({"player_id": pid, "pseudo": p["pseudo"], "budget": p["budget"],
                          "items_points": items_pts, "synergy_points": syn,
                          "trials": trials, "trial_points": trial_pts,
+                         "purchases": p["purchases"],
+                         "spent": sum(x["price"] for x in p["purchases"]),
                          "votes": votes, "vote_points": vote_pts,
                          "score": items_pts + syn + trial_pts + vote_pts})
         rows.sort(key=lambda r: (-r["score"], -r["budget"]))
@@ -292,7 +296,8 @@ class Game:
         a = self.auction
         auction = None
         if self.phase == "auction" and a:
-            auction = {"item": a["item"], "start_price": a["price"], "step": a["step"],
+            auction = {"item": a["item"], "start_price": a["price"],
+                       "opening_min": OPENING_MIN, "step": a["step"],
                        "current_bid": a["bid"], "leader_id": a["leader"],
                        "required_bid": self.required_bid(),
                        "folded": sorted(a["folded"]),
@@ -306,7 +311,7 @@ class Game:
         for pid in self.order:
             p = self.players[pid]
             players.append({"id": pid, "pseudo": p["pseudo"], "budget": p["budget"],
-                            "items": p["items"],
+                            "items": p["items"], "purchases": p["purchases"],
                             "folded": bool(a and pid in a["folded"])})
         return {"phase": self.phase, "mode": self.mode,
                 "settings": self.settings,
