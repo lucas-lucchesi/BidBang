@@ -45,40 +45,50 @@ static func stats_text(item: Dictionary) -> String:
 	return " - ".join(parts)
 
 
-static func make_card(item: Dictionary, show_price: bool = true, with_art: bool = true) -> PanelContainer:
+static func make_card(item: Dictionary, show_price: bool = true, with_art: bool = true, compact: bool = false) -> PanelContainer:
 	var card := PanelContainer.new()
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 8)
-	card.add_child(box)
+	var root: BoxContainer = HBoxContainer.new() if compact else VBoxContainer.new()
+	root.add_theme_constant_override("separation", 14 if compact else 8)
+	card.add_child(root)
 	var rarity: int = clampi(int(item.get("rarity", 0)), 0, 3)
 	var sb := StyleBoxFlat.new()
 	sb.bg_color = Color(0.13, 0.06, 0.08, 0.96)
 	sb.set_corner_radius_all(16)
-	sb.border_width_left = 10
+	sb.border_width_left = 8 if compact else 10
 	sb.border_width_top = 2
 	sb.border_width_right = 2
-	sb.border_width_bottom = 4
+	sb.border_width_bottom = 3 if compact else 4
 	sb.border_color = RARITY_COLORS[rarity]
 	sb.shadow_color = Color(0, 0, 0, 0.5)
-	sb.shadow_size = 10
-	sb.shadow_offset = Vector2(0, 4)
-	sb.content_margin_left = 26.0
-	sb.content_margin_right = 20.0
-	sb.content_margin_top = 18.0
-	sb.content_margin_bottom = 20.0
+	sb.shadow_size = 8
+	sb.shadow_offset = Vector2(0, 3)
+	sb.content_margin_left = 20.0 if compact else 26.0
+	sb.content_margin_right = 16.0 if compact else 20.0
+	sb.content_margin_top = 12.0 if compact else 18.0
+	sb.content_margin_bottom = 14.0 if compact else 20.0
 	card.add_theme_stylebox_override("panel", sb)
 	if with_art:
 		var art: Control = ItemArt.new()
 		art.call("setup", item)
-		box.add_child(art)
+		if compact:
+			art.custom_minimum_size = Vector2(150, 150)
+			art.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		root.add_child(art)
+	var box: BoxContainer = root
+	if compact:
+		box = VBoxContainer.new()
+		box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		box.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		box.add_theme_constant_override("separation", 4)
+		root.add_child(box)
 	var title: Label = make_label(box, str(item.get("name", "?")), "HeadingLabel")
 	title.add_theme_color_override("font_color", RARITY_COLORS[rarity])
 	var sub: String = T.t(str(RARITY_NAMES[rarity]))
 	if show_price:
 		sub += " - " + format_money(int(item.get("price", 0)))
 	make_label(box, sub, "MutedLabel")
-	make_label(box, stats_text(item))
+	make_label(box, stats_text(item), "MutedLabel" if compact else "")
 	var tags: Array = item.get("tags", [])
-	if tags.size() > 0:
+	if tags.size() > 0 and not compact:
 		make_label(box, T.t("Tags : ") + ", ".join(PackedStringArray(tags)), "MutedLabel")
 	return card

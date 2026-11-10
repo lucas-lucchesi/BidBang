@@ -57,6 +57,7 @@ func _draw() -> void:
 		draw_texture_rect_region(_tex, Rect2(Vector2.ZERO, Vector2(w, h)), Rect2((ts - Vector2(w, h) / k) / 2.0, Vector2(w, h) / k))
 		draw_rect(Rect2(0, 0, w, h), accent, false, 3.0)
 		return
+	var k2: float = clampf(minf(w, h) / 260.0, 0.4, 1.0)  # échelle du médaillon
 	var tint: Color = _tint()
 	var sb := StyleBoxFlat.new()
 	sb.bg_color = tint.darkened(0.5)
@@ -67,7 +68,7 @@ func _draw() -> void:
 	sb.border_width_bottom = 2
 	sb.border_color = accent.darkened(0.35)
 	draw_style_box(sb, Rect2(0, 0, w, h))
-	var c := Vector2(w / 2.0, h / 2.0 - 12.0)
+	var c := Vector2(w / 2.0, h / 2.0 - 12.0 * k2)
 	for i in 8:
 		draw_circle(c, h * 0.52 * (1.0 - i * 0.1), Color(tint.r, tint.g, tint.b, 0.14))
 	for i in 10:
@@ -75,16 +76,16 @@ func _draw() -> void:
 		var a1: float = a0 + TAU / 10.0 * 0.35
 		draw_colored_polygon(PackedVector2Array([c, c + Vector2(cos(a0), sin(a0)) * h * 0.55, c + Vector2(cos(a1), sin(a1)) * h * 0.55]), Color(accent.r, accent.g, accent.b, 0.06))
 	var pulse: float = 1.0 + sin(_t * 2.0) * 0.02
-	var radius: float = 84.0 * pulse
-	draw_circle(c, radius + 10.0, Color(accent.r, accent.g, accent.b, 0.22))
+	var radius: float = 84.0 * k2 * pulse
+	draw_circle(c, radius + 10.0 * k2, Color(accent.r, accent.g, accent.b, 0.22))
 	draw_circle(c, radius, Color(0.1, 0.05, 0.07, 1))
-	draw_arc(c, radius, 0.0, TAU, 64, accent, 6.0, true)
-	draw_arc(c, radius - 14.0, 0.0, TAU, 64, Color(accent.r, accent.g, accent.b, 0.35), 2.0, true)
+	draw_arc(c, radius, 0.0, TAU, 64, accent, maxf(3.0, 6.0 * k2), true)
+	draw_arc(c, radius - 14.0 * k2, 0.0, TAU, 64, Color(accent.r, accent.g, accent.b, 0.35), 2.0, true)
 	var letter: String = title.substr(0, 1).to_upper()
-	draw_string(FONT, Vector2(c.x - 50.0, c.y + 28.0), letter, HORIZONTAL_ALIGNMENT_CENTER, 100.0, 84, accent)
+	draw_string(FONT, Vector2(c.x - 50.0 * k2, c.y + 28.0 * k2), letter, HORIZONTAL_ALIGNMENT_CENTER, 100.0 * k2, int(84.0 * k2), accent)
 	var n: int = rarity + 1
 	for i in n:
-		_gem(Vector2(c.x + (i - (n - 1) / 2.0) * 38.0, h - 30.0), 13.0, accent)
+		_gem(Vector2(c.x + (i - (n - 1) / 2.0) * 38.0 * k2, h - 30.0 * k2), 13.0 * k2, accent)
 	if rarity >= 2:
 		for i in 4:
 			var ph: float = _t * 1.3 + i * 1.7
