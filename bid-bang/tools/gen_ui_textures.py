@@ -1,7 +1,7 @@
 """Génère les textures de l'interface réaliste (bois sombre, or, velours) dans assets/ui_real/.
 
 Usage : python tools/gen_ui_textures.py   (nécessite Pillow)
-Les PNG sont des 9-patch (marge 34 px) utilisés par theme/main_theme.tres.
+Les PNG sont des 9-patch (marge 30 px) utilisés par theme/main_theme.tres.
 Pour remplacer un style par une vraie texture, déposer un PNG du même nom dans assets/ui_real/.
 """
 import random
@@ -49,7 +49,7 @@ def grain(img, amount=7):
     return ImageChops.add(img, Image.merge("RGB", (noise,) * 3), scale=1.0, offset=-128)
 
 
-def button(name, top, bottom, border_top, border_bottom, *, pressed=False, radius=24,
+def button(name, top, bottom, border_top, border_bottom, *, pressed=False, radius=18,
            border=3, alpha=255, glow=None, shape="round", shadow=0.55, glyph=None, gloss=0.18):
     s = SIZE * SS
     pad = PAD * SS
@@ -122,12 +122,12 @@ button("primary_pressed", T((0.74, 0.5, 0.15)), T((0.92, 0.7, 0.3)), T((0.45, 0.
 button("danger_normal", T((0.58, 0.13, 0.15)), T((0.32, 0.05, 0.08)), T(GOLDB[0]), T(GOLDB[1]))
 button("danger_pressed", T((0.25, 0.04, 0.06)), T((0.4, 0.08, 0.1)), T((0.6, 0.45, 0.2)), T((0.8, 0.62, 0.3)), pressed=True, gloss=0.04)
 # panneaux : velours sombre, liseré or fin
-button("card", T((0.17, 0.08, 0.10)), T((0.09, 0.04, 0.06)), T((0.85, 0.68, 0.32)), T((0.5, 0.36, 0.14)), radius=26, border=2, alpha=238, gloss=0.07, shadow=0.7)
-button("hero", T((0.22, 0.11, 0.09)), T((0.11, 0.05, 0.05)), T((1, 0.86, 0.45)), T((0.75, 0.52, 0.18)), radius=28, border=4, alpha=242, gloss=0.1, glow=(240, 180, 70), shadow=0.7)
-button("chip_money", T((0.12, 0.36, 0.23)), T((0.05, 0.2, 0.12)), T(GOLDB[0]), T(GOLDB[1]), radius=34, gloss=0.2)
+button("card", T((0.17, 0.08, 0.10)), T((0.09, 0.04, 0.06)), T((0.85, 0.68, 0.32)), T((0.5, 0.36, 0.14)), radius=20, border=2, alpha=238, gloss=0.07, shadow=0.7)
+button("hero", T((0.22, 0.11, 0.09)), T((0.11, 0.05, 0.05)), T((1, 0.86, 0.45)), T((0.75, 0.52, 0.18)), radius=20, border=4, alpha=242, gloss=0.1, glow=(240, 180, 70), shadow=0.7)
+button("chip_money", T((0.12, 0.36, 0.23)), T((0.05, 0.2, 0.12)), T(GOLDB[0]), T(GOLDB[1]), radius=22, gloss=0.2)
 # champs de saisie : creux sombre
-button("field", T((0.06, 0.03, 0.03)), T((0.12, 0.07, 0.06)), T((0.55, 0.42, 0.22)), T((0.7, 0.55, 0.3)), radius=18, border=2, gloss=0.0, shadow=0.0)
-button("field_focus", T((0.05, 0.03, 0.03)), T((0.11, 0.06, 0.05)), T((1, 0.85, 0.45)), T((1, 0.75, 0.3)), radius=18, border=3, gloss=0.0, shadow=0.0, glow=(255, 200, 90))
+button("field", T((0.06, 0.03, 0.03)), T((0.12, 0.07, 0.06)), T((0.55, 0.42, 0.22)), T((0.7, 0.55, 0.3)), radius=16, border=2, gloss=0.0, shadow=0.0)
+button("field_focus", T((0.05, 0.03, 0.03)), T((0.11, 0.06, 0.05)), T((1, 0.85, 0.45)), T((1, 0.75, 0.3)), radius=16, border=3, gloss=0.0, shadow=0.0, glow=(255, 200, 90))
 # boutons ronds à icône
 for g in ("plus", "minus", "dollar"):
     button(f"icon_{g}", T(WOOD[0]), T(WOOD[1]), T(GOLDB[0]), T(GOLDB[1]), shape="circle", glyph=g, gloss=0.2)

@@ -1,276 +1,289 @@
-[gd_resource type="Theme" load_steps=40 format=3]
+[gd_resource type="Theme" format=3]
 
-[ext_resource type="Texture2D" path="res://assets/ui/ClassicalButtons.png" id="classical"]
-[ext_resource type="Texture2D" path="res://assets/ui/LongButtons2.png" id="long2"]
-[ext_resource type="FontFile" path="res://assets/fonts/PressStart2P-Regular.ttf" id="font"]
+[ext_resource type="Texture2D" path="res://assets/ui_real/btn_normal.png" id="t_btn_normal"]
+[ext_resource type="Texture2D" path="res://assets/ui_real/btn_hover.png" id="t_btn_hover"]
+[ext_resource type="Texture2D" path="res://assets/ui_real/btn_pressed.png" id="t_btn_pressed"]
+[ext_resource type="Texture2D" path="res://assets/ui_real/btn_disabled.png" id="t_btn_disabled"]
+[ext_resource type="Texture2D" path="res://assets/ui_real/primary_normal.png" id="t_primary_normal"]
+[ext_resource type="Texture2D" path="res://assets/ui_real/primary_hover.png" id="t_primary_hover"]
+[ext_resource type="Texture2D" path="res://assets/ui_real/primary_pressed.png" id="t_primary_pressed"]
+[ext_resource type="Texture2D" path="res://assets/ui_real/danger_normal.png" id="t_danger_normal"]
+[ext_resource type="Texture2D" path="res://assets/ui_real/danger_pressed.png" id="t_danger_pressed"]
+[ext_resource type="Texture2D" path="res://assets/ui_real/card.png" id="t_card"]
+[ext_resource type="Texture2D" path="res://assets/ui_real/hero.png" id="t_hero"]
+[ext_resource type="Texture2D" path="res://assets/ui_real/chip_money.png" id="t_chip_money"]
+[ext_resource type="Texture2D" path="res://assets/ui_real/field.png" id="t_field"]
+[ext_resource type="Texture2D" path="res://assets/ui_real/field_focus.png" id="t_field_focus"]
+[ext_resource type="FontFile" path="res://assets/fonts/Lato-Regular.ttf" id="font"]
+[ext_resource type="FontFile" path="res://assets/fonts/Lato-Bold.ttf" id="font_bold"]
+[ext_resource type="FontFile" path="res://assets/fonts/Cinzel.ttf" id="font_title"]
 
 [sub_resource type="StyleBoxTexture" id="btn_normal"]
-texture = ExtResource("long2")
-region_rect = Rect2(1, 19, 14, 10)
-texture_margin_left = 5.0
-texture_margin_top = 4.0
-texture_margin_right = 5.0
-texture_margin_bottom = 5.0
-content_margin_left = 10.0
-content_margin_top = 6.0
-content_margin_right = 10.0
-content_margin_bottom = 8.0
+texture = ExtResource("t_btn_normal")
+texture_margin_left = 30.0
+texture_margin_top = 30.0
+texture_margin_right = 30.0
+texture_margin_bottom = 30.0
+content_margin_left = 34.0
+content_margin_top = 20.0
+content_margin_right = 34.0
+content_margin_bottom = 24.0
+
 
 [sub_resource type="StyleBoxTexture" id="btn_hover"]
-texture = ExtResource("long2")
-region_rect = Rect2(1, 35, 14, 10)
-texture_margin_left = 5.0
-texture_margin_top = 4.0
-texture_margin_right = 5.0
-texture_margin_bottom = 5.0
-content_margin_left = 10.0
-content_margin_top = 6.0
-content_margin_right = 10.0
-content_margin_bottom = 8.0
+texture = ExtResource("t_btn_hover")
+texture_margin_left = 30.0
+texture_margin_top = 30.0
+texture_margin_right = 30.0
+texture_margin_bottom = 30.0
+content_margin_left = 34.0
+content_margin_top = 20.0
+content_margin_right = 34.0
+content_margin_bottom = 24.0
+
 
 [sub_resource type="StyleBoxTexture" id="btn_pressed"]
-texture = ExtResource("long2")
-region_rect = Rect2(17, 19, 14, 10)
-texture_margin_left = 5.0
-texture_margin_top = 4.0
-texture_margin_right = 5.0
-texture_margin_bottom = 5.0
-content_margin_left = 10.0
-content_margin_top = 8.0
-content_margin_right = 10.0
-content_margin_bottom = 6.0
+texture = ExtResource("t_btn_pressed")
+texture_margin_left = 30.0
+texture_margin_top = 30.0
+texture_margin_right = 30.0
+texture_margin_bottom = 30.0
+content_margin_left = 34.0
+content_margin_top = 24.0
+content_margin_right = 34.0
+content_margin_bottom = 20.0
+
 
 [sub_resource type="StyleBoxTexture" id="btn_disabled"]
-texture = ExtResource("long2")
-region_rect = Rect2(1, 3, 14, 10)
-texture_margin_left = 5.0
-texture_margin_top = 4.0
-texture_margin_right = 5.0
-texture_margin_bottom = 5.0
-content_margin_left = 10.0
-content_margin_top = 6.0
-content_margin_right = 10.0
-content_margin_bottom = 8.0
-modulate_color = Color(1, 1, 1, 0.6)
+texture = ExtResource("t_btn_disabled")
+texture_margin_left = 30.0
+texture_margin_top = 30.0
+texture_margin_right = 30.0
+texture_margin_bottom = 30.0
+content_margin_left = 34.0
+content_margin_top = 20.0
+content_margin_right = 34.0
+content_margin_bottom = 24.0
+
 
 [sub_resource type="StyleBoxTexture" id="primary_normal"]
-texture = ExtResource("long2")
-region_rect = Rect2(33, 3, 14, 10)
-texture_margin_left = 5.0
-texture_margin_top = 4.0
-texture_margin_right = 5.0
-texture_margin_bottom = 5.0
-content_margin_left = 14.0
-content_margin_top = 8.0
-content_margin_right = 14.0
-content_margin_bottom = 11.0
-modulate_color = Color(1.45, 1.2, 0.55, 1)
+texture = ExtResource("t_primary_normal")
+texture_margin_left = 30.0
+texture_margin_top = 30.0
+texture_margin_right = 30.0
+texture_margin_bottom = 30.0
+content_margin_left = 40.0
+content_margin_top = 24.0
+content_margin_right = 40.0
+content_margin_bottom = 28.0
+
 
 [sub_resource type="StyleBoxTexture" id="primary_hover"]
-texture = ExtResource("long2")
-region_rect = Rect2(33, 3, 14, 10)
-texture_margin_left = 5.0
-texture_margin_top = 4.0
-texture_margin_right = 5.0
-texture_margin_bottom = 5.0
-content_margin_left = 14.0
-content_margin_top = 8.0
-content_margin_right = 14.0
-content_margin_bottom = 11.0
-modulate_color = Color(1.6, 1.38, 0.72, 1)
+texture = ExtResource("t_primary_hover")
+texture_margin_left = 30.0
+texture_margin_top = 30.0
+texture_margin_right = 30.0
+texture_margin_bottom = 30.0
+content_margin_left = 40.0
+content_margin_top = 24.0
+content_margin_right = 40.0
+content_margin_bottom = 28.0
+
 
 [sub_resource type="StyleBoxTexture" id="primary_pressed"]
-texture = ExtResource("long2")
-region_rect = Rect2(49, 3, 14, 10)
-texture_margin_left = 5.0
-texture_margin_top = 4.0
-texture_margin_right = 5.0
-texture_margin_bottom = 5.0
-content_margin_left = 14.0
-content_margin_top = 10.0
-content_margin_right = 14.0
-content_margin_bottom = 9.0
-modulate_color = Color(1.45, 1.2, 0.55, 1)
+texture = ExtResource("t_primary_pressed")
+texture_margin_left = 30.0
+texture_margin_top = 30.0
+texture_margin_right = 30.0
+texture_margin_bottom = 30.0
+content_margin_left = 40.0
+content_margin_top = 28.0
+content_margin_right = 40.0
+content_margin_bottom = 24.0
+
 
 [sub_resource type="StyleBoxTexture" id="danger_normal"]
-texture = ExtResource("long2")
-region_rect = Rect2(33, 35, 14, 10)
-texture_margin_left = 5.0
-texture_margin_top = 4.0
-texture_margin_right = 5.0
-texture_margin_bottom = 5.0
-content_margin_left = 10.0
-content_margin_top = 6.0
-content_margin_right = 10.0
-content_margin_bottom = 8.0
-modulate_color = Color(1.5, 0.7, 0.7, 1)
+texture = ExtResource("t_danger_normal")
+texture_margin_left = 30.0
+texture_margin_top = 30.0
+texture_margin_right = 30.0
+texture_margin_bottom = 30.0
+content_margin_left = 34.0
+content_margin_top = 20.0
+content_margin_right = 34.0
+content_margin_bottom = 24.0
+
 
 [sub_resource type="StyleBoxTexture" id="danger_pressed"]
-texture = ExtResource("long2")
-region_rect = Rect2(49, 35, 14, 10)
-texture_margin_left = 5.0
-texture_margin_top = 4.0
-texture_margin_right = 5.0
-texture_margin_bottom = 5.0
-content_margin_left = 10.0
-content_margin_top = 8.0
-content_margin_right = 10.0
-content_margin_bottom = 6.0
-modulate_color = Color(1.5, 0.7, 0.7, 1)
+texture = ExtResource("t_danger_pressed")
+texture_margin_left = 30.0
+texture_margin_top = 30.0
+texture_margin_right = 30.0
+texture_margin_bottom = 30.0
+content_margin_left = 34.0
+content_margin_top = 24.0
+content_margin_right = 34.0
+content_margin_bottom = 20.0
+
 
 [sub_resource type="StyleBoxTexture" id="card"]
-texture = ExtResource("classical")
-region_rect = Rect2(0, 0, 16, 16)
-texture_margin_left = 5.0
-texture_margin_top = 5.0
-texture_margin_right = 5.0
-texture_margin_bottom = 7.0
-content_margin_left = 9.0
-content_margin_top = 8.0
-content_margin_right = 9.0
-content_margin_bottom = 11.0
-modulate_color = Color(1, 1, 1, 0.95)
+texture = ExtResource("t_card")
+texture_margin_left = 30.0
+texture_margin_top = 30.0
+texture_margin_right = 30.0
+texture_margin_bottom = 30.0
+content_margin_left = 34.0
+content_margin_top = 28.0
+content_margin_right = 34.0
+content_margin_bottom = 32.0
+
 
 [sub_resource type="StyleBoxTexture" id="hero"]
-texture = ExtResource("classical")
-region_rect = Rect2(0, 16, 16, 16)
-texture_margin_left = 5.0
-texture_margin_top = 5.0
-texture_margin_right = 5.0
-texture_margin_bottom = 7.0
-content_margin_left = 10.0
-content_margin_top = 9.0
-content_margin_right = 10.0
-content_margin_bottom = 12.0
-modulate_color = Color(1.6, 1.25, 0.7, 1)
+texture = ExtResource("t_hero")
+texture_margin_left = 30.0
+texture_margin_top = 30.0
+texture_margin_right = 30.0
+texture_margin_bottom = 30.0
+content_margin_left = 38.0
+content_margin_top = 30.0
+content_margin_right = 38.0
+content_margin_bottom = 34.0
+
 
 [sub_resource type="StyleBoxTexture" id="chip"]
-texture = ExtResource("classical")
-region_rect = Rect2(0, 16, 16, 16)
-texture_margin_left = 5.0
-texture_margin_top = 5.0
-texture_margin_right = 5.0
-texture_margin_bottom = 7.0
-content_margin_left = 6.0
-content_margin_top = 3.0
-content_margin_right = 6.0
-content_margin_bottom = 6.0
+texture = ExtResource("t_btn_normal")
+texture_margin_left = 30.0
+texture_margin_top = 30.0
+texture_margin_right = 30.0
+texture_margin_bottom = 30.0
+content_margin_left = 26.0
+content_margin_top = 14.0
+content_margin_right = 26.0
+content_margin_bottom = 18.0
+
 
 [sub_resource type="StyleBoxTexture" id="chip_money"]
-texture = ExtResource("classical")
-region_rect = Rect2(0, 16, 16, 16)
-texture_margin_left = 5.0
-texture_margin_top = 5.0
-texture_margin_right = 5.0
-texture_margin_bottom = 7.0
-content_margin_left = 6.0
-content_margin_top = 3.0
-content_margin_right = 6.0
-content_margin_bottom = 6.0
-modulate_color = Color(0.7, 1.2, 0.85, 1)
+texture = ExtResource("t_chip_money")
+texture_margin_left = 30.0
+texture_margin_top = 30.0
+texture_margin_right = 30.0
+texture_margin_bottom = 30.0
+content_margin_left = 28.0
+content_margin_top = 14.0
+content_margin_right = 28.0
+content_margin_bottom = 18.0
+
 
 [sub_resource type="StyleBoxTexture" id="field"]
-texture = ExtResource("classical")
-region_rect = Rect2(16, 0, 16, 16)
-texture_margin_left = 5.0
-texture_margin_top = 5.0
-texture_margin_right = 5.0
-texture_margin_bottom = 6.0
-content_margin_left = 6.0
-content_margin_top = 5.0
-content_margin_right = 6.0
-content_margin_bottom = 6.0
+texture = ExtResource("t_field")
+texture_margin_left = 30.0
+texture_margin_top = 30.0
+texture_margin_right = 30.0
+texture_margin_bottom = 30.0
+content_margin_left = 26.0
+content_margin_top = 18.0
+content_margin_right = 26.0
+content_margin_bottom = 20.0
+
 
 [sub_resource type="StyleBoxTexture" id="field_focus"]
-texture = ExtResource("classical")
-region_rect = Rect2(16, 0, 16, 16)
-texture_margin_left = 5.0
-texture_margin_top = 5.0
-texture_margin_right = 5.0
-texture_margin_bottom = 6.0
-content_margin_left = 6.0
-content_margin_top = 5.0
-content_margin_right = 6.0
-content_margin_bottom = 6.0
-modulate_color = Color(1.7, 1.35, 0.8, 1)
+texture = ExtResource("t_field_focus")
+texture_margin_left = 30.0
+texture_margin_top = 30.0
+texture_margin_right = 30.0
+texture_margin_bottom = 30.0
+content_margin_left = 26.0
+content_margin_top = 18.0
+content_margin_right = 26.0
+content_margin_bottom = 20.0
+
 
 [sub_resource type="StyleBoxTexture" id="popup"]
-texture = ExtResource("classical")
-region_rect = Rect2(0, 0, 16, 16)
-texture_margin_left = 5.0
-texture_margin_top = 5.0
-texture_margin_right = 5.0
-texture_margin_bottom = 7.0
-content_margin_left = 6.0
-content_margin_top = 6.0
-content_margin_right = 6.0
-content_margin_bottom = 8.0
+texture = ExtResource("t_card")
+texture_margin_left = 30.0
+texture_margin_top = 30.0
+texture_margin_right = 30.0
+texture_margin_bottom = 30.0
+content_margin_left = 22.0
+content_margin_top = 20.0
+content_margin_right = 22.0
+content_margin_bottom = 22.0
+
 
 [sub_resource type="StyleBoxTexture" id="popup_hover"]
-texture = ExtResource("classical")
-region_rect = Rect2(32, 16, 16, 16)
-texture_margin_left = 5.0
-texture_margin_top = 5.0
-texture_margin_right = 5.0
-texture_margin_bottom = 5.0
-content_margin_left = 4.0
-content_margin_top = 2.0
-content_margin_right = 4.0
-content_margin_bottom = 3.0
+texture = ExtResource("t_btn_hover")
+texture_margin_left = 30.0
+texture_margin_top = 30.0
+texture_margin_right = 30.0
+texture_margin_bottom = 30.0
+content_margin_left = 16.0
+content_margin_top = 8.0
+content_margin_right = 16.0
+content_margin_bottom = 10.0
+
 
 [sub_resource type="StyleBoxEmpty" id="back_normal"]
-content_margin_left = 4.0
-content_margin_top = 4.0
-content_margin_right = 4.0
-content_margin_bottom = 4.0
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
 
 [sub_resource type="StyleBoxFlat" id="bar_bg"]
-bg_color = Color(0.1, 0.06, 0.05, 1)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.03, 0.02, 0.02, 1)
+bg_color = Color(0.05, 0.03, 0.03, 0.9)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.55, 0.42, 0.2, 1)
 
 [sub_resource type="StyleBoxFlat" id="bar_fill"]
-bg_color = Color(0.45, 0.85, 0.55, 1)
+bg_color = Color(0.95, 0.78, 0.35, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
 
-[resource]
-default_font = ExtResource("font")
-default_font_size = 8
-Label/colors/font_color = Color(0.95, 0.88, 0.8, 1)
-Label/colors/font_shadow_color = Color(0.08, 0.04, 0.03, 0.9)
-Label/constants/shadow_offset_x = 1
-Label/constants/shadow_offset_y = 1
-Button/colors/font_color = Color(0.95, 0.88, 0.8, 1)
-Button/colors/font_hover_color = Color(1, 1, 1, 1)
-Button/colors/font_pressed_color = Color(0.85, 0.75, 0.68, 1)
-Button/colors/font_disabled_color = Color(0.55, 0.45, 0.42, 1)
-Button/font_sizes/font_size = 8
+[resource]default_font = ExtResource("font")
+default_font_size = 28
+Label/colors/font_color = Color(0.96, 0.93, 0.86, 1)
+Label/colors/font_shadow_color = Color(0, 0, 0, 0.6)
+Label/constants/shadow_offset_x = 0
+Label/constants/shadow_offset_y = 2
+Button/colors/font_color = Color(0.96, 0.93, 0.86, 1)
+Button/colors/font_hover_color = Color(1, 0.97, 0.88, 1)
+Button/colors/font_pressed_color = Color(0.85, 0.8, 0.7, 1)
+Button/colors/font_disabled_color = Color(0.55, 0.5, 0.45, 1)
+Button/fonts/font = ExtResource("font_bold")
+Button/font_sizes/font_size = 28
 Button/styles/normal = SubResource("btn_normal")
 Button/styles/hover = SubResource("btn_hover")
 Button/styles/pressed = SubResource("btn_pressed")
 Button/styles/disabled = SubResource("btn_disabled")
 Button/styles/focus = SubResource("back_normal")
-LineEdit/colors/font_color = Color(0.95, 0.88, 0.8, 1)
-LineEdit/colors/caret_color = Color(1, 0.8, 0.35, 1)
-LineEdit/colors/selection_color = Color(0.96, 0.62, 0.12, 0.5)
-LineEdit/colors/font_placeholder_color = Color(0.6, 0.5, 0.46, 1)
-LineEdit/constants/caret_width = 2
-LineEdit/font_sizes/font_size = 8
+LineEdit/colors/font_color = Color(0.96, 0.93, 0.86, 1)
+LineEdit/colors/caret_color = Color(1, 0.82, 0.4, 1)
+LineEdit/colors/selection_color = Color(0.9, 0.68, 0.25, 0.5)
+LineEdit/colors/font_placeholder_color = Color(0.6, 0.54, 0.48, 1)
+LineEdit/constants/caret_width = 3
+LineEdit/font_sizes/font_size = 28
 LineEdit/styles/normal = SubResource("field")
 LineEdit/styles/focus = SubResource("field_focus")
 OptionButton/styles/normal = SubResource("btn_normal")
 OptionButton/styles/hover = SubResource("btn_hover")
 OptionButton/styles/pressed = SubResource("btn_pressed")
 OptionButton/styles/focus = SubResource("back_normal")
-OptionButton/colors/font_color = Color(0.95, 0.88, 0.8, 1)
-OptionButton/font_sizes/font_size = 8
+OptionButton/colors/font_color = Color(0.96, 0.93, 0.86, 1)
+OptionButton/fonts/font = ExtResource("font_bold")
+OptionButton/font_sizes/font_size = 28
 PopupMenu/styles/panel = SubResource("popup")
 PopupMenu/styles/hover = SubResource("popup_hover")
-PopupMenu/colors/font_color = Color(0.95, 0.88, 0.8, 1)
+PopupMenu/colors/font_color = Color(0.96, 0.93, 0.86, 1)
 PopupMenu/colors/font_hover_color = Color(1, 1, 1, 1)
-PopupMenu/font_sizes/font_size = 8
+PopupMenu/font_sizes/font_size = 28
 PanelContainer/styles/panel = SubResource("card")
 HeroPanel/base_type = &"PanelContainer"
 HeroPanel/styles/panel = SubResource("hero")
@@ -281,43 +294,49 @@ MoneyChip/styles/panel = SubResource("chip_money")
 ProgressBar/styles/background = SubResource("bar_bg")
 ProgressBar/styles/fill = SubResource("bar_fill")
 PrimaryButton/base_type = &"Button"
-PrimaryButton/colors/font_color = Color(0.2, 0.1, 0.07, 1)
-PrimaryButton/colors/font_hover_color = Color(0.2, 0.1, 0.07, 1)
-PrimaryButton/colors/font_pressed_color = Color(0.2, 0.1, 0.07, 1)
-PrimaryButton/colors/font_disabled_color = Color(0.55, 0.45, 0.42, 1)
-PrimaryButton/font_sizes/font_size = 16
+PrimaryButton/colors/font_color = Color(0.22, 0.12, 0.04, 1)
+PrimaryButton/colors/font_hover_color = Color(0.18, 0.09, 0.02, 1)
+PrimaryButton/colors/font_pressed_color = Color(0.22, 0.12, 0.04, 1)
+PrimaryButton/colors/font_disabled_color = Color(0.5, 0.4, 0.3, 1)
+PrimaryButton/font_sizes/font_size = 34
 PrimaryButton/styles/normal = SubResource("primary_normal")
 PrimaryButton/styles/hover = SubResource("primary_hover")
 PrimaryButton/styles/pressed = SubResource("primary_pressed")
 DangerButton/base_type = &"Button"
-DangerButton/colors/font_color = Color(1, 0.9, 0.85, 1)
+DangerButton/colors/font_color = Color(1, 0.92, 0.88, 1)
 DangerButton/styles/normal = SubResource("danger_normal")
 DangerButton/styles/hover = SubResource("danger_normal")
 DangerButton/styles/pressed = SubResource("danger_pressed")
 BackButton/base_type = &"Button"
-BackButton/colors/font_color = Color(0.85, 0.72, 0.62, 1)
+BackButton/colors/font_color = Color(0.9, 0.78, 0.55, 1)
 BackButton/styles/normal = SubResource("back_normal")
 BackButton/styles/hover = SubResource("back_normal")
 BackButton/styles/pressed = SubResource("back_normal")
 TitleLabel/base_type = &"Label"
-TitleLabel/colors/font_color = Color(1, 0.78, 0.3, 1)
-TitleLabel/colors/font_shadow_color = Color(0.45, 0.2, 0.05, 1)
-TitleLabel/constants/shadow_offset_x = 2
-TitleLabel/constants/shadow_offset_y = 2
-TitleLabel/font_sizes/font_size = 32
+TitleLabel/colors/font_color = Color(0.96, 0.8, 0.4, 1)
+TitleLabel/colors/font_shadow_color = Color(0, 0, 0, 0.75)
+TitleLabel/constants/shadow_offset_y = 4
+TitleLabel/fonts/font = ExtResource("font_title")
+TitleLabel/font_sizes/font_size = 80
 HeadingLabel/base_type = &"Label"
-HeadingLabel/font_sizes/font_size = 16
+HeadingLabel/fonts/font = ExtResource("font_bold")
+HeadingLabel/font_sizes/font_size = 36
 MutedLabel/base_type = &"Label"
-MutedLabel/colors/font_color = Color(0.8, 0.68, 0.6, 1)
+MutedLabel/colors/font_color = Color(0.78, 0.72, 0.64, 1)
+MutedLabel/font_sizes/font_size = 24
 ErrorLabel/base_type = &"Label"
-ErrorLabel/colors/font_color = Color(1, 0.5, 0.45, 1)
+ErrorLabel/colors/font_color = Color(1, 0.52, 0.47, 1)
 InfoLabel/base_type = &"Label"
-InfoLabel/colors/font_color = Color(0.65, 0.92, 0.55, 1)
+InfoLabel/colors/font_color = Color(0.65, 0.92, 0.6, 1)
 FieldLabel/base_type = &"Label"
-FieldLabel/colors/font_color = Color(1, 0.85, 0.55, 1)
+FieldLabel/colors/font_color = Color(0.95, 0.8, 0.5, 1)
+FieldLabel/fonts/font = ExtResource("font_bold")
+FieldLabel/font_sizes/font_size = 24
 MoneyLabel/base_type = &"Label"
-MoneyLabel/colors/font_color = Color(0.7, 1, 0.8, 1)
-MoneyLabel/font_sizes/font_size = 16
+MoneyLabel/colors/font_color = Color(0.7, 0.98, 0.8, 1)
+MoneyLabel/fonts/font = ExtResource("font_bold")
+MoneyLabel/font_sizes/font_size = 32
 BigMoneyLabel/base_type = &"Label"
-BigMoneyLabel/colors/font_color = Color(1, 0.8, 0.3, 1)
-BigMoneyLabel/font_sizes/font_size = 24
+BigMoneyLabel/colors/font_color = Color(1, 0.83, 0.4, 1)
+BigMoneyLabel/fonts/font = ExtResource("font_bold")
+BigMoneyLabel/font_sizes/font_size = 64

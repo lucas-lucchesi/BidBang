@@ -21,11 +21,11 @@ Session="*res://scripts/session.gd"
 
 [display]
 
-window/size/viewport_width=360
-window/size/viewport_height=640
+window/size/viewport_width=720
+window/size/viewport_height=1280
 window/size/window_width_override=450
 window/size/window_height_override=800
-window/stretch/mode="viewport"
+window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 window/handheld/orientation=1
 
@@ -38,8 +38,6 @@ theme/custom="res://theme/main_theme.tres"
 3d/physics_engine="Jolt Physics"
 
 [rendering]
-
-textures/canvas_textures/default_texture_filter=0
 
 rendering_device/driver.windows="d3d12"
 renderer/rendering_method="mobile"
