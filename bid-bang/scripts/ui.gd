@@ -3,6 +3,7 @@ extends RefCounted
 
 const Background = preload("res://scripts/background.gd")
 const Fx = preload("res://scripts/fx.gd")
+const T = preload("res://scripts/texts.gd")
 const BG_COLOR := Color(0.06, 0.07, 0.12, 1)
 
 
@@ -30,7 +31,7 @@ static func page(root: Control, scene_id: String = "", dim: float = 0.0) -> VBox
 
 static func label(parent: Node, content: String, variation: String = "") -> Label:
 	var l := Label.new()
-	l.text = content
+	l.text = T.t(content)
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	if variation != "":
 		l.theme_type_variation = variation
@@ -40,7 +41,7 @@ static func label(parent: Node, content: String, variation: String = "") -> Labe
 
 static func button(parent: Node, content: String, variation: String = "") -> Button:
 	var b := Button.new()
-	b.text = content
+	b.text = T.t(content)
 	if variation != "":
 		b.theme_type_variation = variation
 	# boutons compacts : à la largeur de leur texte (jamais pleine largeur)
@@ -67,7 +68,7 @@ static func option(parent: Node, caption: String, labels: Array, values: Array, 
 	label(parent, caption, "FieldLabel")
 	var o := OptionButton.new()
 	for i in labels.size():
-		o.add_item(str(labels[i]), i)
+		o.add_item(T.t(str(labels[i])), i)
 		o.set_item_metadata(i, values[i])
 		if values[i] == selected:
 			o.select(i)

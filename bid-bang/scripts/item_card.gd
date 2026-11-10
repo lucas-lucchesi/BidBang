@@ -3,6 +3,7 @@ extends RefCounted
 ## Usage : const ItemCard = preload("res://scripts/item_card.gd")
 
 const ItemArt = preload("res://scripts/item_art.gd")
+const T = preload("res://scripts/texts.gd")
 const STAT_NAMES := {
 	"confort": "Confort", "style": "Style", "utilite": "Utilité",
 	"securite": "Sécurité", "sante": "Santé",
@@ -26,7 +27,7 @@ static func format_money(amount: int) -> String:
 
 static func make_label(parent: Node, content: String, variation: String = "") -> Label:
 	var l := Label.new()
-	l.text = content
+	l.text = T.t(content)
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	if variation != "":
 		l.theme_type_variation = variation
@@ -40,7 +41,7 @@ static func stats_text(item: Dictionary) -> String:
 	for key in STAT_NAMES:
 		var v: int = int(stats.get(key, 0))
 		if v > 0:
-			parts.append("%s %d" % [STAT_NAMES[key], v])
+			parts.append("%s %d" % [T.t(STAT_NAMES[key]), v])
 	return " - ".join(parts)
 
 
@@ -68,12 +69,12 @@ static func make_card(item: Dictionary, show_price: bool = true, with_art: bool 
 		box.add_child(art)
 	var title: Label = make_label(box, str(item.get("name", "?")), "HeadingLabel")
 	title.add_theme_color_override("font_color", RARITY_COLORS[rarity])
-	var sub: String = str(RARITY_NAMES[rarity])
+	var sub: String = T.t(str(RARITY_NAMES[rarity]))
 	if show_price:
 		sub += " - " + format_money(int(item.get("price", 0)))
 	make_label(box, sub, "MutedLabel")
 	make_label(box, stats_text(item))
 	var tags: Array = item.get("tags", [])
 	if tags.size() > 0:
-		make_label(box, "Tags : " + ", ".join(PackedStringArray(tags)), "MutedLabel")
+		make_label(box, T.t("Tags : ") + ", ".join(PackedStringArray(tags)), "MutedLabel")
 	return card

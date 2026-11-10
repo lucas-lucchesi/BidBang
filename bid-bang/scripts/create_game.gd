@@ -2,6 +2,7 @@ extends Control
 ## Création d'un salon : réglages de la partie.
 
 const UI = preload("res://scripts/ui.gd")
+const T = preload("res://scripts/texts.gd")
 
 var _box: VBoxContainer
 var _error: Label
@@ -15,11 +16,11 @@ var _create: Button
 
 func _ready() -> void:
 	_box = UI.page(self, "", 0.5)
-	var back: Button = UI.button(_box, "< Retour", "BackButton")
+	var back: Button = UI.button(_box, T.t("< Retour"), "BackButton")
 	back.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	back.pressed.connect(func() -> void: UI.goto(self, "res://menu.tscn"))
-	UI.label(_box, "Nouvelle partie", "HeadingLabel")
-	_error = UI.label(_box, "Chargement des lieux...", "MutedLabel")
+	UI.label(_box, T.t("Nouvelle partie"), "HeadingLabel")
+	_error = UI.label(_box, T.t("Chargement des lieux..."), "MutedLabel")
 	Session.net.http_done.connect(_on_http_done)
 	Session.net.request("locations", Session.server_url, HTTPClient.METHOD_GET, "/locations")
 
@@ -27,7 +28,7 @@ func _ready() -> void:
 func _on_http_done(tag: String, ok: bool, data: Dictionary) -> void:
 	if tag == "locations":
 		if not ok:
-			_error.text = str(data.get("detail", "Erreur."))
+			_error.text = T.t(str(data.get("detail", "Erreur.")))
 			_error.theme_type_variation = "ErrorLabel"
 			return
 		_error.text = ""
@@ -37,9 +38,9 @@ func _on_http_done(tag: String, ok: bool, data: Dictionary) -> void:
 		if ok:
 			Session.enter_room(data)
 			if not UI.goto(self, "res://scenes/lobby.tscn"):
-				_error.text = "Impossible d'ouvrir le salon."
+				_error.text = T.t("Impossible d'ouvrir le salon.")
 		else:
-			_error.text = str(data.get("detail", "Erreur."))
+			_error.text = T.t(str(data.get("detail", "Erreur.")))
 
 
 func _build_form(locations: Array) -> void:
@@ -49,12 +50,12 @@ func _build_form(locations: Array) -> void:
 		var d: Dictionary = loc
 		names.append(str(d["name"]))
 		ids.append(str(d["id"]))
-	_mode = UI.option(_box, "Mode", ["Construction", "Survie"], ["construction", "survie"], "construction")
-	_theme = UI.option(_box, "Lieu", names, ids, ids[0] if ids.size() > 0 else "")
-	_budget = UI.option(_box, "Budget", ["1 200 €", "2 200 €", "3 500 €"], [1200, 2200, 3500], 2200)
-	_items = UI.option(_box, "Nombre d'objets", ["6", "8", "10"], [6, 8, 10], 8)
-	_timer = UI.option(_box, "Chrono d'enchère", ["10 s", "15 s", "20 s", "30 s"], [10, 15, 20, 30], 15)
-	_create = UI.button(_box, "Créer le salon", "PrimaryButton")
+	_mode = UI.option(_box, T.t("Mode"), [T.t("Construction"), T.t("Survie")], ["construction", "survie"], "construction")
+	_theme = UI.option(_box, T.t("Lieu"), names, ids, ids[0] if ids.size() > 0 else "")
+	_budget = UI.option(_box, T.t("Budget"), ["1 200 €", "2 200 €", "3 500 €"], [1200, 2200, 3500], 2200)
+	_items = UI.option(_box, T.t("Nombre d'objets"), ["6", "8", "10"], [6, 8, 10], 8)
+	_timer = UI.option(_box, T.t("Chrono d'enchère"), ["10 s", "15 s", "20 s", "30 s"], [10, 15, 20, 30], 15)
+	_create = UI.button(_box, T.t("Créer le salon"), "PrimaryButton")
 	_create.pressed.connect(_on_create)
 
 
