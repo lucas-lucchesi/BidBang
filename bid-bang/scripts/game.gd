@@ -4,6 +4,8 @@ extends Control
 
 const UI = preload("res://scripts/ui.gd")
 const ItemCard = preload("res://scripts/item_card.gd")
+const Fx = preload("res://scripts/fx.gd")
+const Confetti = preload("res://scripts/confetti.gd")
 
 var _box: VBoxContainer
 var _countdown: Label = null
@@ -14,6 +16,9 @@ var _toast: String = ""
 var _bid_edit: LineEdit = null
 var _bid_value: int = 0
 var _bid_item_id: String = ""
+var _anim_key: String = ""
+var _last_bid: int = -1
+var _confetti_done: bool = false
 
 
 func _ready() -> void:
@@ -38,7 +43,12 @@ func _process(_delta: float) -> void:
 	if _countdown != null:
 		_countdown.text = "%d s" % int(ceil(left))
 	if _bar != null:
-		UI.set_bar_fraction(_bar, left / maxf(_total_s, 0.1))
+		var fraction: float = left / maxf(_total_s, 0.1)
+		UI.set_bar_fraction(_bar, fraction)
+		if fraction < 0.25 and left > 0.0:
+			_bar.modulate.a = 0.55 + 0.45 * absf(sin(_now() * 8.0))
+		else:
+			_bar.modulate.a = 1.0
 
 
 func _on_error(message: String) -> void:
@@ -103,6 +113,22 @@ func _render(game: Dictionary) -> void:
 			_render_results(game)
 	if phase != "finished":
 		_render_players(game)
+	var key: String = "%s_%d" % [phase, int(game.get("item_index", 0))]
+	if key != _anim_key:
+		_anim_key = key
+		Fx.stagger_in(_box, 0.05)
+	if phase == "finished" and not _confetti_done:
+		_confetti_done = true
+		if _is_winner(game):
+			add_child(Confetti.new())
+
+
+func _is_winner(game: Dictionary) -> bool:
+	for r in game.get("results", []):
+		var row: Dictionary = r
+		if str(row["player_id"]) == Session.player_id and bool(row["winner"]):
+			return true
+	return false
 
 
 # ------------------------------------------------------------------ enchères
@@ -133,7 +159,10 @@ func _render_auction(game: Dictionary, me: Dictionary) -> void:
 		ItemCard.make_label(hbox, "Aucune mise pour l'instant", "MutedLabel")
 	else:
 		ItemCard.make_label(hbox, "Mise actuelle - " + _pseudo_of(game, leader_id), "MutedLabel")
-		ItemCard.make_label(hbox, ItemCard.format_money(int(a["current_bid"])), "BigMoneyLabel")
+		var bid_label: Label = ItemCard.make_label(hbox, ItemCard.format_money(int(a["current_bid"])), "BigMoneyLabel")
+		if int(a["current_bid"]) != _last_bid:
+			Fx.pop(bid_label)
+	_last_bid = int(a["current_bid"]) if a["current_bid"] != null else -1
 	_bar = UI.timer_bar(hbox)
 	_countdown = ItemCard.make_label(hbox, "", "MutedLabel")
 	if a["seconds_left"] != null:
