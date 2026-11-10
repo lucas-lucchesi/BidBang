@@ -25,7 +25,6 @@ func _draw() -> void:
 	draw_circle(center, 66.0, Color(0.1, 0.09, 0.14, 1))
 	draw_arc(center, 66.0, 0.0, TAU, 64, amber, 7.0, true)
 	draw_arc(center, 54.0, 0.0, TAU, 64, Color(1, 0.85, 0.5, 0.4), 2.0, true)
-	var squash: float = 1.0 + maxf(0.0, sin(_t * 3.77)) * 0.0
 	var font: Font = ThemeDB.fallback_font
-	draw_string(font, Vector2(center.x - 50.0, center.y + 22.0 * squash), "BB",
+	draw_string(font, Vector2(center.x - 50.0, center.y + 22.0), "BB",
 		HORIZONTAL_ALIGNMENT_CENTER, 100.0, 64, Color(1, 0.82, 0.4, 1))

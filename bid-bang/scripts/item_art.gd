@@ -28,7 +28,7 @@ func _process(delta: float) -> void:
 
 
 func _tint() -> Color:
-	var h: float = float(hash(tag) % 360) / 360.0
+	var h: float = float(posmod(hash(tag), 360)) / 360.0
 	return Color.from_hsv(h, 0.55, 0.45)
 
 

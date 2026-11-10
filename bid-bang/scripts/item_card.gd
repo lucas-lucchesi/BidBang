@@ -2,6 +2,7 @@ extends RefCounted
 ## Carte d'objet (texte seul) et petits helpers d'affichage. Fonctions statiques.
 ## Usage : const ItemCard = preload("res://scripts/item_card.gd")
 
+const ItemArt = preload("res://scripts/item_art.gd")
 const STAT_NAMES := {
 	"confort": "Confort", "style": "Style", "utilite": "Utilité",
 	"securite": "Sécurité", "sante": "Santé",
@@ -43,7 +44,7 @@ static func stats_text(item: Dictionary) -> String:
 	return " - ".join(parts)
 
 
-static func make_card(item: Dictionary, show_price: bool = true) -> PanelContainer:
+static func make_card(item: Dictionary, show_price: bool = true, with_art: bool = true) -> PanelContainer:
 	var card := PanelContainer.new()
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 6)
@@ -59,6 +60,10 @@ static func make_card(item: Dictionary, show_price: bool = true) -> PanelContain
 	sb.content_margin_top = 16.0
 	sb.content_margin_bottom = 16.0
 	card.add_theme_stylebox_override("panel", sb)
+	if with_art:
+		var art: Control = ItemArt.new()
+		art.call("setup", item)
+		box.add_child(art)
 	var title: Label = make_label(box, str(item.get("name", "?")), "HeadingLabel")
 	title.add_theme_color_override("font_color", RARITY_COLORS[rarity])
 	var sub: String = str(RARITY_NAMES[rarity])
