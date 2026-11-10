@@ -3,8 +3,8 @@ extends Control
 
 const UI = preload("res://scripts/ui.gd")
 
-## Mode « Enchère à l'aveugle » : masqué tant qu'il n'est pas au point (serveur et écran déjà codés).
-const ENABLE_BLIND_MODE := false
+## Mode « Enchère à l'aveugle » : mettre à false pour le masquer de la création de salon.
+const ENABLE_BLIND_MODE := true
 const T = preload("res://scripts/texts.gd")
 
 var _box: VBoxContainer
