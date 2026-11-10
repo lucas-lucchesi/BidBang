@@ -8,6 +8,8 @@ const Fx = preload("res://scripts/fx.gd")
 var _pseudo: LineEdit
 var _server: LineEdit
 var _error: Label
+var _server_toggle: Button
+var _server_panel: VBoxContainer
 
 
 func _ready() -> void:
@@ -20,13 +22,33 @@ func _ready() -> void:
 	box.add_child(gap)
 	_pseudo = UI.field(box, "Pseudo", Session.pseudo, 16)
 	_pseudo.placeholder_text = "Votre pseudo"
-	_server = UI.field(box, "Adresse du serveur", Session.server_url)
 	_error = UI.label(box, "", "ErrorLabel")
 	var create: Button = UI.button(box, "Créer une partie", "PrimaryButton")
 	create.pressed.connect(_on_create)
 	var join: Button = UI.button(box, "Rejoindre avec un code")
 	join.pressed.connect(_on_join)
+	_build_server_option(box)
 	Fx.stagger_in(box, 0.07)
+	if _pseudo.text == "":
+		_pseudo.grab_focus()
+
+
+## Réglage du serveur : masqué par défaut, ouvert par un petit bouton.
+func _build_server_option(box: VBoxContainer) -> void:
+	_server_toggle = UI.button(box, "Options du serveur  v", "BackButton")
+	_server_panel = VBoxContainer.new()
+	_server_panel.visible = false
+	box.add_child(_server_panel)
+	_server = UI.field(_server_panel, "Adresse du serveur", Session.server_url)
+	UI.label(_server_panel, "Émulateur Android : http://10.0.2.2:8000", "MutedLabel")
+	_server_toggle.pressed.connect(_toggle_server)
+
+
+func _toggle_server() -> void:
+	_server_panel.visible = not _server_panel.visible
+	_server_toggle.text = "Options du serveur  " + ("^" if _server_panel.visible else "v")
+	if _server_panel.visible:
+		_server.grab_focus()
 
 
 func _validate() -> bool:
@@ -36,7 +58,9 @@ func _validate() -> bool:
 		return false
 	var url: String = _server.text.strip_edges()
 	if not (url.begins_with("http://") or url.begins_with("https://")):
-		_error.text = "L'adresse doit commencer par http:// ou https://."
+		_error.text = "L'adresse du serveur doit commencer par http:// ou https://."
+		if not _server_panel.visible:
+			_toggle_server()
 		return false
 	Session.pseudo = name_text
 	Session.server_url = url
