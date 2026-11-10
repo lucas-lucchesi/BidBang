@@ -163,12 +163,14 @@ func _draw() -> void:
 
 func _draw_hall() -> void:
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	# remplit tout l'écran (recadrage centré si le format diffère), quelle que soit la taille du Control
+	var area: Vector2 = get_viewport_rect().size
 	var tex_size: Vector2 = HALL.get_size()
-	var k: float = maxf(size.x / tex_size.x, size.y / tex_size.y)
+	var k: float = maxf(area.x / tex_size.x, area.y / tex_size.y)
 	var dest: Vector2 = tex_size * k
-	draw_texture_rect(HALL, Rect2((size - dest) / 2.0, dest), false)
+	draw_texture_rect(HALL, Rect2((area - dest) / 2.0 - global_position, dest), false)
 	if dim > 0.0:
-		draw_rect(Rect2(Vector2.ZERO, size), Color(0.03, 0.01, 0.02, dim))
+		draw_rect(Rect2(-global_position, area), Color(0.03, 0.01, 0.02, dim))
 
 
 func _draw_default() -> void:
