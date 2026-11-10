@@ -43,7 +43,9 @@ static func button(parent: Node, content: String, variation: String = "") -> But
 	b.text = content
 	if variation != "":
 		b.theme_type_variation = variation
-	b.custom_minimum_size = Vector2(0, 24)
+	# boutons compacts : à la largeur de leur texte (jamais pleine largeur)
+	b.custom_minimum_size = Vector2(0 if variation == "BackButton" else 120, 24)
+	b.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN if variation == "BackButton" else Control.SIZE_SHRINK_CENTER
 	Fx.squish(b)
 	parent.add_child(b)
 	return b
