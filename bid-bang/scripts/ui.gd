@@ -14,14 +14,14 @@ static func page(root: Control, scene_id: String = "") -> VBoxContainer:
 	var margin := MarginContainer.new()
 	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
 	for side in ["left", "right", "top", "bottom"]:
-		margin.add_theme_constant_override("margin_" + side, 24)
+		margin.add_theme_constant_override("margin_" + side, 12)
 	root.add_child(margin)
 	var scroll := ScrollContainer.new()
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	margin.add_child(scroll)
 	var box := VBoxContainer.new()
 	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	box.add_theme_constant_override("separation", 14)
+	box.add_theme_constant_override("separation", 8)
 	scroll.add_child(box)
 	return box
 
@@ -95,7 +95,7 @@ static func timer_bar(parent: Node) -> ProgressBar:
 	b.min_value = 0.0
 	b.max_value = 1.0
 	b.value = 1.0
-	b.custom_minimum_size = Vector2(0, 16)
+	b.custom_minimum_size = Vector2(0, 8)
 	parent.add_child(b)
 	return b
 
@@ -103,11 +103,39 @@ static func timer_bar(parent: Node) -> ProgressBar:
 static func set_bar_fraction(bar: ProgressBar, fraction: float) -> void:
 	bar.value = clampf(fraction, 0.0, 1.0)
 	var fill := StyleBoxFlat.new()
-	fill.set_corner_radius_all(8)
 	if fraction > 0.5:
-		fill.bg_color = Color(0.25, 0.8, 0.68, 1)
+		fill.bg_color = Color(0.45, 0.85, 0.55, 1)
 	elif fraction > 0.25:
-		fill.bg_color = Color(0.96, 0.62, 0.12, 1)
+		fill.bg_color = Color(1, 0.75, 0.25, 1)
 	else:
-		fill.bg_color = Color(1, 0.4, 0.4, 1)
+		fill.bg_color = Color(1, 0.4, 0.35, 1)
 	bar.add_theme_stylebox_override("fill", fill)
+
+
+const ICONS = preload("res://assets/ui/freebuttons2.png")
+## Position des icônes dans freebuttons2.png : (ligne, paire). Jeu foncé = colonnes 0-3, clair = 4-7.
+const ICON_PLUS := Vector2i(1, 0)
+const ICON_CHECK := Vector2i(1, 1)
+const ICON_CROSS := Vector2i(2, 0)
+const ICON_MINUS := Vector2i(2, 1)
+const ICON_DOLLAR := Vector2i(3, 1)
+
+
+static func _icon_cell(row: int, col: int) -> AtlasTexture:
+	var t := AtlasTexture.new()
+	t.atlas = ICONS
+	t.region = Rect2(col * 16, row * 16, 16, 16)
+	return t
+
+
+## Bouton-icône en pixel art (32x32 = échelle x2). `icon` : une des constantes ICON_*.
+static func icon_button(parent: Node, icon: Vector2i) -> TextureButton:
+	var b := TextureButton.new()
+	b.texture_normal = _icon_cell(icon.x, icon.y * 2)
+	b.texture_pressed = _icon_cell(icon.x, icon.y * 2 + 1)
+	b.texture_hover = _icon_cell(icon.x, 4 + icon.y * 2)
+	b.ignore_texture_size = true
+	b.stretch_mode = TextureButton.STRETCH_SCALE
+	b.custom_minimum_size = Vector2(32, 32)
+	parent.add_child(b)
+	return b

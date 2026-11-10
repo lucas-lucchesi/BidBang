@@ -24,7 +24,7 @@ func _ready() -> void:
 	_info = UI.label(_box, "", "MutedLabel")
 	UI.label(_box, "Joueurs", "HeadingLabel")
 	_players_box = VBoxContainer.new()
-	_players_box.add_theme_constant_override("separation", 8)
+	_players_box.add_theme_constant_override("separation", 4)
 	_box.add_child(_players_box)
 	_error = UI.label(_box, "", "ErrorLabel")
 	_start = UI.button(_box, "Lancer la partie", "PrimaryButton")

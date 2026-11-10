@@ -18,7 +18,7 @@ func _ready() -> void:
 	UI.label(box, "BidBang", "TitleLabel").horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	UI.label(box, "Enchérissez. Construisez. Survivez.", "MutedLabel").horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	var gap := Control.new()
-	gap.custom_minimum_size = Vector2(0, 30)
+	gap.custom_minimum_size = Vector2(0, 12)
 	box.add_child(gap)
 	_pseudo = UI.field(box, "Pseudo", Session.pseudo, 16)
 	_pseudo.placeholder_text = "Votre pseudo"

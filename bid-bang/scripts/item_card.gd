@@ -47,18 +47,20 @@ static func stats_text(item: Dictionary) -> String:
 static func make_card(item: Dictionary, show_price: bool = true, with_art: bool = true) -> PanelContainer:
 	var card := PanelContainer.new()
 	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 6)
+	box.add_theme_constant_override("separation", 3)
 	card.add_child(box)
 	var rarity: int = clampi(int(item.get("rarity", 0)), 0, 3)
 	var sb := StyleBoxFlat.new()
-	sb.bg_color = Color(0.02, 0.03, 0.06, 0.62)
-	sb.set_corner_radius_all(18)
-	sb.border_width_left = 10
+	sb.bg_color = Color(0.2, 0.13, 0.11, 1)
+	sb.border_width_left = 4
+	sb.border_width_top = 1
+	sb.border_width_right = 1
+	sb.border_width_bottom = 3
 	sb.border_color = RARITY_COLORS[rarity]
-	sb.content_margin_left = 22.0
-	sb.content_margin_right = 18.0
-	sb.content_margin_top = 16.0
-	sb.content_margin_bottom = 16.0
+	sb.content_margin_left = 10.0
+	sb.content_margin_right = 8.0
+	sb.content_margin_top = 8.0
+	sb.content_margin_bottom = 8.0
 	card.add_theme_stylebox_override("panel", sb)
 	if with_art:
 		var art: Control = ItemArt.new()

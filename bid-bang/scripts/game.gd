@@ -15,6 +15,7 @@ var _total_s: float = 1.0
 var _toast: String = ""
 var _bid_edit: LineEdit = null
 var _bid_value: int = 0
+var _bid_required: int = 0
 var _bid_item_id: String = ""
 var _anim_key: String = ""
 var _last_bid: int = -1
@@ -94,7 +95,7 @@ func _render(game: Dictionary) -> void:
 	var loc: Dictionary = game.get("location", {})
 	var me: Dictionary = _me(game)
 	var header := HBoxContainer.new()
-	header.add_theme_constant_override("separation", 10)
+	header.add_theme_constant_override("separation", 5)
 	_box.add_child(header)
 	UI.chip(header, str(loc.get("name", "")))
 	var spacer := Control.new()
@@ -154,7 +155,7 @@ func _render_auction(game: Dictionary, me: Dictionary) -> void:
 	hero.theme_type_variation = "HeroPanel"
 	_box.add_child(hero)
 	var hbox := VBoxContainer.new()
-	hbox.add_theme_constant_override("separation", 8)
+	hbox.add_theme_constant_override("separation", 4)
 	hero.add_child(hbox)
 	if a["current_bid"] == null:
 		ItemCard.make_label(hbox, "Aucune mise pour l'instant", "MutedLabel")
@@ -184,30 +185,40 @@ func _render_auction(game: Dictionary, me: Dictionary) -> void:
 
 func _render_bid_controls(a: Dictionary, budget: int, required: int) -> void:
 	var item_id: String = str(a["item"]["id"])
+	_bid_required = required
 	if item_id != _bid_item_id or _bid_value < required:
 		_bid_item_id = item_id
 		_bid_value = required
 	_bid_value = mini(_bid_value, maxi(budget, required))
 	ItemCard.make_label(_box, "Votre mise (minimum %s)" % ItemCard.format_money(required), "FieldLabel")
+	var line := HBoxContainer.new()
+	line.add_theme_constant_override("separation", 4)
+	_box.add_child(line)
+	var minus: TextureButton = UI.icon_button(line, UI.ICON_MINUS)
+	minus.pressed.connect(_on_adjust.bind(-10, budget))
 	_bid_edit = LineEdit.new()
 	_bid_edit.text = str(_bid_value)
 	_bid_edit.alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_bid_edit.virtual_keyboard_type = LineEdit.KEYBOARD_TYPE_NUMBER
-	_bid_edit.add_theme_font_size_override("font_size", 40)
+	_bid_edit.add_theme_font_size_override("font_size", 16)
+	_bid_edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_bid_edit.text_changed.connect(_on_bid_text)
-	_box.add_child(_bid_edit)
+	line.add_child(_bid_edit)
+	var plus: TextureButton = UI.icon_button(line, UI.ICON_PLUS)
+	plus.pressed.connect(_on_adjust.bind(10, budget))
+	var all_in: TextureButton = UI.icon_button(line, UI.ICON_DOLLAR)
+	all_in.disabled = budget < required
+	all_in.pressed.connect(_on_set_bid.bind(budget))
 	var chips := HBoxContainer.new()
-	chips.add_theme_constant_override("separation", 8)
+	chips.add_theme_constant_override("separation", 4)
 	_box.add_child(chips)
-	for delta in [10, 50, 100, 250]:
-		var b := Button.new()
-		b.text = "+%d" % delta
-		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		b.pressed.connect(_on_adjust.bind(delta, budget))
-		chips.add_child(b)
-	var max_b: Button = UI.button(_box, "Tout mon budget (%s)" % ItemCard.format_money(budget))
-	max_b.disabled = budget < required
-	max_b.pressed.connect(_on_set_bid.bind(budget))
+	for delta in [50, 100, 250]:
+		var cb := Button.new()
+		cb.text = "+%d" % delta
+		cb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		cb.pressed.connect(_on_adjust.bind(delta, budget))
+		chips.add_child(cb)
+	ItemCard.make_label(_box, "$ = tout mon budget", "MutedLabel")
 	var bid_b: Button = UI.button(_box, "Miser", "PrimaryButton")
 	bid_b.disabled = budget < required
 	bid_b.pressed.connect(_on_bid)
@@ -220,7 +231,9 @@ func _on_bid_text(t: String) -> void:
 
 
 func _on_adjust(delta: int, budget: int) -> void:
-	_on_set_bid(mini(_bid_value + delta, budget))
+	if budget < _bid_required:
+		return
+	_on_set_bid(clampi(_bid_value + delta, _bid_required, budget))
 
 
 func _on_set_bid(amount: int) -> void:
@@ -281,7 +294,7 @@ func _render_voting(game: Dictionary) -> void:
 		var chosen: bool = mine != null and str(mine) == str(d["id"])
 		var card := PanelContainer.new()
 		var col := VBoxContainer.new()
-		col.add_theme_constant_override("separation", 6)
+		col.add_theme_constant_override("separation", 3)
 		card.add_child(col)
 		ItemCard.make_label(col, str(d["pseudo"]), "HeadingLabel")
 		_add_purchase_lines(col, d["purchases"])
@@ -326,7 +339,7 @@ func _render_results(game: Dictionary) -> void:
 		if bool(row["winner"]):
 			card.theme_type_variation = "HeroPanel"
 		var col := VBoxContainer.new()
-		col.add_theme_constant_override("separation", 6)
+		col.add_theme_constant_override("separation", 3)
 		card.add_child(col)
 		var title: String = "%d. %s" % [int(row["rank"]), str(row["pseudo"])]
 		if bool(row["winner"]):
