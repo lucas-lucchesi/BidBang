@@ -22,7 +22,7 @@ func _ready() -> void:
 			"x": rng.randf(), "y": -rng.randf() * 0.6,
 			"vy": rng.randf_range(0.25, 0.6), "sway": rng.randf_range(0.02, 0.08),
 			"ph": rng.randf() * TAU, "rot": rng.randf() * TAU, "spin": rng.randf_range(-6.0, 6.0),
-			"w": rng.randf_range(8.0, 16.0), "h": rng.randf_range(5.0, 9.0),
+			"w": float(rng.randi_range(2, 4) * 2), "h": float(rng.randi_range(1, 3) * 2),
 			"c": palette[rng.randi() % palette.size()],
 		})
 

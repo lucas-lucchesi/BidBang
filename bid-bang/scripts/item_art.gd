@@ -2,6 +2,8 @@ extends Control
 ## Illustration d'une carte dessinée en code : halo, rayons tournants, médaillon
 ## avec monogramme et étoiles de rareté. La teinte dépend du premier tag.
 
+const FONT = preload("res://assets/fonts/PressStart2P-Regular.ttf")
+const VS := 2.0
 const RARITY_COLORS := [
 	Color(0.7, 0.72, 0.8, 1), Color(0.4, 0.7, 1, 1),
 	Color(0.75, 0.5, 1, 1), Color(1, 0.75, 0.25, 1),
@@ -18,7 +20,7 @@ func setup(item: Dictionary) -> void:
 	title = str(item.get("name", "?"))
 	var tags: Array = item.get("tags", [])
 	tag = str(tags[0]) if tags.size() > 0 else ""
-	custom_minimum_size = Vector2(0, 170)
+	custom_minimum_size = Vector2(0, 85)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 
@@ -42,15 +44,15 @@ func _star(center: Vector2, r: float, col: Color) -> void:
 
 
 func _draw() -> void:
-	var w: float = size.x
-	var h: float = size.y
+	var w: float = size.x * VS
+	var h: float = size.y * VS
+	var unit := Vector2(1.0 / VS, 1.0 / VS)
+	draw_set_transform(Vector2.ZERO, 0.0, unit)
 	var center := Vector2(w / 2.0, h / 2.0 - 8.0)
 	var tint: Color = _tint()
 	var accent: Color = RARITY_COLORS[rarity]
-	var bg := StyleBoxFlat.new()
-	bg.bg_color = tint.darkened(0.55)
-	bg.set_corner_radius_all(14)
-	draw_style_box(bg, Rect2(0, 0, w, h))
+	draw_rect(Rect2(0, 0, w, h), tint.darkened(0.55))
+	draw_rect(Rect2(0, 0, w, h), Color(0, 0, 0, 0.4), false, 6.0)
 	for k in 7:
 		var f: float = 1.0 - k * 0.12
 		draw_circle(center, h * 0.52 * f, Color(tint.r, tint.g, tint.b, 0.12))
@@ -65,12 +67,13 @@ func _draw() -> void:
 	var pulse: float = 1.0 + sin(_t * 2.0) * 0.02
 	draw_circle(center, 50.0 * pulse + 6.0, Color(accent.r, accent.g, accent.b, 0.25))
 	draw_circle(center, 50.0 * pulse, Color(0.08, 0.09, 0.15, 1))
-	draw_arc(center, 50.0 * pulse, 0.0, TAU, 48, accent, 5.0, true)
-	draw_arc(center, 41.0 * pulse, 0.0, TAU, 48, Color(accent.r, accent.g, accent.b, 0.35), 2.0, true)
-	var font: Font = ThemeDB.fallback_font
+	draw_arc(center, 50.0 * pulse, 0.0, TAU, 48, accent, 5.0, false)
+	draw_arc(center, 41.0 * pulse, 0.0, TAU, 48, Color(accent.r, accent.g, accent.b, 0.35), 2.0, false)
 	var letter: String = title.substr(0, 1).to_upper()
-	draw_string(font, Vector2(center.x - 40.0, center.y + 22.0), letter,
-		HORIZONTAL_ALIGNMENT_CENTER, 80.0, 64, accent)
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	var rc: Vector2 = center / VS
+	draw_string(FONT, Vector2(rc.x - 20.0, rc.y + 12.0), letter, HORIZONTAL_ALIGNMENT_CENTER, 40.0, 32, accent)
+	draw_set_transform(Vector2.ZERO, 0.0, unit)
 	var n: int = rarity + 1
 	for i in n:
 		var sx: float = center.x + (i - (n - 1) / 2.0) * 24.0

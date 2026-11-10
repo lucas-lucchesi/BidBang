@@ -4,11 +4,13 @@ extends Control
 
 const ORB_COUNT := 8
 const FPS_STEP := 1.0 / 30.0
+const VS := 2.0  # les paysages sont dessinés pour 720x1280, puis réduits (jeu en 360x640)
 
 var scene_id: String = ""
 var _orbs: Array[Dictionary] = []
 var _t: float = 0.0
 var _acc: float = 0.0
+var _vs: Vector2 = Vector2(720, 1280)
 
 
 func set_scene(id: String) -> void:
@@ -49,7 +51,7 @@ func _r(i: int) -> float:
 
 
 func _sky(y0: float, y1: float, top: Color, bottom: Color) -> void:
-	draw_polygon(PackedVector2Array([Vector2(0, y0), Vector2(size.x, y0), Vector2(size.x, y1), Vector2(0, y1)]),
+	draw_polygon(PackedVector2Array([Vector2(0, y0), Vector2(_vs.x, y0), Vector2(_vs.x, y1), Vector2(0, y1)]),
 		PackedColorArray([top, top, bottom, bottom]))
 
 
@@ -61,7 +63,7 @@ func _glow(c: Vector2, radius: float, col: Color, layers: int = 6) -> void:
 
 func _stars(count: int, max_y: float, seed_offset: int = 0) -> void:
 	for i in count:
-		var p := Vector2(_r(i + seed_offset) * size.x, _r(i * 3 + 11 + seed_offset) * max_y)
+		var p := Vector2(_r(i + seed_offset) * _vs.x, _r(i * 3 + 11 + seed_offset) * max_y)
 		var tw: float = 0.5 + 0.5 * sin(_t * (0.8 + _r(i) * 2.0) + float(i))
 		draw_circle(p, 1.0 + _r(i + 5) * 1.6, Color(1, 1, 1, 0.25 + 0.6 * tw))
 
@@ -69,13 +71,13 @@ func _stars(count: int, max_y: float, seed_offset: int = 0) -> void:
 func _ridge(base_y: float, amp: float, seed_v: float, drift: float) -> PackedVector2Array:
 	var pts := PackedVector2Array()
 	var x: float = 0.0
-	while x <= size.x + 24.0:
+	while x <= _vs.x + 24.0:
 		var xs: float = x + drift
 		var y: float = base_y - amp * (0.6 * absf(sin(xs * 0.0055 + seed_v)) + 0.25 * absf(sin(xs * 0.013 + seed_v * 1.7)) + 0.15 * sin(xs * 0.03 + seed_v))
 		pts.append(Vector2(x, y))
 		x += 24.0
-	pts.append(Vector2(size.x + 24.0, size.y))
-	pts.append(Vector2(0, size.y))
+	pts.append(Vector2(_vs.x + 24.0, _vs.y))
+	pts.append(Vector2(0, _vs.y))
 	return pts
 
 
@@ -103,9 +105,9 @@ func _pine(x: float, base_y: float, height: float, col: Color) -> void:
 func _skyline(base_y: float, seed_v: int, hmin: float, hmax: float, col: Color, lit: bool, win_col: Color) -> void:
 	var x: float = -10.0
 	var i: int = seed_v
-	while x < size.x:
+	while x < _vs.x:
 		var bw: float = 36.0 + _r(i) * 54.0
-		var bh: float = size.y * (hmin + _r(i + 100) * (hmax - hmin))
+		var bh: float = _vs.y * (hmin + _r(i + 100) * (hmax - hmin))
 		var top: float = base_y - bh
 		draw_rect(Rect2(x, top, bw, bh + 4.0), col)
 		if lit:
@@ -128,7 +130,13 @@ func _skyline(base_y: float, seed_v: int, hmin: float, hmax: float, col: Color, 
 
 
 # --------------------------------------------------------------------- paysages
+func _base_transform() -> void:
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2(1.0 / VS, 1.0 / VS))
+
+
 func _draw() -> void:
+	_vs = size * VS
+	_base_transform()
 	match scene_id:
 		"montagne":
 			_draw_mountain()
@@ -144,12 +152,12 @@ func _draw() -> void:
 			_draw_station()
 		_:
 			_draw_default()
-	draw_rect(Rect2(Vector2.ZERO, size), Color(0, 0, 0, 0.22))
+	draw_rect(Rect2(Vector2.ZERO, _vs), Color(0, 0, 0, 0.22))
 
 
 func _draw_default() -> void:
-	var w: float = size.x
-	var h: float = size.y
+	var w: float = _vs.x
+	var h: float = _vs.y
 	_sky(0, h, Color(0.10, 0.10, 0.20, 1), Color(0.03, 0.04, 0.08, 1))
 	var base: float = minf(w, h)
 	for o in _orbs:
@@ -164,8 +172,8 @@ func _draw_default() -> void:
 
 
 func _draw_mountain() -> void:
-	var w: float = size.x
-	var h: float = size.y
+	var w: float = _vs.x
+	var h: float = _vs.y
 	_sky(0, h, Color(0.07, 0.11, 0.3), Color(0.9, 0.58, 0.5))
 	_stars(40, h * 0.4)
 	var moon := Vector2(w * 0.78, h * 0.16)
@@ -188,8 +196,8 @@ func _draw_mountain() -> void:
 
 
 func _draw_cabin() -> void:
-	var w: float = size.x
-	var h: float = size.y
+	var w: float = _vs.x
+	var h: float = _vs.y
 	_sky(0, h, Color(0.02, 0.05, 0.11), Color(0.07, 0.2, 0.2))
 	_stars(50, h * 0.45, 200)
 	var moon := Vector2(w * 0.25, h * 0.14)
@@ -227,8 +235,8 @@ func _draw_cabin() -> void:
 
 
 func _draw_beach() -> void:
-	var w: float = size.x
-	var h: float = size.y
+	var w: float = _vs.x
+	var h: float = _vs.y
 	var hz: float = h * 0.58
 	_sky(0, hz * 0.6, Color(0.2, 0.17, 0.42), Color(0.9, 0.4, 0.35))
 	_sky(hz * 0.6, hz, Color(0.9, 0.4, 0.35), Color(1, 0.78, 0.42))
@@ -258,7 +266,7 @@ func _draw_beach() -> void:
 		var f: float = float(k) / 12.0
 		var bend: float = sin(f * PI) * -28.0
 		trunk.append(base.lerp(top, f) + Vector2(bend, 0))
-	draw_polyline(trunk, Color(0.12, 0.08, 0.05), 12.0, true)
+	draw_polyline(trunk, Color(0.12, 0.08, 0.05), 12.0, false)
 	for k in 8:
 		var ang: float = -PI + k * PI / 7.0 + sin(_t * 0.9 + k) * 0.05
 		var leaf := PackedVector2Array()
@@ -266,12 +274,12 @@ func _draw_beach() -> void:
 			var f2: float = float(j) / 8.0
 			var dir := Vector2(cos(ang), sin(ang))
 			leaf.append(top + dir * f2 * 110.0 + Vector2(0, f2 * f2 * 50.0))
-		draw_polyline(leaf, Color(0.03, 0.2, 0.1), 7.0, true)
+		draw_polyline(leaf, Color(0.03, 0.2, 0.1), 7.0, false)
 
 
 func _draw_city(top_c: Color, bot_c: Color, win: Color, far_c: Color, near_c: Color, blinds: bool) -> void:
-	var w: float = size.x
-	var h: float = size.y
+	var w: float = _vs.x
+	var h: float = _vs.y
 	_sky(0, h, top_c, bot_c)
 	_stars(35, h * 0.35, 300)
 	var moon := Vector2(w * 0.8, h * 0.13)
@@ -294,22 +302,22 @@ func _draw_city(top_c: Color, bot_c: Color, win: Color, far_c: Color, near_c: Co
 
 
 func _draw_station() -> void:
-	var w: float = size.x
-	var h: float = size.y
+	var w: float = _vs.x
+	var h: float = _vs.y
 	_sky(0, h, Color(0.01, 0.01, 0.05), Color(0.05, 0.04, 0.14))
 	_stars(110, h, 500)
 	var pc := Vector2(w * 0.5, h * 1.42)
 	var pr: float = w * 0.95
 	_glow(pc, pr + 40.0, Color(0.3, 0.7, 1, 0.5), 5)
 	draw_circle(pc, pr, Color(0.06, 0.22, 0.55))
-	draw_arc(pc, pr, PI * 1.1, PI * 1.9, 80, Color(0.5, 0.85, 1, 0.8), 6.0, true)
+	draw_arc(pc, pr, PI * 1.1, PI * 1.9, 80, Color(0.5, 0.85, 1, 0.8), 6.0, false)
 	for k in 8:
 		var a: float = PI * 1.2 + k * 0.1 + _t * 0.01
 		var p: Vector2 = pc + Vector2(cos(a), sin(a)) * (pr - 30.0 - _r(k) * 40.0)
 		draw_circle(p, 26.0 + _r(k + 3) * 26.0, Color(0.2, 0.6, 0.35, 0.5))
 		draw_circle(p + Vector2(12, -8), 18.0, Color(1, 1, 1, 0.25))
 	var sp := Vector2(w * 0.68 - fposmod(_t * 3.0, 40.0), h * 0.28 + sin(_t * 0.4) * 8.0)
-	draw_set_transform(sp, 0.12 + sin(_t * 0.3) * 0.03, Vector2.ONE)
+	draw_set_transform(sp / VS, 0.12 + sin(_t * 0.3) * 0.03, Vector2(1.0 / VS, 1.0 / VS))
 	draw_rect(Rect2(-50, -13, 100, 26), Color(0.8, 0.82, 0.88))
 	draw_rect(Rect2(-6, -34, 12, 68), Color(0.6, 0.62, 0.7))
 	for side in [-1, 1]:
@@ -319,4 +327,4 @@ func _draw_station() -> void:
 			draw_line(Vector2(x0 + g * 21.0, -22), Vector2(x0 + g * 21.0, 22), Color(0.4, 0.6, 1, 0.5), 1.5)
 		draw_line(Vector2(x0, 0), Vector2(x0 + 84, 0), Color(0.4, 0.6, 1, 0.5), 1.5)
 	draw_circle(Vector2(40, 0), 3.0, Color(1, 0.3, 0.3, 0.5 + 0.5 * sin(_t * 4.0)))
-	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	_base_transform()
