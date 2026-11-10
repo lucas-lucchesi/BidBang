@@ -20,7 +20,8 @@ TRIAL_PARTIAL_MAX = 9
 VOTE_DURATION = 45
 BASE_ITEM_COUNT = 6  # les seuils de survie sont donnés pour 6 objets
 
-MODES = ("construction", "survie")
+MODES = ("construction", "survie", "aveugle")
+BUILDING_MODES = ("construction", "aveugle")  # mêmes règles de score (rareté, votes)
 BUDGETS = (1200, 2200, 3500)
 ITEM_COUNTS = (6, 8, 10)
 BID_TIMERS = (10, 15, 20, 30)
@@ -54,7 +55,7 @@ def min_step(price: int) -> int:
 
 def item_points(item: dict, mode: str) -> int:
     total = sum(item["stats"].values())
-    if mode == "construction":
+    if mode in BUILDING_MODES:
         total += RARITY_BONUS[item["rarity"]]
     return total
 
@@ -75,6 +76,7 @@ class Game:
             raise GameError("Il faut au moins 2 joueurs.")
         self.settings = validate_settings(settings)
         self.mode: str = self.settings["mode"]
+        self.blind: bool = self.mode == "aveugle"
         self.clock = clock
         self.rng = rng or random.Random()
         self.location = catalog.get_location(self.settings["theme_id"])
@@ -108,13 +110,20 @@ class Game:
             return
         item = self.items[self.index]
         a = {"item": item, "price": item["price"], "step": min_step(item["price"]),
-             "bid": None, "leader": None, "folded": set(), "deadline": None}
+             "bid": None, "leader": None, "folded": set(), "deadline": None,
+             "sealed": {}}  # enchère à l'aveugle : pid -> mise secrète (0 = passe), dans l'ordre d'envoi
         for pid, p in self.players.items():
             if p["budget"] < OPENING_MIN:
                 a["folded"].add(pid)  # ne peut pas payer la mise minimale
+                if self.blind:
+                    a["sealed"][pid] = 0
         self.auction = a
         self._bump()
-        if not self._active_challengers():
+        if self.blind:
+            if len(a["sealed"]) == len(self.players):
+                self._resolve()
+                return
+        elif not self._active_challengers():
             self._resolve()
             return
         a["deadline"] = self.clock() + self.settings["bid_timer"]
@@ -141,6 +150,8 @@ class Game:
             raise GameError("Joueur inconnu.")
         if not isinstance(amount, int) or isinstance(amount, bool):
             raise GameError("Montant invalide.")
+        if self.blind:
+            return self._blind_bid(pid, amount)
         if pid in a["folded"]:
             raise GameError("Vous vous êtes couché pour cet objet.")
         if pid == a["leader"]:
@@ -157,10 +168,57 @@ class Game:
         else:
             a["deadline"] = self.clock() + self.settings["bid_timer"]
 
+    # ------------------------------------------------- enchère à l'aveugle
+    def _blind_bid(self, pid: str, amount) -> None:
+        a = self.auction
+        if pid in a["sealed"]:
+            raise GameError("Vous avez déjà joué pour cet objet.")
+        if amount < OPENING_MIN:
+            raise GameError(f"La mise minimale est de {OPENING_MIN} €.")
+        if amount > self.players[pid]["budget"]:
+            raise GameError("Budget insuffisant.")
+        a["sealed"][pid] = amount
+        self._after_seal()
+
+    def _blind_pass(self, pid: str) -> None:
+        a = self.auction
+        if pid in a["sealed"]:
+            raise GameError("Vous avez déjà joué pour cet objet.")
+        a["sealed"][pid] = 0
+        self._after_seal()
+
+    def _after_seal(self) -> None:
+        self._bump()
+        if len(self.auction["sealed"]) == len(self.players):
+            self._resolve()
+
+    def _resolve_blind(self) -> None:
+        a = self.auction
+        item = a["item"]
+        best_pid, best = None, 0
+        for pid, amount in a["sealed"].items():  # ordre d'envoi : à égalité, le premier gagne
+            if amount > best:
+                best_pid, best = pid, amount
+        bids = [{"player_id": pid, "pseudo": self.players[pid]["pseudo"],
+                 "amount": a["sealed"].get(pid, 0)} for pid in self.order]
+        if best_pid is not None:
+            winner = self.players[best_pid]
+            winner["budget"] -= best
+            winner["items"].append(item)
+            winner["purchases"].append({"item": item, "price": best})
+            self.last_result = {"item": item, "winner_id": best_pid,
+                                "winner": winner["pseudo"], "price": best, "bids": bids}
+        else:
+            self.last_result = {"item": item, "winner_id": None, "winner": None,
+                                "price": None, "bids": bids}
+        self.next_item()
+
     def fold(self, pid: str) -> None:
         a = self._require_auction()
         if pid not in self.players:
             raise GameError("Joueur inconnu.")
+        if self.blind:
+            return self._blind_pass(pid)
         if pid == a["leader"]:
             raise GameError("Le meneur ne peut pas se coucher.")
         if pid in a["folded"]:
@@ -171,6 +229,8 @@ class Game:
             self._resolve()
 
     def _resolve(self) -> None:
+        if self.blind:
+            return self._resolve_blind()
         a = self.auction
         item = a["item"]
         if a["leader"] is not None:
@@ -199,7 +259,7 @@ class Game:
 
     # ------------------------------------------------------- fin d'enchères
     def finish_auctions(self) -> None:
-        if self.mode == "construction" and len(self.players) >= 3:
+        if self.mode in BUILDING_MODES and len(self.players) >= 3:
             self.phase = "voting"
             self.vote_deadline = self.clock() + VOTE_DURATION
             self._bump()
@@ -301,7 +361,10 @@ class Game:
                        "current_bid": a["bid"], "leader_id": a["leader"],
                        "required_bid": self.required_bid(),
                        "folded": sorted(a["folded"]),
-                       "seconds_left": self.seconds_left()}
+                       "seconds_left": self.seconds_left(),
+                       "blind": self.blind,
+                       "submitted": sorted(a["sealed"]) if self.blind else [],
+                       "your_bid": a["sealed"].get(viewer_id) if self.blind else None}
         vote = None
         if self.phase == "voting":
             vote = {"seconds_left": max(0.0, self.vote_deadline - self.clock()),

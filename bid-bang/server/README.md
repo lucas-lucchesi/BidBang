@@ -22,7 +22,7 @@ python -m uvicorn app.main:app --host 0.0.0.0 --port 8000
 
 Erreurs : HTTP 400 `{detail}` avec un message en français.
 
-Réglages : `mode` (`construction` / `survie`), `theme_id`, `budget` (1200 / 2200 / 3500), `item_count` (6 / 8 / 10), `bid_timer` (10 / 15 / 20 / 30 s).
+Réglages : `mode` (`construction` / `survie` / `aveugle`), `theme_id`, `budget` (1200 / 2200 / 3500), `item_count` (6 / 8 / 10), `bid_timer` (10 / 15 / 20 / 30 s).
 
 ## WebSocket `WS /ws/{code}?token=...`
 
@@ -36,6 +36,8 @@ Client vers serveur : `start_game` (hôte), `bid` {amount}, `fold`, `vote` {targ
 
 ## Règles
 
-Voir `app/game.py` (constantes en tête de fichier). Mise d'ouverture libre (`opening_min` = 10 € minimum), puis surenchère d'au moins `step`. `players[].purchases` et `results[].purchases` listent `{item, price}` ; `results[].spent` donne le total dépensé.
+Voir `app/game.py` (constantes en tête de fichier). Mode `aveugle` : `bid` et `fold` sont secrets (une seule fois par objet) ; `auction.blind`, `auction.submitted` (qui a joué) et `auction.your_bid` (0 = passé) remplacent `current_bid` / `leader_id` ; `last_result.bids` révèle toutes les mises après résolution.
+
+Mise d'ouverture libre (`opening_min` = 10 € minimum), puis surenchère d'au moins `step`. `players[].purchases` et `results[].purchases` listent `{item, price}` ; `results[].spent` donne le total dépensé.
 
 Seuils de survie donnés pour 6 objets, mis à l'échelle selon `item_count`. Le catalogue est généré par `python tools/gen_catalog.py`.

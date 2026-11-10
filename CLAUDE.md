@@ -9,6 +9,7 @@ Jeu mobile multijoueur d'enchères (Android d'abord, iOS ensuite). 2 à 4 joueur
 | Mode | Objectif | Fin de partie |
 |---|---|---|
 | Construction | Acheter les meilleurs objets pour un lieu | Score + synergies + votes des joueurs |
+| Enchère à l'aveugle (`aveugle`) | Comme Construction, mais chaque joueur mise en secret une seule fois par objet | Score + synergies + votes (mêmes règles que Construction) |
 | Survie | Acheter le matériel adapté à un scénario | 3 épreuves à seuils, classement |
 
 Principe non négociable : **le serveur fait autorité**. Le téléphone n'affiche que l'état reçu et envoie des intentions (miser, se coucher, voter). Il ne décide jamais qui gagne ni combien d'argent a un joueur.
@@ -37,7 +38,7 @@ scripts/item_card.gd       carte d'objet (texte), fonctions statiques
 theme/main_theme.tres      thème commun (variations : PrimaryButton, TitleLabel, MutedLabel, ErrorLabel, InfoLabel, FieldLabel, HeadingLabel, BackButton)
 server/app/                main.py (routes, WebSocket), rooms.py (salons), game.py (moteur), catalog.py, models.py, errors.py
 server/data/catalog.json   6 lieux, 72 cartes, épreuves de survie (généré par tools/gen_catalog.py)
-server/tests/              46 tests pytest
+server/tests/              56 tests pytest
 server/tools/gen_catalog.py  génère data/catalog.json (le prototype web de référence n'est pas dans le dépôt)
 ```
 
@@ -67,6 +68,7 @@ Jeu : ouvrir le dossier dans Godot 4.7, F5. Pour jouer seul : Déboguer → Pers
 - Enchères **en temps réel**. Mise d'ouverture **libre** (minimum 10 €, le prix de l'objet n'est qu'indicatif) ; ensuite pas minimal = 8 % du prix arrondi à la dizaine (10 € minimum). Le chrono repart à chaque mise ; à zéro, le meneur remporte l'objet, sinon il reste invendu.
 - **Se coucher** est définitif pour l'objet ; le meneur ne peut pas se coucher. La manche s'arrête tout de suite si personne d'autre ne peut ou ne veut surenchérir. Qui ne peut pas payer la mise minimale (10 €) est couché d'office.
 - Points d'une carte : somme des stats (+ bonus de rareté 0/2/4/7 en Construction). Synergies : 3 points par tag partagé au-delà du premier.
+- Enchère à l'aveugle : une mise secrète (ou « passe ») par joueur et par objet, le chrono ne repart pas ; dès que tous ont joué (ou à zéro) la plus haute mise gagne et paie sa propre mise (égalité : le premier à avoir joué). Les mises sont révélées après coup dans `last_result.bids`.
 - Construction : + 8 points par vote reçu (vote impossible pour soi, uniquement à 3 joueurs ou plus, 45 s max). Survie : 18 points par épreuve réussie, sinon 9 × stat / seuil (arrondi).
 - Égalité : le plus gros budget restant passe devant ; sinon co-vainqueurs.
 
