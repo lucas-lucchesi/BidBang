@@ -38,6 +38,10 @@ out.append(box("chip", "btn_normal", (26, 14, 26, 18)))
 out.append(box("chip_money", "chip_money", (28, 14, 28, 18)))
 out.append(box("field", "field", (26, 18, 26, 20)))
 out.append(box("field_focus", "field_focus", (26, 18, 26, 20)))
+out.append(box("small_normal", "btn_normal", (22, 10, 22, 14)))
+out.append(box("small_hover", "btn_hover", (22, 10, 22, 14)))
+out.append(box("small_pressed", "btn_pressed", (22, 14, 22, 10)))
+out.append(box("choice_on", "primary_normal", (22, 10, 22, 14)))
 out.append(box("popup", "card", (22, 20, 22, 22)))
 out.append(box("popup_hover", "btn_hover", (16, 8, 16, 10)))
 out.append('''[sub_resource type="StyleBoxEmpty" id="back_normal"]
@@ -127,6 +131,21 @@ DangerButton/colors/font_color = Color(1, 0.92, 0.88, 1)
 DangerButton/styles/normal = SubResource("danger_normal")
 DangerButton/styles/hover = SubResource("danger_normal")
 DangerButton/styles/pressed = SubResource("danger_pressed")
+SmallButton/base_type = &"Button"
+SmallButton/font_sizes/font_size = 24
+SmallButton/styles/normal = SubResource("small_normal")
+SmallButton/styles/hover = SubResource("small_hover")
+SmallButton/styles/pressed = SubResource("small_pressed")
+ChoiceButton/base_type = &"Button"
+ChoiceButton/font_sizes/font_size = 24
+ChoiceButton/colors/font_pressed_color = Color(0.22, 0.12, 0.04, 1)
+ChoiceButton/colors/font_hover_pressed_color = Color(0.18, 0.09, 0.02, 1)
+ChoiceButton/colors/font_focus_color = Color(0.96, 0.93, 0.86, 1)
+ChoiceButton/styles/normal = SubResource("small_normal")
+ChoiceButton/styles/hover = SubResource("small_hover")
+ChoiceButton/styles/pressed = SubResource("choice_on")
+ChoiceButton/styles/hover_pressed = SubResource("choice_on")
+ChoiceButton/styles/focus = SubResource("back_normal")
 BackButton/base_type = &"Button"
 BackButton/colors/font_color = Color(0.9, 0.78, 0.55, 1)
 BackButton/styles/normal = SubResource("back_normal")

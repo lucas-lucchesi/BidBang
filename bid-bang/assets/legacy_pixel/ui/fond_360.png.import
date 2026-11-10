@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dm6mh2ee55brl"
-path="res://.godot/imported/fond_360.png-ea4570622454cf7aed9d5971d0968644.ctex"
+path="res://.godot/imported/fond_360.png-831e6315a15676dbe6827f8af8301f5f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/ui/fond_360.png"
-dest_files=["res://.godot/imported/fond_360.png-ea4570622454cf7aed9d5971d0968644.ctex"]
+source_file="res://assets/legacy_pixel/ui/fond_360.png"
+dest_files=["res://.godot/imported/fond_360.png-831e6315a15676dbe6827f8af8301f5f.ctex"]
 
 [params]
 

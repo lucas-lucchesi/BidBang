@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://23fjtcpdtbae"
-path="res://.godot/imported/LongButtons.png-982662d44c98d123b7d56cc8ead5dab7.ctex"
+path="res://.godot/imported/LongButtons.png-5a8fd8258f753ef49fd9a50879e7785e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/ui/LongButtons.png"
-dest_files=["res://.godot/imported/LongButtons.png-982662d44c98d123b7d56cc8ead5dab7.ctex"]
+source_file="res://assets/legacy_pixel/ui/LongButtons.png"
+dest_files=["res://.godot/imported/LongButtons.png-5a8fd8258f753ef49fd9a50879e7785e.ctex"]
 
 [params]
 

@@ -45,11 +45,43 @@ static func button(parent: Node, content: String, variation: String = "") -> But
 	if variation != "":
 		b.theme_type_variation = variation
 	# boutons compacts : à la largeur de leur texte (jamais pleine largeur)
-	b.custom_minimum_size = Vector2(0 if variation == "BackButton" else 300, 0)
-	b.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN if variation == "BackButton" else Control.SIZE_SHRINK_CENTER
+	var compact: bool = variation == "BackButton" or variation == "SmallButton"
+	b.custom_minimum_size = Vector2(0 if compact else 300, 0)
+	if variation == "BackButton":
+		b.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	elif variation != "SmallButton":
+		b.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	Fx.squish(b)
 	parent.add_child(b)
 	return b
+
+
+## Choix par pastilles (au lieu d'un menu déroulant) : une rangée qui passe à la ligne si besoin.
+## Retourne le ButtonGroup ; lire la valeur avec choice_value(group). on_change(value) est facultatif.
+static func choice_row(parent: Node, caption: String, labels: Array, values: Array, selected: Variant, on_change: Callable = Callable()) -> ButtonGroup:
+	label(parent, caption, "FieldLabel")
+	var flow := HFlowContainer.new()
+	flow.add_theme_constant_override("h_separation", 10)
+	flow.add_theme_constant_override("v_separation", 10)
+	parent.add_child(flow)
+	var group := ButtonGroup.new()
+	for i in labels.size():
+		var b := Button.new()
+		b.text = T.t(str(labels[i]))
+		b.toggle_mode = true
+		b.button_group = group
+		b.theme_type_variation = "ChoiceButton"
+		b.set_meta("value", values[i])
+		flow.add_child(b)
+		b.button_pressed = values[i] == selected
+	if on_change.is_valid():
+		group.pressed.connect(func(btn: BaseButton) -> void: on_change.call(btn.get_meta("value")))
+	return group
+
+
+static func choice_value(group: ButtonGroup) -> Variant:
+	var b: BaseButton = group.get_pressed_button()
+	return b.get_meta("value") if b != null else null
 
 
 static func field(parent: Node, caption: String, value: String = "", max_len: int = 0) -> LineEdit:

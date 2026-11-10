@@ -9,12 +9,12 @@ const T = preload("res://scripts/texts.gd")
 
 var _box: VBoxContainer
 var _error: Label
-var _mode: OptionButton
+var _mode: ButtonGroup
 var _mode_hint: Label
-var _theme: OptionButton
-var _budget: OptionButton
-var _items: OptionButton
-var _timer: OptionButton
+var _theme: ButtonGroup
+var _budget: ButtonGroup
+var _items: ButtonGroup
+var _timer: ButtonGroup
 var _create: Button
 
 
@@ -54,45 +54,40 @@ func _build_form(locations: Array) -> void:
 		var d: Dictionary = loc
 		names.append(str(d["name"]))
 		ids.append(str(d["id"]))
-	var mode_labels: Array = [T.t("Construction"), T.t("Survie")]
+	var mode_labels: Array = ["Construction", "Survie"]
 	var mode_values: Array = ["construction", "survie"]
 	if ENABLE_BLIND_MODE:
-		mode_labels.insert(1, T.t("Enchère à l'aveugle"))
+		mode_labels.insert(1, "Enchère à l'aveugle")
 		mode_values.insert(1, "aveugle")
-	_mode = UI.option(_box, T.t("Mode"), mode_labels, mode_values, "construction")
-	_mode.item_selected.connect(_on_mode_selected)
+	_mode = UI.choice_row(_box, "Mode", mode_labels, mode_values, "construction", _on_mode_selected)
 	_mode_hint = UI.label(_box, "", "MutedLabel")
-	_on_mode_selected(_mode.selected)
-	_theme = UI.option(_box, T.t("Lieu"), names, ids, ids[0] if ids.size() > 0 else "")
-	_budget = UI.option(_box, T.t("Budget"), ["1 200 €", "2 200 €", "3 500 €"], [1200, 2200, 3500], 2200)
-	_items = UI.option(_box, T.t("Nombre d'objets"), ["6", "8", "10"], [6, 8, 10], 8)
-	_timer = UI.option(_box, T.t("Chrono d'enchère"), ["10 s", "15 s", "20 s", "30 s"], [10, 15, 20, 30], 15)
+	_on_mode_selected("construction")
+	_theme = UI.choice_row(_box, "Lieu", names, ids, ids[0] if ids.size() > 0 else "")
+	_budget = UI.choice_row(_box, "Budget", ["1 200 €", "2 200 €", "3 500 €"], [1200, 2200, 3500], 2200)
+	_items = UI.choice_row(_box, "Nombre d'objets", ["6", "8", "10"], [6, 8, 10], 8)
+	_timer = UI.choice_row(_box, "Chrono d'enchère", ["10 s", "15 s", "20 s", "30 s"], [10, 15, 20, 30], 15)
 	_create = UI.button(_box, T.t("Créer le salon"), "PrimaryButton")
 	_create.pressed.connect(_on_create)
 
 
-func _on_mode_selected(index: int) -> void:
+func _on_mode_selected(mode: Variant) -> void:
 	var hints := {
 		"construction": "Enchères publiques : surenchérissez en temps réel, puis votez pour la meilleure collection.",
 		"aveugle": "Enchère à l'aveugle : chacun mise en secret une seule fois, la plus haute mise gagne.",
 		"survie": "Survie : achetez le matériel pour réussir 3 épreuves.",
 	}
-	_mode_hint.text = T.t(str(hints[str(_mode.get_item_metadata(index))]))
-
-
-func _selected(o: OptionButton) -> Variant:
-	return o.get_item_metadata(o.selected)
+	_mode_hint.text = T.t(str(hints[str(mode)]))
 
 
 func _on_create() -> void:
 	_create.disabled = true
 	_error.text = ""
 	var settings := {
-		"mode": _selected(_mode),
-		"theme_id": _selected(_theme),
-		"budget": _selected(_budget),
-		"item_count": _selected(_items),
-		"bid_timer": _selected(_timer),
+		"mode": UI.choice_value(_mode),
+		"theme_id": UI.choice_value(_theme),
+		"budget": UI.choice_value(_budget),
+		"item_count": UI.choice_value(_items),
+		"bid_timer": UI.choice_value(_timer),
 	}
 	Session.net.request("create", Session.server_url, HTTPClient.METHOD_POST, "/rooms",
 		{"pseudo": Session.pseudo, "settings": settings})

@@ -198,6 +198,54 @@ content_margin_right = 26.0
 content_margin_bottom = 20.0
 
 
+[sub_resource type="StyleBoxTexture" id="small_normal"]
+texture = ExtResource("t_btn_normal")
+texture_margin_left = 30.0
+texture_margin_top = 30.0
+texture_margin_right = 30.0
+texture_margin_bottom = 30.0
+content_margin_left = 22.0
+content_margin_top = 10.0
+content_margin_right = 22.0
+content_margin_bottom = 14.0
+
+
+[sub_resource type="StyleBoxTexture" id="small_hover"]
+texture = ExtResource("t_btn_hover")
+texture_margin_left = 30.0
+texture_margin_top = 30.0
+texture_margin_right = 30.0
+texture_margin_bottom = 30.0
+content_margin_left = 22.0
+content_margin_top = 10.0
+content_margin_right = 22.0
+content_margin_bottom = 14.0
+
+
+[sub_resource type="StyleBoxTexture" id="small_pressed"]
+texture = ExtResource("t_btn_pressed")
+texture_margin_left = 30.0
+texture_margin_top = 30.0
+texture_margin_right = 30.0
+texture_margin_bottom = 30.0
+content_margin_left = 22.0
+content_margin_top = 14.0
+content_margin_right = 22.0
+content_margin_bottom = 10.0
+
+
+[sub_resource type="StyleBoxTexture" id="choice_on"]
+texture = ExtResource("t_primary_normal")
+texture_margin_left = 30.0
+texture_margin_top = 30.0
+texture_margin_right = 30.0
+texture_margin_bottom = 30.0
+content_margin_left = 22.0
+content_margin_top = 10.0
+content_margin_right = 22.0
+content_margin_bottom = 14.0
+
+
 [sub_resource type="StyleBoxTexture" id="popup"]
 texture = ExtResource("t_card")
 texture_margin_left = 30.0
@@ -307,6 +355,21 @@ DangerButton/colors/font_color = Color(1, 0.92, 0.88, 1)
 DangerButton/styles/normal = SubResource("danger_normal")
 DangerButton/styles/hover = SubResource("danger_normal")
 DangerButton/styles/pressed = SubResource("danger_pressed")
+SmallButton/base_type = &"Button"
+SmallButton/font_sizes/font_size = 24
+SmallButton/styles/normal = SubResource("small_normal")
+SmallButton/styles/hover = SubResource("small_hover")
+SmallButton/styles/pressed = SubResource("small_pressed")
+ChoiceButton/base_type = &"Button"
+ChoiceButton/font_sizes/font_size = 24
+ChoiceButton/colors/font_pressed_color = Color(0.22, 0.12, 0.04, 1)
+ChoiceButton/colors/font_hover_pressed_color = Color(0.18, 0.09, 0.02, 1)
+ChoiceButton/colors/font_focus_color = Color(0.96, 0.93, 0.86, 1)
+ChoiceButton/styles/normal = SubResource("small_normal")
+ChoiceButton/styles/hover = SubResource("small_hover")
+ChoiceButton/styles/pressed = SubResource("choice_on")
+ChoiceButton/styles/hover_pressed = SubResource("choice_on")
+ChoiceButton/styles/focus = SubResource("back_normal")
 BackButton/base_type = &"Button"
 BackButton/colors/font_color = Color(0.9, 0.78, 0.55, 1)
 BackButton/styles/normal = SubResource("back_normal")

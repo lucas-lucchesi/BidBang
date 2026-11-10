@@ -41,8 +41,7 @@ func _ready() -> void:
 	panel.add_child(box)
 	UI.label(box, "Paramètres", "HeadingLabel").horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	# langue
-	var lang: OptionButton = UI.option(box, "Langue", ["Français", "English"], ["fr", "en"], Session.language)
-	lang.item_selected.connect(_on_language.bind(lang))
+	UI.choice_row(box, "Langue", ["Français", "English"], ["fr", "en"], Session.language, _on_language)
 	# volume
 	UI.label(box, "Volume", "FieldLabel")
 	var row := HBoxContainer.new()
@@ -64,8 +63,7 @@ func _ready() -> void:
 	var labels: Array = []
 	for v in FPS_VALUES:
 		labels.append("Illimité" if v == 0 else str(v))
-	var fps: OptionButton = UI.option(box, "Images par seconde (FPS)", labels, FPS_VALUES, Session.max_fps)
-	fps.item_selected.connect(_on_fps.bind(fps))
+	UI.choice_row(box, "Images par seconde (FPS)", labels, FPS_VALUES, Session.max_fps, _on_fps)
 	# serveur
 	_server = UI.field(box, "Adresse du serveur", Session.server_url)
 	_server.text_changed.connect(_on_server_text)
@@ -81,8 +79,8 @@ func _show_volume() -> void:
 	_vol_label.text = "%d %%" % pct
 
 
-func _on_language(index: int, o: OptionButton) -> void:
-	Session.language = str(o.get_item_metadata(index))
+func _on_language(value: Variant) -> void:
+	Session.language = str(value)
 	Session.apply_settings()
 	Session.save_settings()
 
@@ -94,8 +92,8 @@ func _on_volume(delta: int) -> void:
 	_show_volume()
 
 
-func _on_fps(index: int, o: OptionButton) -> void:
-	Session.max_fps = int(o.get_item_metadata(index))
+func _on_fps(value: Variant) -> void:
+	Session.max_fps = int(value)
 	Session.apply_settings()
 	Session.save_settings()
 
