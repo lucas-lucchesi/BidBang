@@ -6,7 +6,7 @@ extends RefCounted
 static func stagger_in(parent: Node, step: float = 0.06, duration: float = 0.35) -> void:
 	var i: int = 0
 	for c in parent.get_children():
-		if c is CanvasItem:
+		if c is CanvasItem and not c.is_queued_for_deletion():
 			var ci: CanvasItem = c
 			ci.modulate.a = 0.0
 			var tw: Tween = ci.create_tween()

@@ -84,6 +84,7 @@ func _start_timer(seconds_left: float, total: float) -> void:
 
 func _render(game: Dictionary) -> void:
 	for c in _box.get_children():
+		_box.remove_child(c)
 		c.queue_free()
 	_countdown = null
 	_bar = null
