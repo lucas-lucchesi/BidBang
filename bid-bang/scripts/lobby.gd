@@ -32,8 +32,8 @@ func _ready() -> void:
 	leave.pressed.connect(_on_leave)
 	Session.room_updated.connect(_refresh)
 	Session.game_updated.connect(_on_game)
-	Session.error_received.connect(func(m: String) -> void: _error.text = m)
-	Session.connection_lost.connect(func() -> void: _error.text = "Connexion perdue avec le serveur.")
+	Session.error_received.connect(_on_error)
+	Session.connection_lost.connect(_on_connection_lost)
 	_refresh(Session.room)
 	if not Session.game.is_empty():
 		_on_game(Session.game)
@@ -67,6 +67,14 @@ func _refresh(room: Dictionary) -> void:
 	_start.visible = Session.is_host()
 	_start.disabled = players.size() < 2
 	_start.text = "Lancer la partie" if players.size() >= 2 else "En attente d'un autre joueur..."
+
+
+func _on_error(message: String) -> void:
+	_error.text = message
+
+
+func _on_connection_lost() -> void:
+	_error.text = "Connexion perdue avec le serveur."
 
 
 func _on_start() -> void:
