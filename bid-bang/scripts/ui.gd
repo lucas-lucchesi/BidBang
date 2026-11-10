@@ -88,6 +88,31 @@ static func open_settings(host: Node) -> void:
 	panel_script.call("open", host)
 
 
+## Section dépliable : un bouton-titre qui montre / cache le contenu. Retourne le conteneur du contenu.
+## on_toggle(expanded: bool) permet de mémoriser l'état d'un écran reconstruit à chaque mise à jour.
+static func collapsible(parent: Node, title: String, expanded: bool = false, on_toggle: Callable = Callable()) -> VBoxContainer:
+	var wrap := VBoxContainer.new()
+	wrap.add_theme_constant_override("separation", 3)
+	parent.add_child(wrap)
+	var head := Button.new()
+	head.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	head.clip_text = true
+	head.custom_minimum_size = Vector2(0, 22)
+	head.text = ("^ " if expanded else "v ") + title
+	Fx.squish(head)
+	wrap.add_child(head)
+	var content := VBoxContainer.new()
+	content.add_theme_constant_override("separation", 3)
+	content.visible = expanded
+	wrap.add_child(content)
+	head.pressed.connect(func() -> void:
+		content.visible = not content.visible
+		head.text = ("^ " if content.visible else "v ") + title
+		if on_toggle.is_valid():
+			on_toggle.call(content.visible))
+	return content
+
+
 static func goto(node: Node, path: String) -> bool:
 	var err: int = node.get_tree().change_scene_to_file(path)
 	return err == OK
