@@ -2,6 +2,9 @@ extends Control
 ## Création d'un salon : réglages de la partie.
 
 const UI = preload("res://scripts/ui.gd")
+
+## Mode « Enchère à l'aveugle » : masqué tant qu'il n'est pas au point (serveur et écran déjà codés).
+const ENABLE_BLIND_MODE := false
 const T = preload("res://scripts/texts.gd")
 
 var _box: VBoxContainer
@@ -51,7 +54,12 @@ func _build_form(locations: Array) -> void:
 		var d: Dictionary = loc
 		names.append(str(d["name"]))
 		ids.append(str(d["id"]))
-	_mode = UI.option(_box, T.t("Mode"), [T.t("Construction"), T.t("Enchère à l'aveugle"), T.t("Survie")], ["construction", "aveugle", "survie"], "construction")
+	var mode_labels: Array = [T.t("Construction"), T.t("Survie")]
+	var mode_values: Array = ["construction", "survie"]
+	if ENABLE_BLIND_MODE:
+		mode_labels.insert(1, T.t("Enchère à l'aveugle"))
+		mode_values.insert(1, "aveugle")
+	_mode = UI.option(_box, T.t("Mode"), mode_labels, mode_values, "construction")
 	_mode.item_selected.connect(_on_mode_selected)
 	_mode_hint = UI.label(_box, "", "MutedLabel")
 	_on_mode_selected(_mode.selected)
