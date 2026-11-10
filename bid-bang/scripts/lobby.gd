@@ -71,7 +71,8 @@ func _refresh(room: Dictionary) -> void:
 		row.add_child(l)
 		_players_box.add_child(row)
 	var s: Dictionary = room.get("settings", {})
-	var mode_text: String = T.t("Construction") if str(s.get("mode", "")) == "construction" else T.t("Survie")
+	var mode_names := {"construction": "Construction", "aveugle": "Enchère à l'aveugle", "survie": "Survie"}
+	var mode_text: String = T.t(str(mode_names.get(str(s.get("mode", "")), "Construction")))
 	_info.text = T.t("%s - %d objets - budget %d € - chrono %d s - %d/%d joueurs") % [
 		mode_text, int(s.get("item_count", 0)), int(s.get("budget", 0)),
 		int(s.get("bid_timer", 0)), players.size(), int(room.get("max_players", 4))]

@@ -7,6 +7,7 @@ const T = preload("res://scripts/texts.gd")
 var _box: VBoxContainer
 var _error: Label
 var _mode: OptionButton
+var _mode_hint: Label
 var _theme: OptionButton
 var _budget: OptionButton
 var _items: OptionButton
@@ -50,13 +51,25 @@ func _build_form(locations: Array) -> void:
 		var d: Dictionary = loc
 		names.append(str(d["name"]))
 		ids.append(str(d["id"]))
-	_mode = UI.option(_box, T.t("Mode"), [T.t("Construction"), T.t("Survie")], ["construction", "survie"], "construction")
+	_mode = UI.option(_box, T.t("Mode"), [T.t("Construction"), T.t("Enchère à l'aveugle"), T.t("Survie")], ["construction", "aveugle", "survie"], "construction")
+	_mode.item_selected.connect(_on_mode_selected)
+	_mode_hint = UI.label(_box, "", "MutedLabel")
+	_on_mode_selected(_mode.selected)
 	_theme = UI.option(_box, T.t("Lieu"), names, ids, ids[0] if ids.size() > 0 else "")
 	_budget = UI.option(_box, T.t("Budget"), ["1 200 €", "2 200 €", "3 500 €"], [1200, 2200, 3500], 2200)
 	_items = UI.option(_box, T.t("Nombre d'objets"), ["6", "8", "10"], [6, 8, 10], 8)
 	_timer = UI.option(_box, T.t("Chrono d'enchère"), ["10 s", "15 s", "20 s", "30 s"], [10, 15, 20, 30], 15)
 	_create = UI.button(_box, T.t("Créer le salon"), "PrimaryButton")
 	_create.pressed.connect(_on_create)
+
+
+func _on_mode_selected(index: int) -> void:
+	var hints := {
+		"construction": "Enchères publiques : surenchérissez en temps réel, puis votez pour la meilleure collection.",
+		"aveugle": "Enchère à l'aveugle : chacun mise en secret une seule fois, la plus haute mise gagne.",
+		"survie": "Survie : achetez le matériel pour réussir 3 épreuves.",
+	}
+	_mode_hint.text = T.t(str(hints[str(_mode.get_item_metadata(index))]))
 
 
 func _selected(o: OptionButton) -> Variant:

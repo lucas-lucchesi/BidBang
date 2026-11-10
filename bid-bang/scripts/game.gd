@@ -7,6 +7,7 @@ const T = preload("res://scripts/texts.gd")
 const ItemCard = preload("res://scripts/item_card.gd")
 const Fx = preload("res://scripts/fx.gd")
 const Confetti = preload("res://scripts/confetti.gd")
+const Podium = preload("res://scripts/podium.gd")
 
 var _box: VBoxContainer
 var _countdown: Label = null
@@ -21,6 +22,7 @@ var _bid_item_id: String = ""
 var _anim_key: String = ""
 var _last_bid: int = -1
 var _confetti_done: bool = false
+var _open: Dictionary = {}  # sections dépliées (clé -> bool), conservées entre deux mises à jour
 
 
 func _ready() -> void:
@@ -149,9 +151,14 @@ func _render_auction(game: Dictionary, me: Dictionary) -> void:
 		else:
 			ItemCard.make_label(_box, T.t("%s remporté par %s pour %s.") % [
 				str(lr["item"]["name"]), str(lr["winner"]), ItemCard.format_money(int(lr["price"]))], "InfoLabel")
+		if lr.get("bids") is Array:
+			_render_bids(lr["bids"], str(lr.get("winner_id", "")))
 	_box.add_child(ItemCard.make_card(item))
 	ItemCard.make_label(_box, T.t("Valeur indicative : %s - vous misez le montant que vous voulez.") % ItemCard.format_money(int(a["start_price"])), "MutedLabel")
 
+	if bool(a.get("blind", false)):
+		_render_blind(game, me, a, settings)
+		return
 	var leader_id: String = str(a["leader_id"]) if a["leader_id"] != null else ""
 	var hero := PanelContainer.new()
 	hero.theme_type_variation = "HeroPanel"
@@ -185,7 +192,7 @@ func _render_auction(game: Dictionary, me: Dictionary) -> void:
 		_render_bid_controls(a, budget, required)
 
 
-func _render_bid_controls(a: Dictionary, budget: int, required: int) -> void:
+func _render_bid_controls(a: Dictionary, budget: int, required: int, blind: bool = false) -> void:
 	var item_id: String = str(a["item"]["id"])
 	_bid_required = required
 	if item_id != _bid_item_id or _bid_value < required:
@@ -221,10 +228,10 @@ func _render_bid_controls(a: Dictionary, budget: int, required: int) -> void:
 		cb.pressed.connect(_on_adjust.bind(delta, budget))
 		chips.add_child(cb)
 	ItemCard.make_label(_box, T.t("$ = tout mon budget"), "MutedLabel")
-	var bid_b: Button = UI.button(_box, T.t("Miser"), "PrimaryButton")
+	var bid_b: Button = UI.button(_box, T.t("Valider la mise") if blind else T.t("Miser"), "PrimaryButton")
 	bid_b.disabled = budget < required
 	bid_b.pressed.connect(_on_bid)
-	var f: Button = UI.button(_box, T.t("Se coucher"), "DangerButton")
+	var f: Button = UI.button(_box, T.t("Passer") if blind else T.t("Se coucher"), "DangerButton")
 	f.pressed.connect(_on_fold)
 
 
@@ -252,33 +259,73 @@ func _on_fold() -> void:
 	Session.send({"type": "fold"})
 
 
+# ----------------------------------------------------------- enchère à l'aveugle
+func _render_blind(game: Dictionary, me: Dictionary, a: Dictionary, settings: Dictionary) -> void:
+	var hero := PanelContainer.new()
+	hero.theme_type_variation = "HeroPanel"
+	_box.add_child(hero)
+	var hbox := VBoxContainer.new()
+	hbox.add_theme_constant_override("separation", 4)
+	hero.add_child(hbox)
+	ItemCard.make_label(hbox, T.t("Enchère à l'aveugle"), "HeadingLabel")
+	var submitted: Array = a["submitted"]
+	ItemCard.make_label(hbox, T.t("%d / %d joueurs ont joué") % [submitted.size(), game["players"].size()], "MutedLabel")
+	_bar = UI.timer_bar(hbox)
+	_countdown = ItemCard.make_label(hbox, "", "MutedLabel")
+	if a["seconds_left"] != null:
+		_start_timer(float(a["seconds_left"]), float(settings["bid_timer"]))
+	var mine: Variant = a.get("your_bid")
+	if mine == null:
+		_render_bid_controls(a, int(me.get("budget", 0)), int(a["required_bid"]), true)
+	elif int(mine) > 0:
+		ItemCard.make_label(_box, T.t("Votre mise secrète : %s") % ItemCard.format_money(int(mine)), "InfoLabel")
+		ItemCard.make_label(_box, T.t("En attente des autres joueurs..."), "MutedLabel")
+	else:
+		ItemCard.make_label(_box, T.t("Vous passez pour cet objet."), "MutedLabel")
+		ItemCard.make_label(_box, T.t("En attente des autres joueurs..."), "MutedLabel")
+
+
+func _render_bids(bids: Array, winner_id: String) -> void:
+	var inner: VBoxContainer = UI.collapsible(_box, T.t("Mises révélées"), bool(_open.get("bids", false)), _remember.bind("bids"))
+	var sorted_bids: Array = bids.duplicate()
+	sorted_bids.sort_custom(func(x: Dictionary, y: Dictionary) -> bool: return int(x["amount"]) > int(y["amount"]))
+	for b in sorted_bids:
+		var d: Dictionary = b
+		var txt: String = ItemCard.format_money(int(d["amount"])) if int(d["amount"]) > 0 else T.t("passe")
+		if str(d["player_id"]) == winner_id:
+			txt += T.t(" (gagnant)")
+		ItemCard.make_label(inner, "%s : %s" % [str(d["pseudo"]), txt], "MutedLabel")
+
+
+func _remember(expanded: bool, key: String) -> void:
+	_open[key] = expanded
+
+
 # ------------------------------------------------------------------- joueurs
 func _render_players(game: Dictionary) -> void:
 	ItemCard.make_label(_box, T.t("Joueurs"), "HeadingLabel")
 	var leader_id: String = ""
 	var folded: Array = []
+	var submitted: Array = []
 	if game.get("auction") is Dictionary:
 		var a: Dictionary = game["auction"]
 		leader_id = str(a["leader_id"]) if a["leader_id"] != null else ""
 		folded = a["folded"]
+		submitted = a.get("submitted", [])
 	for p in game["players"]:
 		var d: Dictionary = p
-		var items: Array = d["items"]
-		var line: String = T.t("%s - %s - %d objet(s)") % [str(d["pseudo"]), ItemCard.format_money(int(d["budget"])), items.size()]
-		if str(d["id"]) == leader_id:
+		var pid: String = str(d["id"])
+		var purchases: Array = d["purchases"]
+		var line: String = T.t("%s - %s - %d objet(s)") % [str(d["pseudo"]), ItemCard.format_money(int(d["budget"])), purchases.size()]
+		if pid == leader_id:
 			line += T.t(" - mène")
-		elif folded.has(str(d["id"])):
+		elif submitted.has(pid):
+			line += T.t(" - a joué")
+		elif folded.has(pid):
 			line += T.t(" - couché")
-		var row := PanelContainer.new()
-		var col := VBoxContainer.new()
-		row.add_child(col)
-		ItemCard.make_label(col, line)
-		if items.size() > 0:
-			var names: PackedStringArray = []
-			for it in items:
-				names.append(str(it["name"]))
-			ItemCard.make_label(col, ", ".join(names), "MutedLabel")
-		_box.add_child(row)
+		var key: String = "p_" + pid
+		var inner: VBoxContainer = UI.collapsible(_box, line, bool(_open.get(key, false)), _remember.bind(key))
+		_add_purchase_lines(inner, purchases)
 
 
 # ---------------------------------------------------------------------- vote
@@ -299,7 +346,9 @@ func _render_voting(game: Dictionary) -> void:
 		col.add_theme_constant_override("separation", 3)
 		card.add_child(col)
 		ItemCard.make_label(col, str(d["pseudo"]), "HeadingLabel")
-		_add_purchase_lines(col, d["purchases"])
+		var vkey: String = "v_" + str(d["id"])
+		var inner: VBoxContainer = UI.collapsible(col, T.t("Voir les objets (%d)") % d["purchases"].size(), bool(_open.get(vkey, false)), _remember.bind(vkey))
+		_add_purchase_lines(inner, d["purchases"])
 		var b: Button = UI.button(col, T.t("Voter pour ") + str(d["pseudo"]) + (T.t(" (votre choix)") if chosen else ""), "PrimaryButton" if chosen else "")
 		b.pressed.connect(_on_vote.bind(str(d["id"])))
 		_box.add_child(card)
@@ -330,27 +379,22 @@ func _add_purchase_lines(parent: Node, purchases: Array) -> void:
 
 
 func _render_results(game: Dictionary) -> void:
-	ItemCard.make_label(_box, T.t("Résultats"), "TitleLabel")
+	ItemCard.make_label(_box, T.t("Podium"), "TitleLabel").horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	var scenario: Variant = game.get("scenario")
 	if scenario is Dictionary:
 		var sc: Dictionary = scenario
 		ItemCard.make_label(_box, str(sc["title"]) + " - " + str(sc["text"]), "MutedLabel")
+	Podium.build(_box, game["results"])
+	ItemCard.make_label(_box, T.t("Détails"), "HeadingLabel")
 	for r in game["results"]:
 		var row: Dictionary = r
-		var card := PanelContainer.new()
-		if bool(row["winner"]):
-			card.theme_type_variation = "HeroPanel"
-		var col := VBoxContainer.new()
-		col.add_theme_constant_override("separation", 3)
-		card.add_child(col)
-		var title: String = "%d. %s" % [int(row["rank"]), str(row["pseudo"])]
-		if bool(row["winner"]):
-			title += T.t(" - gagnant")
-		ItemCard.make_label(col, title, "HeadingLabel")
-		ItemCard.make_label(col, "%d pts" % int(row["score"]), "BigMoneyLabel")
+		var mine: bool = str(row["player_id"]) == Session.player_id
+		var title: String = "%d. %s - %s" % [int(row["rank"]), str(row["pseudo"]), T.t("%d pts") % int(row["score"])]
+		var key: String = "r_" + str(row["player_id"])
+		var col: VBoxContainer = UI.collapsible(_box, title, bool(_open.get(key, mine)), _remember.bind(key))
 		ItemCard.make_label(col, T.t("Objets %d - Synergies %d - Budget restant %s") % [
 			int(row["items_points"]), int(row["synergy_points"]), ItemCard.format_money(int(row["budget"]))], "MutedLabel")
-		if str(game["mode"]) == "construction":
+		if str(game["mode"]) != "survie":
 			ItemCard.make_label(col, T.t("Votes reçus : %d (+%d)") % [int(row["votes"]), int(row["vote_points"])], "MutedLabel")
 		for t in row["trials"]:
 			var tr: Dictionary = t
@@ -360,7 +404,6 @@ func _render_results(game: Dictionary) -> void:
 				"InfoLabel" if bool(tr["success"]) else "ErrorLabel")
 		ItemCard.make_label(col, T.t("Achats (%s dépensés)") % ItemCard.format_money(int(row["spent"])), "FieldLabel")
 		_add_purchase_lines(col, row["purchases"])
-		_box.add_child(card)
 	var back: Button = UI.button(_box, T.t("Retour au menu"), "PrimaryButton")
 	back.pressed.connect(_on_back)
 
