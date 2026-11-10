@@ -13,8 +13,8 @@ func _ready() -> void:
 	var box: VBoxContainer = UI.page(self)
 	UI.label(box, "BidBang", "TitleLabel").horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	UI.label(box, T.t("Enchérissez. Construisez. Survivez."), "MutedLabel").horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	var gap := Control.new()  # laisse voir l'enseigne du fond
-	gap.custom_minimum_size = Vector2(0, 215)
+	var gap := Control.new()
+	gap.custom_minimum_size = Vector2(0, 140)
 	box.add_child(gap)
 	_pseudo = UI.field(box, T.t("Pseudo"), Session.pseudo, 16)
 	_pseudo.placeholder_text = T.t("Votre pseudo")

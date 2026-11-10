@@ -3,12 +3,13 @@ extends Control
 
 
 func _ready() -> void:
-	custom_minimum_size = Vector2(28, 14)
+	custom_minimum_size = Vector2(56, 28)
 	size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 
 func _draw() -> void:
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2(2, 2))
 	var gold := Color(1, 0.8, 0.25)
 	var dark := Color(0.5, 0.3, 0.05)
 	draw_colored_polygon(PackedVector2Array([

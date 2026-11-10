@@ -17,14 +17,14 @@ static func page(root: Control, scene_id: String = "", dim: float = 0.0) -> VBox
 	var margin := MarginContainer.new()
 	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
 	for side in ["left", "right", "top", "bottom"]:
-		margin.add_theme_constant_override("margin_" + side, 12)
+		margin.add_theme_constant_override("margin_" + side, 28)
 	root.add_child(margin)
 	var scroll := ScrollContainer.new()
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	margin.add_child(scroll)
 	var box := VBoxContainer.new()
 	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	box.add_theme_constant_override("separation", 8)
+	box.add_theme_constant_override("separation", 16)
 	scroll.add_child(box)
 	return box
 
@@ -45,7 +45,7 @@ static func button(parent: Node, content: String, variation: String = "") -> But
 	if variation != "":
 		b.theme_type_variation = variation
 	# boutons compacts : à la largeur de leur texte (jamais pleine largeur)
-	b.custom_minimum_size = Vector2(0 if variation == "BackButton" else 120, 24)
+	b.custom_minimum_size = Vector2(0 if variation == "BackButton" else 300, 0)
 	b.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN if variation == "BackButton" else Control.SIZE_SHRINK_CENTER
 	Fx.squish(b)
 	parent.add_child(b)
@@ -92,17 +92,17 @@ static func open_settings(host: Node) -> void:
 ## on_toggle(expanded: bool) permet de mémoriser l'état d'un écran reconstruit à chaque mise à jour.
 static func collapsible(parent: Node, title: String, expanded: bool = false, on_toggle: Callable = Callable()) -> VBoxContainer:
 	var wrap := VBoxContainer.new()
-	wrap.add_theme_constant_override("separation", 3)
+	wrap.add_theme_constant_override("separation", 6)
 	parent.add_child(wrap)
 	var head := Button.new()
 	head.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	head.clip_text = true
-	head.custom_minimum_size = Vector2(0, 22)
+	head.custom_minimum_size = Vector2(0, 64)
 	head.text = ("^ " if expanded else "v ") + title
 	Fx.squish(head)
 	wrap.add_child(head)
 	var content := VBoxContainer.new()
-	content.add_theme_constant_override("separation", 3)
+	content.add_theme_constant_override("separation", 6)
 	content.visible = expanded
 	wrap.add_child(content)
 	head.pressed.connect(func() -> void:
@@ -139,7 +139,7 @@ static func timer_bar(parent: Node) -> ProgressBar:
 	b.min_value = 0.0
 	b.max_value = 1.0
 	b.value = 1.0
-	b.custom_minimum_size = Vector2(0, 8)
+	b.custom_minimum_size = Vector2(0, 18)
 	parent.add_child(b)
 	return b
 
@@ -147,40 +147,33 @@ static func timer_bar(parent: Node) -> ProgressBar:
 static func set_bar_fraction(bar: ProgressBar, fraction: float) -> void:
 	bar.value = clampf(fraction, 0.0, 1.0)
 	var fill := StyleBoxFlat.new()
+	fill.set_corner_radius_all(6)
 	if fraction > 0.5:
-		fill.bg_color = Color(0.45, 0.85, 0.55, 1)
+		fill.bg_color = Color(0.95, 0.78, 0.35, 1)
 	elif fraction > 0.25:
-		fill.bg_color = Color(1, 0.75, 0.25, 1)
+		fill.bg_color = Color(0.95, 0.55, 0.2, 1)
 	else:
-		fill.bg_color = Color(1, 0.4, 0.35, 1)
+		fill.bg_color = Color(0.85, 0.2, 0.2, 1)
 	bar.add_theme_stylebox_override("fill", fill)
 
 
-const ICONS = preload("res://assets/ui/freebuttons2.png")
-## Position des icônes dans freebuttons2.png : (ligne, paire). Jeu foncé = colonnes 0-3, clair = 4-7.
-const ICON_PLUS := Vector2i(1, 0)
-const ICON_CHECK := Vector2i(1, 1)
-const ICON_CROSS := Vector2i(2, 0)
-const ICON_MINUS := Vector2i(2, 1)
-const ICON_DOLLAR := Vector2i(3, 1)
+## Icônes rondes (textures générées : assets/ui_real/icon_<nom>[_hover|_pressed].png)
+const ICON_PLUS := "plus"
+const ICON_MINUS := "minus"
+const ICON_DOLLAR := "dollar"
 
 
-static func _icon_cell(row: int, col: int) -> AtlasTexture:
-	var t := AtlasTexture.new()
-	t.atlas = ICONS
-	t.region = Rect2(col * 16, row * 16, 16, 16)
-	return t
-
-
-## Bouton-icône en pixel art (32x32 = échelle x2). `icon` : une des constantes ICON_*.
-static func icon_button(parent: Node, icon: Vector2i) -> TextureButton:
+## Bouton-icône rond. `icon` : une des constantes ICON_*.
+static func icon_button(parent: Node, icon: String) -> TextureButton:
 	var b := TextureButton.new()
-	b.texture_normal = _icon_cell(icon.x, icon.y * 2)
-	b.texture_pressed = _icon_cell(icon.x, icon.y * 2 + 1)
-	b.texture_hover = _icon_cell(icon.x, 4 + icon.y * 2)
+	b.texture_normal = load("res://assets/ui_real/icon_%s.png" % icon)
+	b.texture_hover = load("res://assets/ui_real/icon_%s_hover.png" % icon)
+	b.texture_pressed = load("res://assets/ui_real/icon_%s_pressed.png" % icon)
 	b.ignore_texture_size = true
-	b.stretch_mode = TextureButton.STRETCH_SCALE
-	b.custom_minimum_size = Vector2(32, 32)
+	b.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
+	b.custom_minimum_size = Vector2(88, 88)
 	Fx.squish(b)
 	parent.add_child(b)
 	return b
+
+

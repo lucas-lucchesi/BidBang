@@ -19,11 +19,11 @@ func _ready() -> void:
 	if not Session.in_room():
 		UI.goto(self, "res://menu.tscn")
 		return
-	_box = UI.page(self, "", 0.5)
+	_box = UI.page(self, str(Session.room.get("settings", {}).get("theme_id", "")), 0.5)
 	UI.label(_box, T.t("Salon"), "MutedLabel")
 	var code_button: Button = UI.button(_box, Session.code, "BackButton")
 	code_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	code_button.add_theme_font_size_override("font_size", 32)
+	code_button.add_theme_font_size_override("font_size", 64)
 	code_button.add_theme_color_override("font_color", Color(1, 0.78, 0.3, 1))
 	code_button.add_theme_color_override("font_hover_color", Color(1, 0.9, 0.6, 1))
 	code_button.pressed.connect(_on_copy_code)
@@ -32,7 +32,7 @@ func _ready() -> void:
 	_info = UI.label(_box, "", "MutedLabel")
 	UI.label(_box, T.t("Joueurs"), "HeadingLabel")
 	_players_box = VBoxContainer.new()
-	_players_box.add_theme_constant_override("separation", 4)
+	_players_box.add_theme_constant_override("separation", 10)
 	_box.add_child(_players_box)
 	_error = UI.label(_box, "", "ErrorLabel")
 	_start = UI.button(_box, T.t("Lancer la partie"), "PrimaryButton")

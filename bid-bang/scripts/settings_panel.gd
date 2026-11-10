@@ -32,12 +32,12 @@ func _ready() -> void:
 	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(center)
 	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2(300, 0)
+	panel.custom_minimum_size = Vector2(600, 0)
 	panel.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	panel.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	center.add_child(panel)
 	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 6)
+	box.add_theme_constant_override("separation", 14)
 	panel.add_child(box)
 	UI.label(box, "Paramètres", "HeadingLabel").horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	# langue
@@ -46,7 +46,7 @@ func _ready() -> void:
 	# volume
 	UI.label(box, "Volume", "FieldLabel")
 	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 4)
+	row.add_theme_constant_override("separation", 10)
 	box.add_child(row)
 	UI.icon_button(row, UI.ICON_MINUS).pressed.connect(_on_volume.bind(-10))
 	_vol_bar = ProgressBar.new()
@@ -55,7 +55,7 @@ func _ready() -> void:
 	_vol_bar.max_value = 100.0
 	_vol_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_vol_bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	_vol_bar.custom_minimum_size = Vector2(0, 12)
+	_vol_bar.custom_minimum_size = Vector2(0, 24)
 	row.add_child(_vol_bar)
 	UI.icon_button(row, UI.ICON_PLUS).pressed.connect(_on_volume.bind(10))
 	_vol_label = UI.label(box, "", "MutedLabel")
