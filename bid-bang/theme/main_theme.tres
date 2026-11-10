@@ -1,6 +1,11 @@
 [gd_resource type="Theme" format=3]
 
 [sub_resource type="StyleBoxFlat" id="btn_normal"]
+border_width_bottom = 5
+border_color = Color(0.11, 0.13, 0.2, 1)
+shadow_color = Color(0, 0, 0, 0.3)
+shadow_size = 6
+shadow_offset = Vector2(0, 3)
 bg_color = Color(0.2, 0.23, 0.33, 1)
 corner_radius_top_left = 14
 corner_radius_top_right = 14
@@ -12,6 +17,11 @@ content_margin_right = 18.0
 content_margin_bottom = 14.0
 
 [sub_resource type="StyleBoxFlat" id="btn_hover"]
+border_width_bottom = 5
+border_color = Color(0.13, 0.15, 0.24, 1)
+shadow_color = Color(0, 0, 0, 0.3)
+shadow_size = 6
+shadow_offset = Vector2(0, 3)
 bg_color = Color(0.26, 0.3, 0.42, 1)
 corner_radius_top_left = 14
 corner_radius_top_right = 14
@@ -45,6 +55,11 @@ content_margin_right = 18.0
 content_margin_bottom = 14.0
 
 [sub_resource type="StyleBoxFlat" id="primary_normal"]
+border_width_bottom = 5
+border_color = Color(0.62, 0.36, 0.04, 1)
+shadow_color = Color(0, 0, 0, 0.3)
+shadow_size = 6
+shadow_offset = Vector2(0, 3)
 bg_color = Color(0.96, 0.62, 0.12, 1)
 corner_radius_top_left = 14
 corner_radius_top_right = 14
@@ -56,6 +71,11 @@ content_margin_right = 18.0
 content_margin_bottom = 16.0
 
 [sub_resource type="StyleBoxFlat" id="primary_hover"]
+border_width_bottom = 5
+border_color = Color(0.7, 0.42, 0.06, 1)
+shadow_color = Color(0, 0, 0, 0.3)
+shadow_size = 6
+shadow_offset = Vector2(0, 3)
 bg_color = Color(1, 0.72, 0.28, 1)
 corner_radius_top_left = 14
 corner_radius_top_right = 14
@@ -252,7 +272,12 @@ BackButton/styles/hover = SubResource("back_normal")
 BackButton/styles/pressed = SubResource("back_normal")
 TitleLabel/base_type = &"Label"
 TitleLabel/colors/font_color = Color(0.96, 0.62, 0.12, 1)
-TitleLabel/font_sizes/font_size = 56
+TitleLabel/font_sizes/font_size = 64
+TitleLabel/colors/font_shadow_color = Color(0.96, 0.62, 0.12, 0.4)
+TitleLabel/constants/shadow_offset_y = 4
+TitleLabel/constants/shadow_outline_size = 14
+TitleLabel/colors/font_outline_color = Color(0.3, 0.16, 0.02, 1)
+TitleLabel/constants/outline_size = 6
 HeadingLabel/base_type = &"Label"
 HeadingLabel/font_sizes/font_size = 32
 MutedLabel/base_type = &"Label"
