@@ -1,0 +1,1545 @@
+{
+ "stats": [
+  "confort",
+  "style",
+  "utilite",
+  "securite",
+  "sante"
+ ],
+ "locations": [
+  {
+   "id": "cabane",
+   "name": "Cabane en forêt",
+   "description": "Une cabane isolée au milieu des bois, loin de tout.",
+   "survival": {
+    "title": "Une semaine sans réseau",
+    "text": "La neige bloque la route. Il faut tenir jusqu'à l'arrivée des secours.",
+    "trials": [
+     {
+      "id": "froid",
+      "name": "Nuit glaciale",
+      "stat": "confort",
+      "threshold": 9
+     },
+     {
+      "id": "tempete",
+      "name": "Tempête de neige",
+      "stat": "securite",
+      "threshold": 8
+     },
+     {
+      "id": "faim",
+      "name": "Pénurie de vivres",
+      "stat": "utilite",
+      "threshold": 9
+     }
+    ]
+   }
+  },
+  {
+   "id": "appartement",
+   "name": "Appartement en ville",
+   "description": "Un trois-pièces lumineux au cinquième étage, en plein centre.",
+   "survival": {
+    "title": "Coupure générale",
+    "text": "Plus d'électricité ni d'eau courante dans toute la ville pendant plusieurs jours.",
+    "trials": [
+     {
+      "id": "noir",
+      "name": "Plongée dans le noir",
+      "stat": "utilite",
+      "threshold": 9
+     },
+     {
+      "id": "chaleur",
+      "name": "Canicule",
+      "stat": "confort",
+      "threshold": 8
+     },
+     {
+      "id": "pillage",
+      "name": "Quartier agité",
+      "stat": "securite",
+      "threshold": 8
+     }
+    ]
+   }
+  },
+  {
+   "id": "plage",
+   "name": "Plage tropicale",
+   "description": "Sable blanc, cocotiers et une île à peine habitée.",
+   "survival": {
+    "title": "Naufragés",
+    "text": "Le bateau est parti sans vous. Les secours passeront dans quelques jours.",
+    "trials": [
+     {
+      "id": "soleil",
+      "name": "Soleil de plomb",
+      "stat": "sante",
+      "threshold": 8
+     },
+     {
+      "id": "soif",
+      "name": "Soif",
+      "stat": "utilite",
+      "threshold": 9
+     },
+     {
+      "id": "orage",
+      "name": "Orage tropical",
+      "stat": "securite",
+      "threshold": 8
+     }
+    ]
+   }
+  },
+  {
+   "id": "montagne",
+   "name": "Refuge de montagne",
+   "description": "Un refuge à 2 500 mètres d'altitude, face aux glaciers.",
+   "survival": {
+    "title": "Avalanche",
+    "text": "Le col est fermé. Il faut tenir en altitude jusqu'à la fin de la tempête.",
+    "trials": [
+     {
+      "id": "gel",
+      "name": "Gel extrême",
+      "stat": "confort",
+      "threshold": 9
+     },
+     {
+      "id": "alt",
+      "name": "Mal des montagnes",
+      "stat": "sante",
+      "threshold": 8
+     },
+     {
+      "id": "sauv",
+      "name": "Évacuation",
+      "stat": "securite",
+      "threshold": 9
+     }
+    ]
+   }
+  },
+  {
+   "id": "bureau",
+   "name": "Bureau de start-up",
+   "description": "Un open space branché avec baby-foot et machine à café.",
+   "survival": {
+    "title": "Nuit de livraison",
+    "text": "Le produit doit sortir demain matin. L'équipe ne dormira pas.",
+    "trials": [
+     {
+      "id": "fatigue",
+      "name": "Fatigue extrême",
+      "stat": "confort",
+      "threshold": 8
+     },
+     {
+      "id": "bug",
+      "name": "Bug critique",
+      "stat": "utilite",
+      "threshold": 9
+     },
+     {
+      "id": "stress",
+      "name": "Pression du client",
+      "stat": "sante",
+      "threshold": 7
+     }
+    ]
+   }
+  },
+  {
+   "id": "station",
+   "name": "Station spatiale",
+   "description": "Un module orbital avec vue sur la Terre, loin de tout secours.",
+   "survival": {
+    "title": "Dépressurisation",
+    "text": "Un module est touché par des débris. L'équipage attend la navette de relève.",
+    "trials": [
+     {
+      "id": "air",
+      "name": "Manque d'oxygène",
+      "stat": "sante",
+      "threshold": 9
+     },
+     {
+      "id": "panne",
+      "name": "Panne électrique",
+      "stat": "utilite",
+      "threshold": 10
+     },
+     {
+      "id": "radiation",
+      "name": "Tempête solaire",
+      "stat": "securite",
+      "threshold": 9
+     }
+    ]
+   }
+  }
+ ],
+ "items": [
+  {
+   "id": "cabane_01",
+   "location_id": "cabane",
+   "name": "Poêle à bois",
+   "icon": "fire",
+   "price": 220,
+   "rarity": 1,
+   "stats": {
+    "confort": 4,
+    "style": 1,
+    "utilite": 4,
+    "securite": 2,
+    "sante": 0
+   },
+   "tags": [
+    "chaleur",
+    "bois"
+   ]
+  },
+  {
+   "id": "cabane_02",
+   "location_id": "cabane",
+   "name": "Hache de bûcheron",
+   "icon": "axe",
+   "price": 90,
+   "rarity": 0,
+   "stats": {
+    "confort": 0,
+    "style": 1,
+    "utilite": 4,
+    "securite": 2,
+    "sante": 0
+   },
+   "tags": [
+    "bois",
+    "outil"
+   ]
+  },
+  {
+   "id": "cabane_03",
+   "location_id": "cabane",
+   "name": "Fauteuil en cuir",
+   "icon": "chair",
+   "price": 180,
+   "rarity": 1,
+   "stats": {
+    "confort": 5,
+    "style": 3,
+    "utilite": 0,
+    "securite": 0,
+    "sante": 0
+   },
+   "tags": [
+    "confort",
+    "cuir"
+   ]
+  },
+  {
+   "id": "cabane_04",
+   "location_id": "cabane",
+   "name": "Tapis en peau d'ours",
+   "icon": "rug",
+   "price": 260,
+   "rarity": 2,
+   "stats": {
+    "confort": 4,
+    "style": 4,
+    "utilite": 0,
+    "securite": 0,
+    "sante": 0
+   },
+   "tags": [
+    "chaleur",
+    "cuir"
+   ]
+  },
+  {
+   "id": "cabane_05",
+   "location_id": "cabane",
+   "name": "Lampe tempête",
+   "icon": "lamp",
+   "price": 60,
+   "rarity": 0,
+   "stats": {
+    "confort": 1,
+    "style": 1,
+    "utilite": 3,
+    "securite": 3,
+    "sante": 0
+   },
+   "tags": [
+    "lumiere",
+    "outil"
+   ]
+  },
+  {
+   "id": "cabane_06",
+   "location_id": "cabane",
+   "name": "Réserve de conserves",
+   "icon": "can",
+   "price": 120,
+   "rarity": 0,
+   "stats": {
+    "confort": 0,
+    "style": 0,
+    "utilite": 4,
+    "securite": 0,
+    "sante": 4
+   },
+   "tags": [
+    "vivres"
+   ]
+  },
+  {
+   "id": "cabane_07",
+   "location_id": "cabane",
+   "name": "Couverture de laine",
+   "icon": "blanket",
+   "price": 70,
+   "rarity": 0,
+   "stats": {
+    "confort": 4,
+    "style": 1,
+    "utilite": 1,
+    "securite": 0,
+    "sante": 1
+   },
+   "tags": [
+    "chaleur",
+    "confort"
+   ]
+  },
+  {
+   "id": "cabane_08",
+   "location_id": "cabane",
+   "name": "Fusil de chasse",
+   "icon": "gun",
+   "price": 340,
+   "rarity": 2,
+   "stats": {
+    "confort": 0,
+    "style": 2,
+    "utilite": 3,
+    "securite": 5,
+    "sante": 0
+   },
+   "tags": [
+    "outil",
+    "securite"
+   ]
+  },
+  {
+   "id": "cabane_09",
+   "location_id": "cabane",
+   "name": "Trousse de secours",
+   "icon": "kit",
+   "price": 100,
+   "rarity": 0,
+   "stats": {
+    "confort": 0,
+    "style": 0,
+    "utilite": 2,
+    "securite": 2,
+    "sante": 5
+   },
+   "tags": [
+    "soin"
+   ]
+  },
+  {
+   "id": "cabane_10",
+   "location_id": "cabane",
+   "name": "Cheminée en pierre",
+   "icon": "stone",
+   "price": 420,
+   "rarity": 3,
+   "stats": {
+    "confort": 5,
+    "style": 5,
+    "utilite": 3,
+    "securite": 1,
+    "sante": 0
+   },
+   "tags": [
+    "chaleur",
+    "bois"
+   ]
+  },
+  {
+   "id": "cabane_11",
+   "location_id": "cabane",
+   "name": "Serrure renforcée",
+   "icon": "lock",
+   "price": 130,
+   "rarity": 1,
+   "stats": {
+    "confort": 0,
+    "style": 0,
+    "utilite": 1,
+    "securite": 5,
+    "sante": 0
+   },
+   "tags": [
+    "securite"
+   ]
+  },
+  {
+   "id": "cabane_12",
+   "location_id": "cabane",
+   "name": "Lit en rondins",
+   "icon": "bed",
+   "price": 200,
+   "rarity": 1,
+   "stats": {
+    "confort": 5,
+    "style": 2,
+    "utilite": 1,
+    "securite": 0,
+    "sante": 2
+   },
+   "tags": [
+    "confort",
+    "bois"
+   ]
+  },
+  {
+   "id": "appartement_01",
+   "location_id": "appartement",
+   "name": "Canapé d'angle",
+   "icon": "sofa",
+   "price": 300,
+   "rarity": 1,
+   "stats": {
+    "confort": 5,
+    "style": 3,
+    "utilite": 0,
+    "securite": 0,
+    "sante": 0
+   },
+   "tags": [
+    "confort",
+    "salon"
+   ]
+  },
+  {
+   "id": "appartement_02",
+   "location_id": "appartement",
+   "name": "Télévision 4K",
+   "icon": "tv",
+   "price": 280,
+   "rarity": 1,
+   "stats": {
+    "confort": 2,
+    "style": 3,
+    "utilite": 2,
+    "securite": 0,
+    "sante": 0
+   },
+   "tags": [
+    "ecran",
+    "salon"
+   ]
+  },
+  {
+   "id": "appartement_03",
+   "location_id": "appartement",
+   "name": "Cafetière italienne",
+   "icon": "coffee",
+   "price": 40,
+   "rarity": 0,
+   "stats": {
+    "confort": 1,
+    "style": 1,
+    "utilite": 3,
+    "securite": 0,
+    "sante": 1
+   },
+   "tags": [
+    "cuisine"
+   ]
+  },
+  {
+   "id": "appartement_04",
+   "location_id": "appartement",
+   "name": "Plantes d'intérieur",
+   "icon": "plant",
+   "price": 50,
+   "rarity": 0,
+   "stats": {
+    "confort": 2,
+    "style": 3,
+    "utilite": 0,
+    "securite": 0,
+    "sante": 3
+   },
+   "tags": [
+    "deco",
+    "nature"
+   ]
+  },
+  {
+   "id": "appartement_05",
+   "location_id": "appartement",
+   "name": "Lampe de designer",
+   "icon": "lamp",
+   "price": 150,
+   "rarity": 1,
+   "stats": {
+    "confort": 1,
+    "style": 5,
+    "utilite": 2,
+    "securite": 0,
+    "sante": 0
+   },
+   "tags": [
+    "deco",
+    "lumiere"
+   ]
+  },
+  {
+   "id": "appartement_06",
+   "location_id": "appartement",
+   "name": "Porte blindée",
+   "icon": "door",
+   "price": 380,
+   "rarity": 2,
+   "stats": {
+    "confort": 0,
+    "style": 1,
+    "utilite": 1,
+    "securite": 5,
+    "sante": 0
+   },
+   "tags": [
+    "securite"
+   ]
+  },
+  {
+   "id": "appartement_07",
+   "location_id": "appartement",
+   "name": "Ventilateur silencieux",
+   "icon": "fan",
+   "price": 70,
+   "rarity": 0,
+   "stats": {
+    "confort": 4,
+    "style": 0,
+    "utilite": 3,
+    "securite": 0,
+    "sante": 1
+   },
+   "tags": [
+    "confort"
+   ]
+  },
+  {
+   "id": "appartement_08",
+   "location_id": "appartement",
+   "name": "Réchaud de camping",
+   "icon": "stove",
+   "price": 60,
+   "rarity": 0,
+   "stats": {
+    "confort": 0,
+    "style": 0,
+    "utilite": 4,
+    "securite": 1,
+    "sante": 1
+   },
+   "tags": [
+    "cuisine",
+    "outil"
+   ]
+  },
+  {
+   "id": "appartement_09",
+   "location_id": "appartement",
+   "name": "Tableau de maître",
+   "icon": "art",
+   "price": 450,
+   "rarity": 3,
+   "stats": {
+    "confort": 0,
+    "style": 5,
+    "utilite": 0,
+    "securite": 0,
+    "sante": 0
+   },
+   "tags": [
+    "deco",
+    "luxe"
+   ]
+  },
+  {
+   "id": "appartement_10",
+   "location_id": "appartement",
+   "name": "Bureau en chêne",
+   "icon": "desk",
+   "price": 210,
+   "rarity": 1,
+   "stats": {
+    "confort": 2,
+    "style": 4,
+    "utilite": 3,
+    "securite": 0,
+    "sante": 0
+   },
+   "tags": [
+    "bureau",
+    "luxe"
+   ]
+  },
+  {
+   "id": "appartement_11",
+   "location_id": "appartement",
+   "name": "Réserve d'eau",
+   "icon": "water",
+   "price": 80,
+   "rarity": 0,
+   "stats": {
+    "confort": 0,
+    "style": 0,
+    "utilite": 3,
+    "securite": 1,
+    "sante": 5
+   },
+   "tags": [
+    "vivres"
+   ]
+  },
+  {
+   "id": "appartement_12",
+   "location_id": "appartement",
+   "name": "Système d'alarme",
+   "icon": "alarm",
+   "price": 190,
+   "rarity": 1,
+   "stats": {
+    "confort": 0,
+    "style": 0,
+    "utilite": 2,
+    "securite": 5,
+    "sante": 0
+   },
+   "tags": [
+    "securite",
+    "ecran"
+   ]
+  },
+  {
+   "id": "plage_01",
+   "location_id": "plage",
+   "name": "Parasol géant",
+   "icon": "umbrella",
+   "price": 80,
+   "rarity": 0,
+   "stats": {
+    "confort": 3,
+    "style": 2,
+    "utilite": 1,
+    "securite": 0,
+    "sante": 4
+   },
+   "tags": [
+    "ombre",
+    "plage"
+   ]
+  },
+  {
+   "id": "plage_02",
+   "location_id": "plage",
+   "name": "Hamac brodé",
+   "icon": "hammock",
+   "price": 110,
+   "rarity": 0,
+   "stats": {
+    "confort": 5,
+    "style": 3,
+    "utilite": 0,
+    "securite": 0,
+    "sante": 1
+   },
+   "tags": [
+    "confort",
+    "plage"
+   ]
+  },
+  {
+   "id": "plage_03",
+   "location_id": "plage",
+   "name": "Planche de surf",
+   "icon": "surf",
+   "price": 260,
+   "rarity": 1,
+   "stats": {
+    "confort": 0,
+    "style": 5,
+    "utilite": 2,
+    "securite": 0,
+    "sante": 1
+   },
+   "tags": [
+    "sport",
+    "plage"
+   ]
+  },
+  {
+   "id": "plage_04",
+   "location_id": "plage",
+   "name": "Filtre à eau",
+   "icon": "filter",
+   "price": 130,
+   "rarity": 1,
+   "stats": {
+    "confort": 0,
+    "style": 0,
+    "utilite": 5,
+    "securite": 1,
+    "sante": 4
+   },
+   "tags": [
+    "eau",
+    "outil"
+   ]
+  },
+  {
+   "id": "plage_05",
+   "location_id": "plage",
+   "name": "Noix de coco",
+   "icon": "coconut",
+   "price": 20,
+   "rarity": 0,
+   "stats": {
+    "confort": 1,
+    "style": 1,
+    "utilite": 2,
+    "securite": 0,
+    "sante": 3
+   },
+   "tags": [
+    "vivres",
+    "nature"
+   ]
+  },
+  {
+   "id": "plage_06",
+   "location_id": "plage",
+   "name": "Canot de sauvetage",
+   "icon": "boat",
+   "price": 400,
+   "rarity": 2,
+   "stats": {
+    "confort": 1,
+    "style": 1,
+    "utilite": 3,
+    "securite": 5,
+    "sante": 0
+   },
+   "tags": [
+    "eau",
+    "securite"
+   ]
+  },
+  {
+   "id": "plage_07",
+   "location_id": "plage",
+   "name": "Crème solaire",
+   "icon": "sun",
+   "price": 30,
+   "rarity": 0,
+   "stats": {
+    "confort": 0,
+    "style": 0,
+    "utilite": 1,
+    "securite": 0,
+    "sante": 5
+   },
+   "tags": [
+    "soin"
+   ]
+  },
+  {
+   "id": "plage_08",
+   "location_id": "plage",
+   "name": "Bar à cocktails",
+   "icon": "bar",
+   "price": 320,
+   "rarity": 2,
+   "stats": {
+    "confort": 3,
+    "style": 5,
+    "utilite": 1,
+    "securite": 0,
+    "sante": 0
+   },
+   "tags": [
+    "luxe",
+    "plage"
+   ]
+  },
+  {
+   "id": "plage_09",
+   "location_id": "plage",
+   "name": "Fusée de détresse",
+   "icon": "flare",
+   "price": 140,
+   "rarity": 1,
+   "stats": {
+    "confort": 0,
+    "style": 0,
+    "utilite": 3,
+    "securite": 5,
+    "sante": 0
+   },
+   "tags": [
+    "securite",
+    "outil"
+   ]
+  },
+  {
+   "id": "plage_10",
+   "location_id": "plage",
+   "name": "Tente de toile",
+   "icon": "tent",
+   "price": 150,
+   "rarity": 0,
+   "stats": {
+    "confort": 4,
+    "style": 1,
+    "utilite": 2,
+    "securite": 3,
+    "sante": 1
+   },
+   "tags": [
+    "ombre",
+    "abri"
+   ]
+  },
+  {
+   "id": "plage_11",
+   "location_id": "plage",
+   "name": "Couteau suisse",
+   "icon": "knife",
+   "price": 60,
+   "rarity": 0,
+   "stats": {
+    "confort": 0,
+    "style": 0,
+    "utilite": 5,
+    "securite": 2,
+    "sante": 0
+   },
+   "tags": [
+    "outil"
+   ]
+  },
+  {
+   "id": "plage_12",
+   "location_id": "plage",
+   "name": "Villa sur pilotis",
+   "icon": "villa",
+   "price": 480,
+   "rarity": 3,
+   "stats": {
+    "confort": 5,
+    "style": 5,
+    "utilite": 2,
+    "securite": 3,
+    "sante": 0
+   },
+   "tags": [
+    "luxe",
+    "abri"
+   ]
+  },
+  {
+   "id": "montagne_01",
+   "location_id": "montagne",
+   "name": "Sac de couchage polaire",
+   "icon": "bag",
+   "price": 150,
+   "rarity": 1,
+   "stats": {
+    "confort": 5,
+    "style": 0,
+    "utilite": 2,
+    "securite": 1,
+    "sante": 2
+   },
+   "tags": [
+    "chaleur",
+    "camp"
+   ]
+  },
+  {
+   "id": "montagne_02",
+   "location_id": "montagne",
+   "name": "Piolet",
+   "icon": "pick",
+   "price": 90,
+   "rarity": 0,
+   "stats": {
+    "confort": 0,
+    "style": 1,
+    "utilite": 3,
+    "securite": 3,
+    "sante": 0
+   },
+   "tags": [
+    "escalade",
+    "outil"
+   ]
+  },
+  {
+   "id": "montagne_03",
+   "location_id": "montagne",
+   "name": "Corde d'escalade",
+   "icon": "rope",
+   "price": 70,
+   "rarity": 0,
+   "stats": {
+    "confort": 0,
+    "style": 0,
+    "utilite": 3,
+    "securite": 4,
+    "sante": 0
+   },
+   "tags": [
+    "escalade",
+    "securite"
+   ]
+  },
+  {
+   "id": "montagne_04",
+   "location_id": "montagne",
+   "name": "Réchaud à gaz",
+   "icon": "stove",
+   "price": 80,
+   "rarity": 0,
+   "stats": {
+    "confort": 2,
+    "style": 0,
+    "utilite": 4,
+    "securite": 1,
+    "sante": 1
+   },
+   "tags": [
+    "chaleur",
+    "camp"
+   ]
+  },
+  {
+   "id": "montagne_05",
+   "location_id": "montagne",
+   "name": "Balise de détresse",
+   "icon": "beacon",
+   "price": 240,
+   "rarity": 1,
+   "stats": {
+    "confort": 0,
+    "style": 0,
+    "utilite": 2,
+    "securite": 5,
+    "sante": 0
+   },
+   "tags": [
+    "securite",
+    "tech"
+   ]
+  },
+  {
+   "id": "montagne_06",
+   "location_id": "montagne",
+   "name": "Doudoune en duvet",
+   "icon": "coat",
+   "price": 170,
+   "rarity": 1,
+   "stats": {
+    "confort": 5,
+    "style": 3,
+    "utilite": 1,
+    "securite": 0,
+    "sante": 2
+   },
+   "tags": [
+    "chaleur",
+    "style"
+   ]
+  },
+  {
+   "id": "montagne_07",
+   "location_id": "montagne",
+   "name": "Bouteille d'oxygène",
+   "icon": "o2",
+   "price": 300,
+   "rarity": 2,
+   "stats": {
+    "confort": 0,
+    "style": 0,
+    "utilite": 2,
+    "securite": 2,
+    "sante": 5
+   },
+   "tags": [
+    "soin",
+    "tech"
+   ]
+  },
+  {
+   "id": "montagne_08",
+   "location_id": "montagne",
+   "name": "Skis de randonnée",
+   "icon": "ski",
+   "price": 280,
+   "rarity": 1,
+   "stats": {
+    "confort": 0,
+    "style": 4,
+    "utilite": 3,
+    "securite": 1,
+    "sante": 0
+   },
+   "tags": [
+    "sport",
+    "escalade"
+   ]
+  },
+  {
+   "id": "montagne_09",
+   "location_id": "montagne",
+   "name": "Radio longue portée",
+   "icon": "radio",
+   "price": 200,
+   "rarity": 1,
+   "stats": {
+    "confort": 0,
+    "style": 0,
+    "utilite": 3,
+    "securite": 4,
+    "sante": 0
+   },
+   "tags": [
+    "tech",
+    "securite"
+   ]
+  },
+  {
+   "id": "montagne_10",
+   "location_id": "montagne",
+   "name": "Fondue en kit",
+   "icon": "cheese",
+   "price": 60,
+   "rarity": 0,
+   "stats": {
+    "confort": 3,
+    "style": 2,
+    "utilite": 1,
+    "securite": 0,
+    "sante": 2
+   },
+   "tags": [
+    "vivres",
+    "chaleur"
+   ]
+  },
+  {
+   "id": "montagne_11",
+   "location_id": "montagne",
+   "name": "Lunettes de glacier",
+   "icon": "glasses",
+   "price": 50,
+   "rarity": 0,
+   "stats": {
+    "confort": 0,
+    "style": 3,
+    "utilite": 1,
+    "securite": 0,
+    "sante": 3
+   },
+   "tags": [
+    "style",
+    "soin"
+   ]
+  },
+  {
+   "id": "montagne_12",
+   "location_id": "montagne",
+   "name": "Chalet panoramique",
+   "icon": "chalet",
+   "price": 500,
+   "rarity": 3,
+   "stats": {
+    "confort": 5,
+    "style": 5,
+    "utilite": 2,
+    "securite": 3,
+    "sante": 1
+   },
+   "tags": [
+    "luxe",
+    "chaleur"
+   ]
+  },
+  {
+   "id": "bureau_01",
+   "location_id": "bureau",
+   "name": "Chaise ergonomique",
+   "icon": "chair",
+   "price": 250,
+   "rarity": 1,
+   "stats": {
+    "confort": 5,
+    "style": 2,
+    "utilite": 2,
+    "securite": 0,
+    "sante": 3
+   },
+   "tags": [
+    "confort",
+    "bureau"
+   ]
+  },
+  {
+   "id": "bureau_02",
+   "location_id": "bureau",
+   "name": "Double écran",
+   "icon": "screens",
+   "price": 320,
+   "rarity": 1,
+   "stats": {
+    "confort": 1,
+    "style": 3,
+    "utilite": 5,
+    "securite": 0,
+    "sante": 0
+   },
+   "tags": [
+    "tech",
+    "bureau"
+   ]
+  },
+  {
+   "id": "bureau_03",
+   "location_id": "bureau",
+   "name": "Machine à café pro",
+   "icon": "coffee",
+   "price": 180,
+   "rarity": 1,
+   "stats": {
+    "confort": 2,
+    "style": 1,
+    "utilite": 4,
+    "securite": 0,
+    "sante": 1
+   },
+   "tags": [
+    "vivres",
+    "cafe"
+   ]
+  },
+  {
+   "id": "bureau_04",
+   "location_id": "bureau",
+   "name": "Baby-foot",
+   "icon": "foot",
+   "price": 200,
+   "rarity": 1,
+   "stats": {
+    "confort": 2,
+    "style": 4,
+    "utilite": 0,
+    "securite": 0,
+    "sante": 2
+   },
+   "tags": [
+    "jeu",
+    "deco"
+   ]
+  },
+  {
+   "id": "bureau_05",
+   "location_id": "bureau",
+   "name": "Casque anti-bruit",
+   "icon": "headset",
+   "price": 130,
+   "rarity": 0,
+   "stats": {
+    "confort": 3,
+    "style": 1,
+    "utilite": 3,
+    "securite": 0,
+    "sante": 2
+   },
+   "tags": [
+    "tech",
+    "confort"
+   ]
+  },
+  {
+   "id": "bureau_06",
+   "location_id": "bureau",
+   "name": "Tableau blanc",
+   "icon": "board",
+   "price": 60,
+   "rarity": 0,
+   "stats": {
+    "confort": 0,
+    "style": 1,
+    "utilite": 4,
+    "securite": 0,
+    "sante": 0
+   },
+   "tags": [
+    "bureau",
+    "outil"
+   ]
+  },
+  {
+   "id": "bureau_07",
+   "location_id": "bureau",
+   "name": "Canapé de sieste",
+   "icon": "sofa",
+   "price": 280,
+   "rarity": 1,
+   "stats": {
+    "confort": 5,
+    "style": 2,
+    "utilite": 0,
+    "securite": 0,
+    "sante": 3
+   },
+   "tags": [
+    "confort",
+    "deco"
+   ]
+  },
+  {
+   "id": "bureau_08",
+   "location_id": "bureau",
+   "name": "Serveur de secours",
+   "icon": "server",
+   "price": 400,
+   "rarity": 2,
+   "stats": {
+    "confort": 0,
+    "style": 0,
+    "utilite": 5,
+    "securite": 4,
+    "sante": 0
+   },
+   "tags": [
+    "tech",
+    "securite"
+   ]
+  },
+  {
+   "id": "bureau_09",
+   "location_id": "bureau",
+   "name": "Distributeur de snacks",
+   "icon": "snack",
+   "price": 90,
+   "rarity": 0,
+   "stats": {
+    "confort": 1,
+    "style": 1,
+    "utilite": 2,
+    "securite": 0,
+    "sante": 2
+   },
+   "tags": [
+    "vivres",
+    "cafe"
+   ]
+  },
+  {
+   "id": "bureau_10",
+   "location_id": "bureau",
+   "name": "Plante anti-stress",
+   "icon": "plant",
+   "price": 40,
+   "rarity": 0,
+   "stats": {
+    "confort": 1,
+    "style": 2,
+    "utilite": 0,
+    "securite": 0,
+    "sante": 4
+   },
+   "tags": [
+    "deco",
+    "soin"
+   ]
+  },
+  {
+   "id": "bureau_11",
+   "location_id": "bureau",
+   "name": "Bureau assis-debout",
+   "icon": "desk",
+   "price": 300,
+   "rarity": 1,
+   "stats": {
+    "confort": 3,
+    "style": 3,
+    "utilite": 3,
+    "securite": 0,
+    "sante": 3
+   },
+   "tags": [
+    "bureau",
+    "confort"
+   ]
+  },
+  {
+   "id": "bureau_12",
+   "location_id": "bureau",
+   "name": "Terrasse sur le toit",
+   "icon": "roof",
+   "price": 450,
+   "rarity": 3,
+   "stats": {
+    "confort": 4,
+    "style": 5,
+    "utilite": 1,
+    "securite": 1,
+    "sante": 4
+   },
+   "tags": [
+    "deco",
+    "luxe"
+   ]
+  },
+  {
+   "id": "station_01",
+   "location_id": "station",
+   "name": "Recycleur d'air",
+   "icon": "air",
+   "price": 380,
+   "rarity": 2,
+   "stats": {
+    "confort": 1,
+    "style": 0,
+    "utilite": 3,
+    "securite": 2,
+    "sante": 5
+   },
+   "tags": [
+    "vie",
+    "tech"
+   ]
+  },
+  {
+   "id": "station_02",
+   "location_id": "station",
+   "name": "Panneaux solaires",
+   "icon": "solar",
+   "price": 300,
+   "rarity": 1,
+   "stats": {
+    "confort": 0,
+    "style": 1,
+    "utilite": 5,
+    "securite": 1,
+    "sante": 0
+   },
+   "tags": [
+    "energie",
+    "tech"
+   ]
+  },
+  {
+   "id": "station_03",
+   "location_id": "station",
+   "name": "Combinaison pressurisée",
+   "icon": "suit",
+   "price": 340,
+   "rarity": 1,
+   "stats": {
+    "confort": 2,
+    "style": 2,
+    "utilite": 2,
+    "securite": 4,
+    "sante": 2
+   },
+   "tags": [
+    "securite",
+    "vie"
+   ]
+  },
+  {
+   "id": "station_04",
+   "location_id": "station",
+   "name": "Bouclier anti-radiations",
+   "icon": "shield",
+   "price": 420,
+   "rarity": 2,
+   "stats": {
+    "confort": 0,
+    "style": 0,
+    "utilite": 2,
+    "securite": 5,
+    "sante": 3
+   },
+   "tags": [
+    "securite",
+    "tech"
+   ]
+  },
+  {
+   "id": "station_05",
+   "location_id": "station",
+   "name": "Kit de réparation",
+   "icon": "wrench",
+   "price": 110,
+   "rarity": 0,
+   "stats": {
+    "confort": 0,
+    "style": 0,
+    "utilite": 5,
+    "securite": 2,
+    "sante": 0
+   },
+   "tags": [
+    "outil",
+    "energie"
+   ]
+  },
+  {
+   "id": "station_06",
+   "location_id": "station",
+   "name": "Rations lyophilisées",
+   "icon": "food",
+   "price": 70,
+   "rarity": 0,
+   "stats": {
+    "confort": 1,
+    "style": 0,
+    "utilite": 3,
+    "securite": 0,
+    "sante": 4
+   },
+   "tags": [
+    "vie",
+    "vivres"
+   ]
+  },
+  {
+   "id": "station_07",
+   "location_id": "station",
+   "name": "Hublot panoramique",
+   "icon": "window",
+   "price": 260,
+   "rarity": 1,
+   "stats": {
+    "confort": 3,
+    "style": 5,
+    "utilite": 0,
+    "securite": 0,
+    "sante": 1
+   },
+   "tags": [
+    "deco",
+    "luxe"
+   ]
+  },
+  {
+   "id": "station_08",
+   "location_id": "station",
+   "name": "Batterie de secours",
+   "icon": "battery",
+   "price": 150,
+   "rarity": 0,
+   "stats": {
+    "confort": 0,
+    "style": 0,
+    "utilite": 4,
+    "securite": 2,
+    "sante": 0
+   },
+   "tags": [
+    "energie",
+    "outil"
+   ]
+  },
+  {
+   "id": "station_09",
+   "location_id": "station",
+   "name": "Capsule d'évacuation",
+   "icon": "pod",
+   "price": 480,
+   "rarity": 3,
+   "stats": {
+    "confort": 2,
+    "style": 2,
+    "utilite": 3,
+    "securite": 5,
+    "sante": 2
+   },
+   "tags": [
+    "securite",
+    "luxe"
+   ]
+  },
+  {
+   "id": "station_10",
+   "location_id": "station",
+   "name": "Couchette magnétique",
+   "icon": "bunk",
+   "price": 120,
+   "rarity": 0,
+   "stats": {
+    "confort": 5,
+    "style": 1,
+    "utilite": 0,
+    "securite": 0,
+    "sante": 3
+   },
+   "tags": [
+    "confort"
+   ]
+  },
+  {
+   "id": "station_11",
+   "location_id": "station",
+   "name": "Robot assistant",
+   "icon": "robot",
+   "price": 360,
+   "rarity": 2,
+   "stats": {
+    "confort": 2,
+    "style": 4,
+    "utilite": 5,
+    "securite": 1,
+    "sante": 0
+   },
+   "tags": [
+    "tech",
+    "energie"
+   ]
+  },
+  {
+   "id": "station_12",
+   "location_id": "station",
+   "name": "Jardin hydroponique",
+   "icon": "garden",
+   "price": 220,
+   "rarity": 1,
+   "stats": {
+    "confort": 2,
+    "style": 3,
+    "utilite": 1,
+    "securite": 0,
+    "sante": 5
+   },
+   "tags": [
+    "vie",
+    "deco"
+   ]
+  }
+ ]
+}
