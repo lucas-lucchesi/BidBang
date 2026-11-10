@@ -10,6 +10,8 @@ const FPS_VALUES := [30, 60, 90, 120, 0]
 var _initial_language: String = ""
 var _vol_bar: ProgressBar
 var _vol_label: Label
+var _server: LineEdit
+var _error: Label
 
 
 static func open(host: Node) -> void:
@@ -20,22 +22,24 @@ static func open(host: Node) -> void:
 
 func _ready() -> void:
 	_initial_language = Session.language
-	set_anchors_preset(Control.PRESET_FULL_RECT)
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	var dim := ColorRect.new()
 	dim.color = Color(0, 0, 0, 0.7)
-	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
+	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(dim)
 	var center := CenterContainer.new()
-	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(center)
 	var panel := PanelContainer.new()
 	panel.custom_minimum_size = Vector2(300, 0)
+	panel.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	panel.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	center.add_child(panel)
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 6)
 	panel.add_child(box)
-	UI.label(box, "Paramètres", "HeadingLabel")
+	UI.label(box, "Paramètres", "HeadingLabel").horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	# langue
 	var lang: OptionButton = UI.option(box, "Langue", ["Français", "English"], ["fr", "en"], Session.language)
 	lang.item_selected.connect(_on_language.bind(lang))
@@ -62,6 +66,11 @@ func _ready() -> void:
 		labels.append("Illimité" if v == 0 else str(v))
 	var fps: OptionButton = UI.option(box, "Images par seconde (FPS)", labels, FPS_VALUES, Session.max_fps)
 	fps.item_selected.connect(_on_fps.bind(fps))
+	# serveur
+	_server = UI.field(box, "Adresse du serveur", Session.server_url)
+	_server.text_changed.connect(_on_server_text)
+	UI.label(box, "Émulateur Android : http://10.0.2.2:8000", "MutedLabel")
+	_error = UI.label(box, "", "ErrorLabel")
 	var close: Button = UI.button(box, "Fermer", "PrimaryButton")
 	close.pressed.connect(_on_close)
 
@@ -91,7 +100,16 @@ func _on_fps(index: int, o: OptionButton) -> void:
 	Session.save_settings()
 
 
+func _on_server_text(text: String) -> void:
+	Session.server_url = text.strip_edges()
+	_error.text = ""
+
+
 func _on_close() -> void:
+	if not Session.server_url_valid():
+		_error.text = T.t("L'adresse du serveur doit commencer par http:// ou https://.")
+		return
+	Session.save_settings()
 	var changed: bool = Session.language != _initial_language
 	queue_free()
 	if changed:

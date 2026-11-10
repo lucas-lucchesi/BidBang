@@ -1,15 +1,12 @@
 extends Control
-## Menu : pseudo, adresse du serveur, créer / rejoindre un salon.
+## Menu : pseudo, créer / rejoindre un salon. L'adresse du serveur se règle dans les Paramètres.
 
 const UI = preload("res://scripts/ui.gd")
 const T = preload("res://scripts/texts.gd")
 const Fx = preload("res://scripts/fx.gd")
 
 var _pseudo: LineEdit
-var _server: LineEdit
 var _error: Label
-var _server_toggle: Button
-var _server_panel: VBoxContainer
 
 
 func _ready() -> void:
@@ -26,29 +23,10 @@ func _ready() -> void:
 	create.pressed.connect(_on_create)
 	var join: Button = UI.button(box, T.t("Rejoindre avec un code"))
 	join.pressed.connect(_on_join)
-	_build_server_option(box)
 	UI.settings_button(box, self)
 	Fx.stagger_in(box, 0.07)
 	if _pseudo.text == "":
 		_pseudo.grab_focus()
-
-
-## Réglage du serveur : masqué par défaut, ouvert par un petit bouton.
-func _build_server_option(box: VBoxContainer) -> void:
-	_server_toggle = UI.button(box, T.t("Options du serveur  ") + "v", "BackButton")
-	_server_panel = VBoxContainer.new()
-	_server_panel.visible = false
-	box.add_child(_server_panel)
-	_server = UI.field(_server_panel, T.t("Adresse du serveur"), Session.server_url)
-	UI.label(_server_panel, T.t("Émulateur Android : http://10.0.2.2:8000"), "MutedLabel")
-	_server_toggle.pressed.connect(_toggle_server)
-
-
-func _toggle_server() -> void:
-	_server_panel.visible = not _server_panel.visible
-	_server_toggle.text = T.t("Options du serveur  ") + ("^" if _server_panel.visible else "v")
-	if _server_panel.visible:
-		_server.grab_focus()
 
 
 func _validate() -> bool:
@@ -56,14 +34,11 @@ func _validate() -> bool:
 	if name_text == "":
 		_error.text = T.t("Choisissez un pseudo.")
 		return false
-	var url: String = _server.text.strip_edges()
-	if not (url.begins_with("http://") or url.begins_with("https://")):
+	if not Session.server_url_valid():
 		_error.text = T.t("L'adresse du serveur doit commencer par http:// ou https://.")
-		if not _server_panel.visible:
-			_toggle_server()
+		UI.open_settings(self)
 		return false
 	Session.pseudo = name_text
-	Session.server_url = url
 	Session.save_settings()
 	return true
 

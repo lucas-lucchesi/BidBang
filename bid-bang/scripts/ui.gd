@@ -79,10 +79,13 @@ static func option(parent: Node, caption: String, labels: Array, values: Array, 
 ## Bouton "Paramètres" qui ouvre la fenêtre de réglages par-dessus l'écran courant.
 static func settings_button(parent: Node, host: Node) -> Button:
 	var b: Button = button(parent, "Paramètres")
-	b.pressed.connect(func() -> void:
-		var panel_script: GDScript = load("res://scripts/settings_panel.gd")
-		panel_script.call("open", host))
+	b.pressed.connect(func() -> void: open_settings(host))
 	return b
+
+
+static func open_settings(host: Node) -> void:
+	var panel_script: GDScript = load("res://scripts/settings_panel.gd")
+	panel_script.call("open", host)
 
 
 static func goto(node: Node, path: String) -> bool:

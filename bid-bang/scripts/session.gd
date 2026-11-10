@@ -89,6 +89,10 @@ func _play_click() -> void:
 		_click.play()
 
 
+func server_url_valid() -> bool:
+	return server_url.begins_with("http://") or server_url.begins_with("https://")
+
+
 func is_host() -> bool:
 	return str(room.get("host_id", "")) == player_id
 
