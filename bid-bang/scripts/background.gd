@@ -1,10 +1,11 @@
 extends Control
 ## Fond d'écran. Priorité : image du lieu (assets/backgrounds/<lieu>.png), puis assets/backgrounds/main.png,
-## sinon fond dessiné en code (velours bordeaux, rayon de lumière dorée, bokeh).
+## sinon fond dessiné en code (bleu pétrole, jetons colorés flottants).
 
 const EXTENSIONS := ["png", "jpg", "webp"]
 const FPS_STEP := 1.0 / 30.0
-const BOKEH := 16
+const BOKEH := 18
+const CONFETTI := [Color(0.91, 0.627, 0.267), Color(0.447, 0.643, 0.541), Color(0.769, 0.408, 0.353), Color(0.953, 0.894, 0.788)]
 
 var scene_id: String = ""  # id du lieu (facultatif)
 var dim: float = 0.0       # assombrissement d'une image de fond (0 = aucun)
@@ -70,27 +71,32 @@ func _draw() -> void:
 		var dest: Vector2 = ts * k
 		draw_texture_rect(_tex, Rect2(origin + (area - dest) / 2.0, dest), false)
 		if dim > 0.0:
-			draw_rect(Rect2(origin, area), Color(0.04, 0.01, 0.02, dim))
+			draw_rect(Rect2(origin, area), Color(0.96, 0.9, 0.78, dim) if Session.is_light() else Color(0.06, 0.15, 0.2, dim))
 		return
 	var w: float = area.x
 	var h: float = area.y
-	var top := Color(0.2, 0.06, 0.1, 1)
-	var bottom := Color(0.04, 0.02, 0.04, 1)
+	var light: bool = Session.is_light()
+	var top := Color("#F8EDD5") if light else Color("#21495a")
+	var bottom := Color("#E6D5B3") if light else Color("#142f3b")
 	draw_set_transform(origin, 0.0, Vector2.ONE)
 	draw_polygon(PackedVector2Array([Vector2(0, 0), Vector2(w, 0), Vector2(w, h), Vector2(0, h)]), PackedColorArray([top, top, bottom, bottom]))
-	# rayon de lumière dorée venant du haut
-	var beam := Color(1, 0.8, 0.45, 0.10)
-	var none := Color(1, 0.8, 0.45, 0.0)
-	draw_polygon(PackedVector2Array([Vector2(w * 0.42, 0), Vector2(w * 0.58, 0), Vector2(w * 0.95, h * 0.85), Vector2(w * 0.05, h * 0.85)]), PackedColorArray([beam, beam, none, none]))
-	for k in 6:
-		var f: float = 1.0 - k * 0.15
-		draw_circle(Vector2(w * 0.5, 0), w * 0.9 * f, Color(1, 0.75, 0.4, 0.018))
-	for o in _bokeh:
-		var d: Dictionary = o
-		var px: float = (float(d["x"]) + sin(_t * float(d["sx"]) + float(d["ph"])) * 0.06) * w
-		var py: float = (float(d["y"]) + cos(_t * float(d["sy"]) + float(d["ph"])) * 0.05) * h
-		var r: float = float(d["r"]) * w
-		var a: float = float(d["a"]) * (0.7 + 0.3 * sin(_t * 0.8 + float(d["ph"])))
-		draw_circle(Vector2(px, py), r, Color(1, 0.78, 0.4, a))
-		draw_arc(Vector2(px, py), r, 0.0, TAU, 32, Color(1, 0.88, 0.6, a * 1.6), 2.0, true)
-	_vignette(w, h, 0.65)
+	# grands disques doux (relief du « plateau de jeu »)
+	draw_circle(Vector2(w * 0.85, h * 0.12), w * 0.55, Color(1, 1, 1, 0.35 if light else 0.025))
+	draw_circle(Vector2(w * 0.1, h * 0.7), w * 0.7, Color(0.91, 0.627, 0.267, 0.03))
+	draw_circle(Vector2(w * 0.8, h * 1.0), w * 0.6, Color(0.447, 0.643, 0.541, 0.05))
+	# petits jetons colorés qui flottent lentement (ronds, anneaux, losanges)
+	for i in _bokeh.size():
+		var d: Dictionary = _bokeh[i]
+		var px: float = (float(d["x"]) + sin(_t * float(d["sx"]) + float(d["ph"])) * 0.05) * w
+		var py: float = (float(d["y"]) + cos(_t * float(d["sy"]) + float(d["ph"])) * 0.04) * h
+		var r: float = float(d["r"]) * w * 0.8
+		var col: Color = CONFETTI[i % CONFETTI.size()]
+		col.a = float(d["a"]) * 1.6
+		match i % 3:
+			0:
+				draw_circle(Vector2(px, py), r, col)
+			1:
+				draw_arc(Vector2(px, py), r, 0.0, TAU, 28, col, 4.0, true)
+			_:
+				draw_colored_polygon(PackedVector2Array([Vector2(px, py - r), Vector2(px + r * 0.8, py), Vector2(px, py + r), Vector2(px - r * 0.8, py)]), col)
+	_vignette(w, h, 0.08 if light else 0.28)

@@ -9,6 +9,7 @@ signal connection_lost()
 const NetClient = preload("res://scripts/net_client.gd")
 const T = preload("res://scripts/texts.gd")
 const CLICK_PATH := "res://assets/sounds/click.wav"
+const THEMES := {"dark": "res://theme/main_theme.tres", "light": "res://theme/light_theme.tres"}
 const CONFIG_PATH := "user://settings.cfg"
 const DEFAULT_SERVER := "http://127.0.0.1:8000"
 
@@ -21,6 +22,7 @@ var room: Dictionary = {}
 var game: Dictionary = {}
 var net: NetClient = null
 var language: String = "fr"
+var theme_mode: String = "dark"  # "dark" ou "light"
 var volume: float = 0.8
 var max_fps: int = 60
 var _click: AudioStreamPlayer = null
@@ -45,6 +47,9 @@ func _load_settings() -> void:
 		pseudo = str(cfg.get_value("player", "pseudo", ""))
 		server_url = str(cfg.get_value("server", "url", DEFAULT_SERVER))
 		language = str(cfg.get_value("settings", "language", "fr"))
+		theme_mode = str(cfg.get_value("settings", "theme", "dark"))
+		if not THEMES.has(theme_mode):
+			theme_mode = "dark"
 		volume = clampf(float(cfg.get_value("settings", "volume", 0.8)), 0.0, 1.0)
 		max_fps = int(cfg.get_value("settings", "max_fps", 60))
 
@@ -54,6 +59,7 @@ func save_settings() -> void:
 	cfg.set_value("player", "pseudo", pseudo)
 	cfg.set_value("server", "url", server_url)
 	cfg.set_value("settings", "language", language)
+	cfg.set_value("settings", "theme", theme_mode)
 	cfg.set_value("settings", "volume", volume)
 	cfg.set_value("settings", "max_fps", max_fps)
 	cfg.save(CONFIG_PATH)
@@ -65,6 +71,7 @@ func apply_settings() -> void:
 	AudioServer.set_bus_volume_db(0, linear_to_db(maxf(volume, 0.0001)))
 	AudioServer.set_bus_mute(0, volume <= 0.001)
 	Engine.max_fps = max_fps
+	get_window().theme = load(str(THEMES[theme_mode]))
 
 
 ## Son de clic joué pour tout bouton (connecté automatiquement à chaque bouton créé).
@@ -87,6 +94,10 @@ func _on_node_added(node: Node) -> void:
 func _play_click() -> void:
 	if _click != null:
 		_click.play()
+
+
+func is_light() -> bool:
+	return theme_mode == "light"
 
 
 func server_url_valid() -> bool:

@@ -6,6 +6,7 @@ const UI = preload("res://scripts/ui.gd")
 ## Mode « Enchère à l'aveugle » : mettre à false pour le masquer de la création de salon.
 const ENABLE_BLIND_MODE := true
 const T = preload("res://scripts/texts.gd")
+const Fx = preload("res://scripts/fx.gd")
 
 var _box: VBoxContainer
 var _error: Label
@@ -59,15 +60,19 @@ func _build_form(locations: Array) -> void:
 	if ENABLE_BLIND_MODE:
 		mode_labels.insert(1, "Enchère à l'aveugle")
 		mode_values.insert(1, "aveugle")
-	_mode = UI.choice_row(_box, "Mode", mode_labels, mode_values, "construction", _on_mode_selected)
-	_mode_hint = UI.label(_box, "", "MutedLabel")
+	var mode_card: VBoxContainer = UI.section(_box, T.t("Mode"))
+	_mode = UI.choice_row(mode_card, "", mode_labels, mode_values, "construction", _on_mode_selected)
+	_mode_hint = UI.label(mode_card, "", "MutedLabel")
 	_on_mode_selected("construction")
-	_theme = UI.choice_row(_box, "Lieu", names, ids, ids[0] if ids.size() > 0 else "")
-	_budget = UI.choice_row(_box, "Budget", ["1 200 €", "2 200 €", "3 500 €"], [1200, 2200, 3500], 2200)
-	_items = UI.choice_row(_box, "Nombre d'objets", ["6", "8", "10"], [6, 8, 10], 8)
-	_timer = UI.choice_row(_box, "Chrono d'enchère", ["10 s", "15 s", "20 s", "30 s"], [10, 15, 20, 30], 15)
+	var place_card: VBoxContainer = UI.section(_box, T.t("Lieu"))
+	_theme = UI.choice_row(place_card, "", names, ids, ids[0] if ids.size() > 0 else "")
+	var rules_card: VBoxContainer = UI.section(_box, T.t("Réglages"))
+	_budget = UI.choice_row(rules_card, "Budget", ["1 200 €", "2 200 €", "3 500 €"], [1200, 2200, 3500], 2200)
+	_items = UI.choice_row(rules_card, "Nombre d'objets", ["6", "8", "10"], [6, 8, 10], 8)
+	_timer = UI.choice_row(rules_card, "Chrono d'enchère", ["10 s", "15 s", "20 s", "30 s"], [10, 15, 20, 30], 15)
 	_create = UI.button(_box, T.t("Créer le salon"), "PrimaryButton")
 	_create.pressed.connect(_on_create)
+	Fx.stagger_in(_box, 0.05)
 
 
 func _on_mode_selected(mode: Variant) -> void:

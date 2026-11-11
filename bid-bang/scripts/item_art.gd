@@ -2,21 +2,25 @@ extends Control
 ## Illustration d'une carte. Si assets/items/<id>.png (ou .jpg / .webp) existe, il est affiché ;
 ## sinon un médaillon dessiné en code : halo, anneau, initiale en Cinzel et gemmes de rareté.
 
-const FONT = preload("res://assets/fonts/Cinzel.ttf")
+const FONT = preload("res://assets/fonts/Fredoka.ttf")
 const EXTENSIONS := ["png", "jpg", "webp"]
 const RARITY_COLORS := [
-	Color(0.78, 0.78, 0.84, 1), Color(0.4, 0.7, 1, 1),
-	Color(0.75, 0.5, 1, 1), Color(1, 0.78, 0.3, 1),
+	Color("#A9BDC0"), Color("#5FA8D3"), Color("#A98BD8"), Color("#F2C14E"),
 ]
+const INK := Color("#10262F")
 
 var rarity: int = 0
 var title: String = "?"
 var tag: String = ""
 var _tex: Texture2D = null
 var _t: float = 0.0
+var _font: FontVariation = null
 
 
 func setup(item: Dictionary) -> void:
+	_font = FontVariation.new()
+	_font.base_font = FONT
+	_font.variation_opentype = {2003265652: 700.0}
 	rarity = clampi(int(item.get("rarity", 0)), 0, 3)
 	title = str(item.get("name", "?"))
 	var tags: Array = item.get("tags", [])
@@ -38,7 +42,7 @@ func _process(delta: float) -> void:
 
 func _tint() -> Color:
 	var h: float = float(posmod(hash(tag), 360)) / 360.0
-	return Color.from_hsv(h, 0.45, 0.38)
+	return Color.from_hsv(h, 0.42, 0.52)
 
 
 func _gem(center: Vector2, r: float, col: Color) -> void:
@@ -55,18 +59,15 @@ func _draw() -> void:
 		var k: float = maxf(w / ts.x, h / ts.y)
 		var dest: Vector2 = ts * k
 		draw_texture_rect_region(_tex, Rect2(Vector2.ZERO, Vector2(w, h)), Rect2((ts - Vector2(w, h) / k) / 2.0, Vector2(w, h) / k))
-		draw_rect(Rect2(0, 0, w, h), accent, false, 3.0)
+		draw_rect(Rect2(0, 0, w, h), INK, false, 3.0)
 		return
 	var k2: float = clampf(minf(w, h) / 260.0, 0.4, 1.0)  # échelle du médaillon
 	var tint: Color = _tint()
 	var sb := StyleBoxFlat.new()
-	sb.bg_color = tint.darkened(0.5)
-	sb.set_corner_radius_all(14)
-	sb.border_width_left = 2
-	sb.border_width_top = 2
-	sb.border_width_right = 2
-	sb.border_width_bottom = 2
-	sb.border_color = accent.darkened(0.35)
+	sb.bg_color = tint
+	sb.set_corner_radius_all(18)
+	sb.set_border_width_all(3)
+	sb.border_color = INK
 	draw_style_box(sb, Rect2(0, 0, w, h))
 	var c := Vector2(w / 2.0, h / 2.0 - 12.0 * k2)
 	for i in 8:
@@ -78,11 +79,11 @@ func _draw() -> void:
 	var pulse: float = 1.0 + sin(_t * 2.0) * 0.02
 	var radius: float = 84.0 * k2 * pulse
 	draw_circle(c, radius + 10.0 * k2, Color(accent.r, accent.g, accent.b, 0.22))
-	draw_circle(c, radius, Color(0.1, 0.05, 0.07, 1))
+	draw_circle(c, radius, Color("#173845"))
 	draw_arc(c, radius, 0.0, TAU, 64, accent, maxf(3.0, 6.0 * k2), true)
 	draw_arc(c, radius - 14.0 * k2, 0.0, TAU, 64, Color(accent.r, accent.g, accent.b, 0.35), 2.0, true)
 	var letter: String = title.substr(0, 1).to_upper()
-	draw_string(FONT, Vector2(c.x - 50.0 * k2, c.y + 28.0 * k2), letter, HORIZONTAL_ALIGNMENT_CENTER, 100.0 * k2, int(84.0 * k2), accent)
+	draw_string(_font, Vector2(c.x - 50.0 * k2, c.y + 28.0 * k2), letter, HORIZONTAL_ALIGNMENT_CENTER, 100.0 * k2, int(84.0 * k2), Color("#F3E4C9"))
 	var n: int = rarity + 1
 	for i in n:
 		_gem(Vector2(c.x + (i - (n - 1) / 2.0) * 38.0 * k2, h - 30.0 * k2), 13.0 * k2, accent)

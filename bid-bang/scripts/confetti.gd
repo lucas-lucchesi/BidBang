@@ -14,8 +14,8 @@ func _ready() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.randomize()
 	var palette: Array[Color] = [
-		Color(0.96, 0.62, 0.12), Color(0.25, 0.8, 0.68), Color(0.95, 0.35, 0.5),
-		Color(0.45, 0.55, 1.0), Color(1, 0.85, 0.3),
+		Color("#E8A044"), Color("#72A48A"), Color("#C4685A"),
+		Color("#6FA8C7"), Color("#F3E4C9"), Color("#F2C14E"),
 	]
 	for i in COUNT:
 		_parts.append({
