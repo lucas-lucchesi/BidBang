@@ -5,6 +5,7 @@ signal room_updated(room: Dictionary)
 signal game_updated(game: Dictionary)
 signal error_received(message: String)
 signal connection_lost()
+signal kicked()
 
 const NetClient = preload("res://scripts/net_client.gd")
 const T = preload("res://scripts/texts.gd")
@@ -21,6 +22,7 @@ var token: String = ""
 var room: Dictionary = {}
 var game: Dictionary = {}
 var net: NetClient = null
+var notice: String = ""  # message à afficher au menu (ex. exclusion)
 var language: String = "fr"
 var theme_mode: String = "dark"  # "dark" ou "light"
 var volume: float = 0.8
@@ -36,6 +38,7 @@ func _ready() -> void:
 	net.game_state.connect(_on_game_state)
 	net.server_error.connect(func(m: String) -> void: error_received.emit(m))
 	net.socket_closed.connect(_on_socket_closed)
+	net.kicked.connect(_on_kicked)
 	_load_settings()
 	apply_settings()
 	_setup_click_sound()
@@ -146,6 +149,18 @@ func _on_room_state(r: Dictionary) -> void:
 func _on_game_state(g: Dictionary) -> void:
 	game = g
 	game_updated.emit(g)
+
+
+func _on_kicked() -> void:
+	_leaving = true
+	net.close_socket()
+	code = ""
+	player_id = ""
+	token = ""
+	room = {}
+	game = {}
+	notice = "Vous avez été exclu du salon par l'hôte."
+	kicked.emit()
 
 
 func _on_socket_closed() -> void:

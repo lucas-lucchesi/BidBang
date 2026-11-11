@@ -118,6 +118,12 @@ func _render(game: Dictionary) -> void:
 	header.add_child(spacer)
 	if not me.is_empty():
 		UI.chip(header, ItemCard.format_money(int(me["budget"])), "MoneyChip", "MoneyLabel")
+	var situation: Variant = game.get("situation")
+	if phase == "auction" and situation is Dictionary:
+		# partie personnalisée / IA : rappel discret de la situation
+		var sit: Dictionary = situation
+		var sl: Label = ItemCard.make_label(_box, str(sit.get("title", "")), "MutedLabel")
+		sl.add_theme_font_size_override("font_size", 22)
 	if _toast != "":
 		ItemCard.make_label(_box, _toast, "ErrorLabel")
 		_toast = ""
@@ -539,9 +545,13 @@ func _render_results(game: Dictionary) -> void:
 	if _anim_key != "finished_done":
 		Fx.pop(banner, 1.3)
 	var scenario: Variant = game.get("scenario")
+	var situation: Variant = game.get("situation")
 	if scenario is Dictionary:
 		var sc: Dictionary = scenario
 		ItemCard.make_label(_box, str(sc["title"]) + " - " + str(sc["text"]), "MutedLabel")
+	elif situation is Dictionary:
+		var sit: Dictionary = situation
+		ItemCard.make_label(_box, str(sit["description"]), "MutedLabel")
 	Podium.build(_box, game["results"])
 	ItemCard.make_label(_box, T.t("Détails"), "HeadingLabel")
 	for r in game["results"]:

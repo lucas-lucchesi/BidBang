@@ -7,7 +7,7 @@ import random
 import time
 from typing import Callable
 
-from . import catalog
+from . import catalog, creation, items as items_mod, trials as trials_mod
 from .errors import GameError
 
 RARITY_BONUS = [0, 2, 4, 7]  # Construction seulement
@@ -25,26 +25,62 @@ BUILDING_MODES = ("construction", "aveugle")  # mêmes règles de score (rareté
 BUDGETS = (1200, 2200, 3500)
 ITEM_COUNTS = (6, 8, 10)
 BID_TIMERS = (10, 15, 20, 30)
+PLAYER_COUNTS = (2, 3, 4)
 
 
 def default_settings() -> dict:
-    return {"mode": "construction", "theme_id": "cabane", "budget": 2200,
-            "item_count": 8, "bid_timer": 15}
+    return {"creation_type": "classic", "mode": "construction", "theme_id": "cabane",
+            "budget": 2200, "item_count": 8, "bid_timer": 15, "max_players": 4}
 
 
-def validate_settings(raw: dict | None) -> dict:
+def validate_settings(raw: dict | None, extra_items: dict[str, dict] | None = None,
+                      require_selection: bool = True) -> dict:
+    """Valide les réglages d'une partie.
+
+    `extra_items` : objets hors catalogue (générés par l'IA) autorisés dans la sélection.
+    `require_selection` : False à la création d'un salon `ai` (la sélection vient après).
+    Sans `creation_type`, la partie est classique (anciennes configurations).
+    """
+    raw = raw or {}
+    ctype = raw.get("creation_type", "classic")
+    if ctype not in creation.CREATION_TYPES:
+        raise GameError("Type de partie inconnu.")
     s = default_settings()
-    s.update({k: v for k, v in (raw or {}).items() if k in s})
+    s.update({k: v for k, v in raw.items() if k in s})
+    s["creation_type"] = ctype
     if s["mode"] not in MODES:
         raise GameError("Mode de jeu inconnu.")
-    if catalog.get_location(s["theme_id"]) is None:
-        raise GameError("Lieu inconnu.")
     if s["budget"] not in BUDGETS:
         raise GameError("Budget invalide.")
     if s["item_count"] not in ITEM_COUNTS:
         raise GameError("Nombre d'objets invalide.")
     if s["bid_timer"] not in BID_TIMERS:
         raise GameError("Durée de chrono invalide.")
+    if s["max_players"] not in PLAYER_COUNTS or isinstance(s["max_players"], bool):
+        raise GameError("Nombre de joueurs invalide.")
+    if ctype == "classic":
+        if catalog.get_location(s["theme_id"]) is None:
+            raise GameError("Lieu inconnu.")
+        return s
+    # custom / ai : scénario + sélection d'objets
+    s["theme_id"] = ctype
+    s["scenario"] = creation.clean_scenario(
+        raw.get("scenario"), creation.AI_PROMPT_MAX if ctype == "ai" else creation.SCENARIO_MAX)
+    pack = raw.get("trial_pack", trials_mod.DEFAULT_PACK)
+    if pack not in trials_mod.TRIAL_PACKS:
+        raise GameError("Série d'épreuves inconnue.")
+    s["trial_pack"] = pack
+    known = items_mod.catalog_item_map()
+    if ctype == "ai":
+        known.update(extra_items or {})
+    ids = raw.get("item_ids", [])
+    if ctype == "custom" or ids or require_selection:
+        s["item_ids"] = creation.check_item_ids(ids, known)
+        creation.check_selection_size(s["item_ids"], s["item_count"])
+        s["ready"] = True
+    else:
+        s["item_ids"] = []
+        s["ready"] = False
     return s
 
 
@@ -71,17 +107,40 @@ def synergy_points(items: list[dict]) -> int:
 class Game:
     def __init__(self, players: list[tuple[str, str]], settings: dict,
                  rng: random.Random | None = None,
-                 clock: Callable[[], float] = time.monotonic):
+                 clock: Callable[[], float] = time.monotonic,
+                 pool: list[dict] | None = None,
+                 trials: list[dict] | None = None):
+        """`pool` : objets hors catalogue (IA) ; `trials` : épreuves de Survie validées (IA)."""
         if len(players) < 2:
             raise GameError("Il faut au moins 2 joueurs.")
-        self.settings = validate_settings(settings)
+        extra = {i["id"]: i for i in pool or []}
+        self.settings = validate_settings(settings, extra_items=extra)
+        self.creation_type: str = self.settings["creation_type"]
         self.mode: str = self.settings["mode"]
         self.blind: bool = self.mode == "aveugle"
         self.clock = clock
         self.rng = rng or random.Random()
-        self.location = catalog.get_location(self.settings["theme_id"])
-        pool = catalog.get_items(self.settings["theme_id"])
-        self.items = self.rng.sample(pool, self.settings["item_count"])
+        self.situation: dict | None = None
+        if self.creation_type == "classic":
+            self.location = catalog.get_location(self.settings["theme_id"])
+            self.trials = self.location["survival"]["trials"]
+            self.survival = self.location["survival"]
+            self.items = self.rng.sample(catalog.get_items(self.settings["theme_id"]),
+                                         self.settings["item_count"])
+        else:
+            if not self.settings["ready"]:
+                raise GameError("La sélection d'objets n'est pas validée.")
+            sc = self.settings["scenario"]
+            self.situation = sc
+            self.location = {"id": self.creation_type, "name": sc["title"],
+                             "description": sc["description"]}
+            by_id = {**items_mod.catalog_item_map(), **extra}
+            # uniquement la sélection validée, dans un ordre aléatoire
+            selected = [by_id[i] for i in self.settings["item_ids"]]
+            self.items = self.rng.sample(selected, self.settings["item_count"])
+            self.trials = trials or trials_mod.pack_trials(self.settings["trial_pack"])
+            self.survival = {"title": sc["title"], "text": sc["description"],
+                             "trials": self.trials}
         self.players: dict[str, dict] = {
             pid: {"id": pid, "pseudo": pseudo, "budget": self.settings["budget"],
                   "items": [], "purchases": []}
@@ -144,8 +203,19 @@ class Game:
             raise GameError("Aucune enchère en cours.")
         return self.auction
 
+    def _reject_if_late(self) -> None:
+        """Contrôle basé sur l'horloge du serveur : une action reçue après l'échéance est
+        refusée, même si le chronomètre asyncio n'a pas encore tiré. L'enchère est alors
+        clôturée sur-le-champ (la couche salon diffuse le nouvel état)."""
+        a = self.auction
+        if self.phase == "auction" and a is not None and a["deadline"] is not None \
+                and self.clock() >= a["deadline"]:
+            self._resolve()
+            raise GameError("Temps écoulé : l'enchère est terminée.")
+
     def bid(self, pid: str, amount) -> None:
         a = self._require_auction()
+        self._reject_if_late()
         if pid not in self.players:
             raise GameError("Joueur inconnu.")
         if not isinstance(amount, int) or isinstance(amount, bool):
@@ -215,6 +285,7 @@ class Game:
 
     def fold(self, pid: str) -> None:
         a = self._require_auction()
+        self._reject_if_late()
         if pid not in self.players:
             raise GameError("Joueur inconnu.")
         if self.blind:
@@ -272,6 +343,9 @@ class Game:
             raise GameError("Le vote n'est pas ouvert.")
         if pid not in self.players:
             raise GameError("Joueur inconnu.")
+        if self.vote_deadline is not None and self.clock() >= self.vote_deadline:
+            self.finish_voting()
+            raise GameError("Temps écoulé : le vote est terminé.")
         if target not in self.players:
             raise GameError("Joueur ciblé inconnu.")
         if target == pid:
@@ -297,7 +371,7 @@ class Game:
             return []
         scale = self.settings["item_count"] / BASE_ITEM_COUNT
         out = []
-        for t in self.location["survival"]["trials"]:
+        for t in self.trials:
             threshold = max(1, round(t["threshold"] * scale))
             value = sum(it["stats"][t["stat"]] for it in self.players[pid]["items"])
             ok = value >= threshold
@@ -377,10 +451,11 @@ class Game:
                             "items": p["items"], "purchases": p["purchases"],
                             "folded": bool(a and pid in a["folded"])})
         return {"phase": self.phase, "mode": self.mode,
+                "creation_type": self.creation_type, "situation": self.situation,
                 "settings": self.settings,
                 "location": {"id": self.location["id"], "name": self.location["name"],
                              "description": self.location["description"]},
-                "scenario": self.location["survival"] if self.mode == "survie" else None,
+                "scenario": self.survival if self.mode == "survie" else None,
                 "item_index": min(self.index + 1, len(self.items)),
                 "item_total": len(self.items),
                 "auction": auction, "vote": vote, "players": players,

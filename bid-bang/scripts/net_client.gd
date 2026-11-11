@@ -6,6 +6,7 @@ signal room_state(room: Dictionary)
 signal game_state(game: Dictionary)
 signal server_error(message: String)
 signal socket_closed()
+signal kicked()
 
 var _socket: WebSocketPeer = null
 var _socket_open: bool = false
@@ -20,12 +21,15 @@ func _ws_url(base: String, code: String, token: String) -> String:
 	return "%s/ws/%s?token=%s" % [url, code, token.uri_encode()]
 
 
-func request(tag: String, base: String, method: int, path: String, body: Dictionary = {}) -> void:
+## extra_headers : ex. ["Authorization: Bearer <jeton>"]. timeout : secondes (la génération IA est longue).
+## Les corps de requête ne sont jamais journalisés ici (ils peuvent contenir une clé API).
+func request(tag: String, base: String, method: int, path: String, body: Dictionary = {}, extra_headers: PackedStringArray = PackedStringArray(), timeout: float = 10.0) -> void:
 	var req := HTTPRequest.new()
-	req.timeout = 10.0
+	req.timeout = timeout
 	add_child(req)
 	req.request_completed.connect(_on_request_completed.bind(req, tag))
 	var headers: PackedStringArray = ["Content-Type: application/json"]
+	headers.append_array(extra_headers)
 	var payload: String = JSON.stringify(body) if method != HTTPClient.METHOD_GET else ""
 	var err: int = req.request(base.strip_edges().rstrip("/") + path, headers, method, payload)
 	if err != OK:
@@ -99,5 +103,7 @@ func _handle_packet(text: String) -> void:
 			room_state.emit(msg["room"])
 		"game_state":
 			game_state.emit(msg["game"])
+		"kicked":
+			kicked.emit()
 		"error":
 			server_error.emit(str(msg.get("message", "Erreur.")))

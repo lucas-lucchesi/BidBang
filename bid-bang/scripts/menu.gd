@@ -37,6 +37,9 @@ func _ready() -> void:
 	line.add_child(_pseudo)
 	_error = UI.label(box, "", "ErrorLabel")
 	_error.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	if Session.notice != "":
+		_error.text = T.t(Session.notice)
+		Session.notice = ""
 	var create: Button = UI.button(box, T.t("Créer une partie"), "PrimaryButton")
 	create.pressed.connect(_on_create)
 	var join: Button = UI.button(box, T.t("Rejoindre avec un code"))
