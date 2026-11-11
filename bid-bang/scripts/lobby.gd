@@ -8,6 +8,8 @@ const Fx = preload("res://scripts/fx.gd")
 var _box: VBoxContainer
 var _players_box: VBoxContainer
 var _info: Label
+var _heading: Label
+var _seen: Dictionary = {}
 var _error: Label
 var _start: Button
 var _opening_game: bool = false
@@ -20,26 +22,33 @@ func _ready() -> void:
 		UI.goto(self, "res://menu.tscn")
 		return
 	_box = UI.page(self, str(Session.room.get("settings", {}).get("theme_id", "")), 0.5)
-	UI.label(_box, T.t("Salon"), "MutedLabel")
-	var code_button: Button = UI.button(_box, Session.code, "BackButton")
+	# billet d'invitation : le code en grand, touchez pour copier
+	var ticket: VBoxContainer = UI.section(_box, "", "HeroPanel")
+	UI.label(ticket, T.t("Code d'invitation"), "SectionLabel").horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var code_button: Button = UI.button(ticket, Session.code, "BackButton")
 	code_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	code_button.add_theme_font_size_override("font_size", 64)
-	code_button.add_theme_color_override("font_color", Color(1, 0.78, 0.3, 1))
-	code_button.add_theme_color_override("font_hover_color", Color(1, 0.9, 0.6, 1))
+	code_button.add_theme_font_size_override("font_size", 76)
+	var code_col := Color("#193A49") if Session.is_light() else Color("#F3E4C9")
+	var code_hi := Color("#BD6B1A") if Session.is_light() else Color("#E8A044")
+	code_button.add_theme_color_override("font_color", code_col)
+	code_button.add_theme_color_override("font_hover_color", code_hi)
+	code_button.add_theme_color_override("font_pressed_color", code_hi)
 	code_button.pressed.connect(_on_copy_code)
-	_copy_hint = UI.label(_box, T.t("Touchez le code pour le copier."), "MutedLabel")
+	_copy_hint = UI.label(ticket, T.t("Touchez le code pour le copier."), "MutedLabel")
 	_copy_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_info = UI.label(_box, "", "MutedLabel")
-	UI.label(_box, T.t("Joueurs"), "HeadingLabel")
+	_info.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_heading = UI.label(_box, T.t("Joueurs"), "HeadingLabel")
 	_players_box = VBoxContainer.new()
-	_players_box.add_theme_constant_override("separation", 10)
+	_players_box.add_theme_constant_override("separation", 12)
 	_box.add_child(_players_box)
 	_error = UI.label(_box, "", "ErrorLabel")
 	_start = UI.button(_box, T.t("Lancer la partie"), "PrimaryButton")
 	_start.pressed.connect(_on_start)
-	UI.settings_button(_box, self)
-	var leave: Button = UI.button(_box, T.t("Quitter le salon"))
+	var leave: Button = UI.button(_box, T.t("Quitter le salon"), "DangerButton")
 	leave.pressed.connect(_on_leave)
+	var st: Button = UI.settings_button(_box, self, "BackButton")
+	st.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	Session.room_updated.connect(_refresh)
 	Session.game_updated.connect(_on_game)
 	Session.error_received.connect(_on_error)
@@ -55,21 +64,36 @@ func _refresh(room: Dictionary) -> void:
 		c.queue_free()
 	var host_id: String = str(room.get("host_id", ""))
 	var players: Array = room.get("players", [])
+	_heading.text = "%s (%d/%d)" % [T.t("Joueurs"), players.size(), int(room.get("max_players", 4))]
 	for p in players:
 		var d: Dictionary = p
-		var line: String = str(d["pseudo"])
-		if str(d["id"]) == host_id:
-			line += T.t(" (hôte)")
-		if str(d["id"]) == Session.player_id:
-			line += T.t(" - vous")
-		var row := PanelContainer.new()
-		var l := Label.new()
-		l.text = line
-		if not bool(d.get("connected", false)):
-			l.theme_type_variation = "MutedLabel"
-			l.text += T.t(" (hors ligne)")
-		row.add_child(l)
-		_players_box.add_child(row)
+		var pid: String = str(d["id"])
+		var online: bool = bool(d.get("connected", false))
+		var row: HBoxContainer = UI.row(_players_box)
+		var av: Control = UI.avatar(row, str(d["pseudo"]), 68.0, pid == host_id)
+		if not online:
+			av.modulate.a = 0.5
+		var names := VBoxContainer.new()
+		names.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		names.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		names.add_theme_constant_override("separation", 0)
+		row.add_child(names)
+		var nl: Label = UI.label(names, str(d["pseudo"]), "HeadingLabel")
+		nl.add_theme_font_size_override("font_size", 32)
+		nl.clip_text = true
+		var sub: String = T.t("Hôte") if pid == host_id else T.t("Joueur")
+		if pid == Session.player_id:
+			sub += T.t(" - vous")
+		if not online:
+			sub = T.t("Hors ligne")
+		UI.label(names, sub, "MutedLabel")
+		var dot := Label.new()
+		dot.text = T.t("En ligne") if online else ""
+		dot.theme_type_variation = "InfoLabel"
+		row.add_child(dot)
+		if not _seen.has(pid):
+			_seen[pid] = true
+			Fx.pop(row.get_parent() as Control, 1.06)
 	var s: Dictionary = room.get("settings", {})
 	var mode_names := {"construction": "Construction", "aveugle": "Enchère à l'aveugle", "survie": "Survie"}
 	var mode_text: String = T.t(str(mode_names.get(str(s.get("mode", "")), "Construction")))

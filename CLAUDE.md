@@ -34,7 +34,7 @@ scripts/session.gd         autoload : pseudo, salon courant, dernier game_state,
 scripts/net_client.gd      HTTP (créer/rejoindre) + WebSocketPeer + signaux
 scripts/lobby.gd           salon d'attente
 scripts/game.gd            écran de partie (enchères, vote, résultats), UI construite en code
-scripts/item_card.gd       carte d'objet (texte), fonctions statiques
+scripts/item_card.gd       carte d'objet (papier crème), fonctions statiques
 theme/main_theme.tres      thème commun (variations : PrimaryButton, TitleLabel, MutedLabel, ErrorLabel, InfoLabel, FieldLabel, HeadingLabel, BackButton)
 server/app/                main.py (routes, WebSocket), rooms.py (salons), game.py (moteur), catalog.py, models.py, errors.py
 server/data/catalog.json   6 lieux, 72 cartes, épreuves de survie (généré par tools/gen_catalog.py)
@@ -42,13 +42,28 @@ server/tests/              56 tests pytest
 server/tools/gen_catalog.py  génère data/catalog.json (le prototype web de référence n'est pas dans le dépôt)
 ```
 
-## Direction artistique (réaliste, depuis le pixel art)
+## Direction artistique (jeu de société moderne, chaleureux)
 
-Style « salle des ventes de luxe » : bois sombre, liserés or, velours bordeaux, polices Cinzel (titres) et Lato (texte). Écran 720x1280 (stretch `canvas_items`, filtre de texture par défaut), fenêtre de bureau 450x800.
+Style « soirée jeux entre amis » : formes très arrondies, boutons épais en relief (jetons), cartes papier crème posées sur des panneaux bleu pétrole, ombres douces, petits jetons colorés qui flottent en fond. Pas de pixel art, pas de casino, pas de texture photo-réaliste sur l'interface. Police : Fredoka (variable, graisses 400/600/700). Écran 720x1280 (stretch `canvas_items`), fenêtre de bureau 450x800.
 
-- Boutons, panneaux, champs : textures 9-patch générées par `tools/gen_ui_textures.py` (dans `assets/ui_real/`), assemblées en thème par `tools/gen_theme.py` (écrit `theme/main_theme.tres`). Modifier le style = modifier ces scripts, puis les relancer avec `python3` (Pillow requis, hors du venv du serveur).
+| Rôle | Couleur |
+|---|---|
+| Fond | `#193A49` (dégradé `#21495a` -> `#142f3b`) |
+| Panneaux | `#2C5362` (lignes de liste `#37677A`) |
+| Bouton principal / accents | `#E8A044` (texte dessus `#3A210B`) |
+| Texte clair | `#F3E4C9` (secondaire `#B0C2C2`) |
+| Validation | `#72A48A` |
+| Danger | `#C4685A` |
+| Contour commun | `#10262F` |
+| Raretés | `#A9BDC0` `#5FA8D3` `#A98BD8` `#F2C14E` |
+
+- Textures 9-patch (jetons) : `tools/gen_ui_textures.py` écrit `assets/ui_real/`, `tools/gen_theme.py` écrit `theme/main_theme.tres`. Modifier le style = modifier ces deux scripts puis les relancer avec `python3` (Pillow requis, hors du venv du serveur). Ordre : textures, puis thème.
+- Deux thèmes : sombre (`theme/main_theme.tres`, textures `assets/ui_real/`, palette ci-dessus) et clair (`theme/light_theme.tres`, textures `assets/ui_light/`, fond sable, panneaux crème, texte `#193A49`). Les deux générateurs produisent les deux sans argument (ou `dark` / `light`). Réglage `Session.theme_mode` (sauvegardé, Paramètres > Apparence), appliqué par `Session.apply_settings()` sur la fenêtre ; l'écran est rechargé à la fermeture des paramètres. Le fond (`background.gd`) et quelques couleurs en code utilisent `Session.is_light()`.
+- Variations de thème : PrimaryButton (orange), SuccessButton (vert), DangerButton, SmallButton, ChoiceButton (pastilles), BackButton (lien texte) ; panneaux HeroPanel (liseré orange), RowPanel (ligne de liste), ChipPanel, MoneyChip ; labels TitleLabel, HeadingLabel, SectionLabel, FieldLabel, MutedLabel, InfoLabel, ErrorLabel, MoneyLabel, BigMoneyLabel.
+- Composants réutilisables : `scripts/ui.gd` (page avec marges de sécurité, `section`, `row`, `avatar`, `modal`, `choice_row`, `collapsible`), `avatar.gd` (pastille de joueur), `ring_timer.gd` (chrono circulaire), `logo.gd` (logo dessiné en code), `item_card.gd` (carte papier crème, pastilles de rareté/prix/stats), `podium.gd`, `fx.gd` (animations Tween), `confetti.gd`.
+- Marges de sécurité : `UI.safe_insets()` lit `DisplayServer.get_display_safe_area()` (0 sur ordinateur). À vérifier sur un vrai téléphone ou un émulateur à encoche.
 - Images réelles à venir (déposer simplement les fichiers, le code les détecte) : `assets/backgrounds/main.png` et `assets/backgrounds/<id du lieu>.png` (fond), `assets/items/<id de la carte>.png` (illustration). Sans image : fond et médaillons dessinés en code. Voir les `README.txt` de ces dossiers.
-- `assets/legacy_pixel/` : ancienne version pixel art (police Press Start 2P, sprites, fond), non utilisée, conservée au cas où.
+- `assets/legacy_pixel/` : ancienne version pixel art, conservée au cas où. Cinzel et Lato restent dans `assets/fonts/` mais ne sont plus utilisées.
 
 ## Lancer et tester
 

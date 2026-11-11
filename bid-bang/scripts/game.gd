@@ -8,10 +8,11 @@ const ItemCard = preload("res://scripts/item_card.gd")
 const Fx = preload("res://scripts/fx.gd")
 const Confetti = preload("res://scripts/confetti.gd")
 const Podium = preload("res://scripts/podium.gd")
+const RingTimer = preload("res://scripts/ring_timer.gd")
 
 var _box: VBoxContainer
-var _countdown: Label = null
-var _bar: ProgressBar = null
+var _ring: Control = null
+var _bid_button: Button = null
 var _deadline_s: float = -1.0
 var _total_s: float = 1.0
 var _toast: String = ""
@@ -19,7 +20,9 @@ var _bid_edit: LineEdit = null
 var _bid_value: int = 0
 var _bid_required: int = 0
 var _bid_item_id: String = ""
+var _bid_label_base: String = ""
 var _anim_key: String = ""
+var _card_item_id: String = ""
 var _last_bid: int = -1
 var _confetti_done: bool = false
 var _open: Dictionary = {}  # sections dépliées (clé -> bool), conservées entre deux mises à jour
@@ -44,15 +47,21 @@ func _process(_delta: float) -> void:
 	if _deadline_s < 0.0:
 		return
 	var left: float = maxf(0.0, _deadline_s - _now())
-	if _countdown != null:
-		_countdown.text = "%d s" % int(ceil(left))
-	if _bar != null:
+	if _ring != null:
 		var fraction: float = left / maxf(_total_s, 0.1)
-		UI.set_bar_fraction(_bar, fraction)
+		_ring.call("set_state", int(ceil(left)), fraction)
 		if fraction < 0.25 and left > 0.0:
-			_bar.modulate.a = 0.55 + 0.45 * absf(sin(_now() * 8.0))
+			_ring.modulate.a = 0.6 + 0.4 * absf(sin(_now() * 8.0))
 		else:
-			_bar.modulate.a = 1.0
+			_ring.modulate.a = 1.0
+
+
+func _new_ring(parent: Node, seconds: int) -> Control:
+	var r: Control = RingTimer.new()
+	parent.add_child(r)
+	r.call("set_state", seconds, 1.0)
+	_ring = r
+	return r
 
 
 func _on_error(message: String) -> void:
@@ -90,8 +99,8 @@ func _render(game: Dictionary) -> void:
 	for c in _box.get_children():
 		_box.remove_child(c)
 		c.queue_free()
-	_countdown = null
-	_bar = null
+	_ring = null
+	_bid_button = null
 	_bid_edit = null
 	_deadline_s = -1.0
 	var phase: String = str(game.get("phase", ""))
@@ -100,7 +109,10 @@ func _render(game: Dictionary) -> void:
 	var header := HBoxContainer.new()
 	header.add_theme_constant_override("separation", 12)
 	_box.add_child(header)
-	UI.chip(header, str(loc.get("name", "")))
+	if phase == "auction":
+		UI.chip(header, T.t("Objet %d / %d") % [int(game["item_index"]), int(game["item_total"])])
+	else:
+		UI.chip(header, str(loc.get("name", "")))
 	var spacer := Control.new()
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(spacer)
@@ -118,8 +130,10 @@ func _render(game: Dictionary) -> void:
 			_render_results(game)
 	if phase != "finished":
 		_render_players(game)
-	UI.settings_button(_box, self)
+	_render_footer(game, me, phase)
 	var key: String = "%s_%d" % [phase, int(game.get("item_index", 0))]
+	if phase == "finished":
+		key = "finished_done"
 	if key != _anim_key:
 		_anim_key = key
 		Fx.stagger_in(_box, 0.05)
@@ -127,6 +141,48 @@ func _render(game: Dictionary) -> void:
 		_confetti_done = true
 		if _is_winner(game):
 			add_child(Confetti.new())
+
+
+func _render_footer(game: Dictionary, me: Dictionary, phase: String) -> void:
+	var foot := HBoxContainer.new()
+	foot.add_theme_constant_override("separation", 12)
+	_box.add_child(foot)
+	if phase != "finished" and not me.is_empty():
+		var n: int = me["purchases"].size()
+		var inv: Button = UI.button(foot, T.t("Mon inventaire") + " (%d)" % n, "SmallButton")
+		inv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		inv.pressed.connect(func() -> void: _open_inventory(Session.game, Session.player_id))
+	var st: Button = UI.settings_button(foot, self, "SmallButton")
+	st.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+
+## Inventaire d'un joueur : cartes des objets remportés, dans une fenêtre superposée.
+func _open_inventory(game: Dictionary, pid: String) -> void:
+	var owner_data: Dictionary = {}
+	for p in game.get("players", []):
+		var d: Dictionary = p
+		if str(d["id"]) == pid:
+			owner_data = d
+	if owner_data.is_empty():
+		return
+	var title: String = T.t("Mon inventaire") if pid == Session.player_id else T.t("Inventaire de %s") % str(owner_data["pseudo"])
+	var content: VBoxContainer = UI.modal(self, title)
+	var purchases: Array = owner_data["purchases"]
+	if purchases.is_empty():
+		var empty: Label = ItemCard.make_label(content, T.t("Aucun achat."), "MutedLabel")
+		empty.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		return
+	var spent: int = 0
+	for pu in purchases:
+		var d2: Dictionary = pu
+		var item: Dictionary = d2["item"].duplicate()
+		item["price"] = d2["price"]
+		spent += int(d2["price"])
+		var card: Control = ItemCard.make_card(item, true, true, true, 110.0, true)
+		content.add_child(card)
+		Fx.pop(card, 1.05)
+	var total: Label = ItemCard.make_label(content, T.t("%d objet(s) - %s dépensés") % [purchases.size(), ItemCard.format_money(spent)], "MutedLabel")
+	total.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 
 
 func _is_winner(game: Dictionary) -> bool:
@@ -142,7 +198,6 @@ func _render_auction(game: Dictionary, me: Dictionary) -> void:
 	var a: Dictionary = game["auction"]
 	var item: Dictionary = a["item"]
 	var settings: Dictionary = game["settings"]
-	ItemCard.make_label(_box, T.t("Objet %d / %d") % [int(game["item_index"]), int(game["item_total"])], "FieldLabel")
 	var last: Variant = game.get("last_result")
 	if last is Dictionary:
 		var lr: Dictionary = last
@@ -153,7 +208,11 @@ func _render_auction(game: Dictionary, me: Dictionary) -> void:
 				str(lr["item"]["name"]), str(lr["winner"]), ItemCard.format_money(int(lr["price"]))], "InfoLabel")
 		if lr.get("bids") is Array:
 			_render_bids(lr["bids"], str(lr.get("winner_id", "")))
-	_box.add_child(ItemCard.make_card(item, true, true, true))
+	var card: Control = ItemCard.make_card(item, true, true, false, 170.0)
+	_box.add_child(card)
+	if str(item.get("id", "")) != _card_item_id:
+		_card_item_id = str(item.get("id", ""))
+		Fx.pop(card, 1.05)
 	if bool(a.get("blind", false)):
 		_render_blind(game, me, a, settings)
 		return
@@ -161,24 +220,25 @@ func _render_auction(game: Dictionary, me: Dictionary) -> void:
 	var hero := PanelContainer.new()
 	hero.theme_type_variation = "HeroPanel"
 	_box.add_child(hero)
-	var hbox := VBoxContainer.new()
-	hbox.add_theme_constant_override("separation", 6)
-	hero.add_child(hbox)
-	var top := HBoxContainer.new()
-	hbox.add_child(top)
-	var who: Label = ItemCard.make_label(top, "", "MutedLabel")
-	who.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_countdown = ItemCard.make_label(top, "", "HeadingLabel")
+	var hrow := HBoxContainer.new()
+	hrow.add_theme_constant_override("separation", 22)
+	hero.add_child(hrow)
+	_new_ring(hrow, int(settings["bid_timer"]))
+	var info := VBoxContainer.new()
+	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	info.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	info.add_theme_constant_override("separation", 2)
+	hrow.add_child(info)
 	if a["current_bid"] == null:
-		who.text = T.t("Aucune mise pour l'instant")
+		ItemCard.make_label(info, T.t("Aucune mise pour l'instant"), "MutedLabel")
+		ItemCard.make_label(info, T.t("À vous d'ouvrir !"), "HeadingLabel")
 	else:
-		who.text = T.t("Mise actuelle - ") + _pseudo_of(game, leader_id)
-		var bid_label: Label = ItemCard.make_label(hbox, ItemCard.format_money(int(a["current_bid"])), "BigMoneyLabel")
+		ItemCard.make_label(info, T.t("Mise actuelle - ") + _pseudo_of(game, leader_id), "MutedLabel")
+		var bid_label: Label = ItemCard.make_label(info, ItemCard.format_money(int(a["current_bid"])), "BigMoneyLabel")
+		bid_label.add_theme_font_size_override("font_size", 60)
 		if int(a["current_bid"]) != _last_bid:
 			Fx.pop(bid_label)
 	_last_bid = int(a["current_bid"]) if a["current_bid"] != null else -1
-	_bar = UI.timer_bar(hbox)
-	_bar.custom_minimum_size = Vector2(0, 12)
 	if a["seconds_left"] != null:
 		_start_timer(float(a["seconds_left"]), float(settings["bid_timer"]))
 
@@ -188,9 +248,10 @@ func _render_auction(game: Dictionary, me: Dictionary) -> void:
 	var budget: int = int(me.get("budget", 0))
 	var required: int = int(a["required_bid"])
 	if is_leader:
-		ItemCard.make_label(_box, T.t("Vous menez cette enchère."), "InfoLabel")
+		pass  # le meneur est déjà indiqué dans la carte de mise
 	elif is_folded:
-		ItemCard.make_label(_box, T.t("Vous êtes couché pour cet objet."), "MutedLabel")
+		var fo: Label = ItemCard.make_label(_box, T.t("Vous êtes couché pour cet objet."), "MutedLabel")
+		fo.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	else:
 		_render_bid_controls(a, budget, required)
 
@@ -202,7 +263,6 @@ func _render_bid_controls(a: Dictionary, budget: int, required: int, blind: bool
 		_bid_item_id = item_id
 		_bid_value = required
 	_bid_value = mini(_bid_value, maxi(budget, required))
-	ItemCard.make_label(_box, T.t("Votre mise (minimum %s)") % ItemCard.format_money(required), "MutedLabel")
 	var line := HBoxContainer.new()
 	line.add_theme_constant_override("separation", 10)
 	_box.add_child(line)
@@ -211,9 +271,10 @@ func _render_bid_controls(a: Dictionary, budget: int, required: int, blind: bool
 	minus.pressed.connect(_on_adjust.bind(-10, budget))
 	_bid_edit = LineEdit.new()
 	_bid_edit.text = str(_bid_value)
+	_bid_edit.placeholder_text = T.t("min. %s") % ItemCard.format_money(required)
 	_bid_edit.alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_bid_edit.virtual_keyboard_type = LineEdit.KEYBOARD_TYPE_NUMBER
-	_bid_edit.add_theme_font_size_override("font_size", 40)
+	_bid_edit.add_theme_font_size_override("font_size", 44)
 	_bid_edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_bid_edit.text_changed.connect(_on_bid_text)
 	line.add_child(_bid_edit)
@@ -223,7 +284,7 @@ func _render_bid_controls(a: Dictionary, budget: int, required: int, blind: bool
 	var chips := HBoxContainer.new()
 	chips.add_theme_constant_override("separation", 10)
 	_box.add_child(chips)
-	for delta in [50, 100, 250]:
+	for delta in [50, 100]:
 		var cb: Button = UI.button(chips, "+%d" % delta, "SmallButton")
 		cb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		cb.pressed.connect(_on_adjust.bind(delta, budget))
@@ -243,17 +304,26 @@ func _render_bid_controls(a: Dictionary, budget: int, required: int, blind: bool
 	actions.add_child(f)
 	var bid_b := Button.new()
 	bid_b.text = T.t("Valider la mise") if blind else T.t("Miser")
-	bid_b.theme_type_variation = "PrimaryButton"
+	bid_b.theme_type_variation = "PrimaryButton" if not blind else "SuccessButton"
 	bid_b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	bid_b.size_flags_stretch_ratio = 1.7
 	bid_b.disabled = budget < required
 	bid_b.pressed.connect(_on_bid)
 	Fx.squish(bid_b)
 	actions.add_child(bid_b)
+	_bid_button = bid_b
+	_bid_label_base = bid_b.text
+	_refresh_bid_button()
+
+
+func _refresh_bid_button() -> void:
+	if _bid_button != null:
+		_bid_button.text = "%s %s" % [_bid_label_base, ItemCard.format_money(_bid_value)]
 
 
 func _on_bid_text(t: String) -> void:
 	_bid_value = int(t) if t.is_valid_int() else 0
+	_refresh_bid_button()
 
 
 func _on_adjust(delta: int, budget: int) -> void:
@@ -266,6 +336,7 @@ func _on_set_bid(amount: int) -> void:
 	_bid_value = amount
 	if _bid_edit != null:
 		_bid_edit.text = str(amount)
+	_refresh_bid_button()
 
 
 func _on_bid() -> void:
@@ -281,29 +352,32 @@ func _render_blind(game: Dictionary, me: Dictionary, a: Dictionary, settings: Di
 	var hero := PanelContainer.new()
 	hero.theme_type_variation = "HeroPanel"
 	_box.add_child(hero)
-	var hbox := VBoxContainer.new()
-	hbox.add_theme_constant_override("separation", 6)
-	hero.add_child(hbox)
-	var top := HBoxContainer.new()
-	hbox.add_child(top)
-	var title: Label = ItemCard.make_label(top, T.t("Enchère à l'aveugle"), "HeadingLabel")
-	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_countdown = ItemCard.make_label(top, "", "HeadingLabel")
+	var hrow := HBoxContainer.new()
+	hrow.add_theme_constant_override("separation", 22)
+	hero.add_child(hrow)
+	_new_ring(hrow, int(settings["bid_timer"]))
+	var info := VBoxContainer.new()
+	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	info.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	hrow.add_child(info)
+	ItemCard.make_label(info, T.t("Enchère à l'aveugle"), "HeadingLabel")
 	var submitted: Array = a["submitted"]
-	ItemCard.make_label(hbox, T.t("%d / %d joueurs ont joué") % [submitted.size(), game["players"].size()], "MutedLabel")
-	_bar = UI.timer_bar(hbox)
-	_bar.custom_minimum_size = Vector2(0, 12)
+	ItemCard.make_label(info, T.t("%d / %d joueurs ont joué") % [submitted.size(), game["players"].size()], "MutedLabel")
 	if a["seconds_left"] != null:
 		_start_timer(float(a["seconds_left"]), float(settings["bid_timer"]))
 	var mine: Variant = a.get("your_bid")
 	if mine == null:
 		_render_bid_controls(a, int(me.get("budget", 0)), int(a["required_bid"]), true)
 	elif int(mine) > 0:
-		ItemCard.make_label(_box, T.t("Votre mise secrète : %s") % ItemCard.format_money(int(mine)), "InfoLabel")
-		ItemCard.make_label(_box, T.t("En attente des autres joueurs..."), "MutedLabel")
+		var l1: Label = ItemCard.make_label(_box, T.t("Votre mise secrète : %s") % ItemCard.format_money(int(mine)), "InfoLabel")
+		l1.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		var l2: Label = ItemCard.make_label(_box, T.t("En attente des autres joueurs..."), "MutedLabel")
+		l2.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	else:
-		ItemCard.make_label(_box, T.t("Vous passez pour cet objet."), "MutedLabel")
-		ItemCard.make_label(_box, T.t("En attente des autres joueurs..."), "MutedLabel")
+		var l3: Label = ItemCard.make_label(_box, T.t("Vous passez pour cet objet."), "MutedLabel")
+		l3.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		var l4: Label = ItemCard.make_label(_box, T.t("En attente des autres joueurs..."), "MutedLabel")
+		l4.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 
 
 func _render_bids(bids: Array, winner_id: String) -> void:
@@ -332,49 +406,109 @@ func _render_players(game: Dictionary) -> void:
 		leader_id = str(a["leader_id"]) if a["leader_id"] != null else ""
 		folded = a["folded"]
 		submitted = a.get("submitted", [])
-	var all_box: VBoxContainer = UI.collapsible(_box, "%s (%d)" % [T.t("Joueurs"), game["players"].size()], bool(_open.get("players", false)), _remember.bind("players"))
+	var grid := GridContainer.new()
+	grid.columns = 2
+	grid.add_theme_constant_override("h_separation", 12)
+	grid.add_theme_constant_override("v_separation", 12)
+	_box.add_child(grid)
 	for p in game["players"]:
 		var d: Dictionary = p
 		var pid: String = str(d["id"])
-		var purchases: Array = d["purchases"]
-		var line: String = T.t("%s - %s - %d objet(s)") % [str(d["pseudo"]), ItemCard.format_money(int(d["budget"])), purchases.size()]
+		var tile := PanelContainer.new()
+		tile.theme_type_variation = "RowPanel"
+		tile.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		tile.mouse_filter = Control.MOUSE_FILTER_STOP
+		tile.gui_input.connect(_on_tile_input.bind(pid))
+		grid.add_child(tile)
+		var h := HBoxContainer.new()
+		h.add_theme_constant_override("separation", 12)
+		tile.add_child(h)
+		UI.avatar(h, str(d["pseudo"]), 56.0, false)
+		var col := VBoxContainer.new()
+		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		col.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		col.add_theme_constant_override("separation", -2)
+		h.add_child(col)
+		var nm: Label = ItemCard.make_label(col, str(d["pseudo"]), "")
+		nm.autowrap_mode = TextServer.AUTOWRAP_OFF
+		nm.clip_text = true
+		nm.add_theme_font_size_override("font_size", 26)
+		ItemCard.make_label(col, ItemCard.format_money(int(d["budget"])), "MutedLabel")
+		var status: String = ""
+		var status_var: String = "MutedLabel"
 		if pid == leader_id:
-			line += T.t(" - mène")
+			status = T.t("mène")
+			status_var = "InfoLabel"
 		elif submitted.has(pid):
-			line += T.t(" - a joué")
+			status = T.t("a joué")
+			status_var = "InfoLabel"
 		elif folded.has(pid):
-			line += T.t(" - couché")
-		var key: String = "p_" + pid
-		var inner: VBoxContainer = UI.collapsible(all_box, line, bool(_open.get(key, false)), _remember.bind(key))
-		_add_purchase_lines(inner, purchases)
+			status = T.t("couché")
+			status_var = "ErrorLabel"
+		if status != "":
+			var sl: Label = ItemCard.make_label(col, status, status_var)
+			sl.add_theme_font_size_override("font_size", 20)
+
+
+func _on_tile_input(event: InputEvent, pid: String) -> void:
+	var mb := event as InputEventMouseButton
+	if mb != null and mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:
+		_open_inventory(Session.game, pid)
 
 
 # ---------------------------------------------------------------------- vote
 func _render_voting(game: Dictionary) -> void:
 	var vote: Dictionary = game["vote"]
-	ItemCard.make_label(_box, T.t("Vote : quelle collection est la meilleure ?"), "HeadingLabel")
-	_bar = UI.timer_bar(_box)
-	_countdown = ItemCard.make_label(_box, "", "MutedLabel")
+	var hero := PanelContainer.new()
+	hero.theme_type_variation = "HeroPanel"
+	_box.add_child(hero)
+	var hrow := HBoxContainer.new()
+	hrow.add_theme_constant_override("separation", 22)
+	hero.add_child(hrow)
+	_new_ring(hrow, int(ceil(float(vote["seconds_left"]))))
+	var info := VBoxContainer.new()
+	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	info.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	hrow.add_child(info)
+	ItemCard.make_label(info, T.t("Vote"), "HeadingLabel")
+	ItemCard.make_label(info, T.t("Quelle collection est la meilleure ?"), "MutedLabel")
 	_start_timer(float(vote["seconds_left"]), 45.0)
 	var mine: Variant = vote.get("your_vote")
 	for p in game["players"]:
 		var d: Dictionary = p
-		if str(d["id"]) == Session.player_id:
+		var pid: String = str(d["id"])
+		if pid == Session.player_id:
 			continue
-		var chosen: bool = mine != null and str(mine) == str(d["id"])
+		var chosen: bool = mine != null and str(mine) == pid
 		var card := PanelContainer.new()
-		var col := VBoxContainer.new()
-		col.add_theme_constant_override("separation", 8)
-		card.add_child(col)
-		ItemCard.make_label(col, str(d["pseudo"]), "HeadingLabel")
-		var vkey: String = "v_" + str(d["id"])
-		var inner: VBoxContainer = UI.collapsible(col, T.t("Voir les objets (%d)") % d["purchases"].size(), bool(_open.get(vkey, false)), _remember.bind(vkey))
-		_add_purchase_lines(inner, d["purchases"])
-		var b: Button = UI.button(col, T.t("Voter pour ") + str(d["pseudo"]) + (T.t(" (votre choix)") if chosen else ""), "PrimaryButton" if chosen else "")
-		b.pressed.connect(_on_vote.bind(str(d["id"])))
 		_box.add_child(card)
+		var col := VBoxContainer.new()
+		col.add_theme_constant_override("separation", 12)
+		card.add_child(col)
+		var head := HBoxContainer.new()
+		head.add_theme_constant_override("separation", 16)
+		col.add_child(head)
+		UI.avatar(head, str(d["pseudo"]), 68.0)
+		var names := VBoxContainer.new()
+		names.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		names.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		names.add_theme_constant_override("separation", 0)
+		head.add_child(names)
+		ItemCard.make_label(names, str(d["pseudo"]), "HeadingLabel")
+		ItemCard.make_label(names, T.t("%d objet(s)") % d["purchases"].size(), "MutedLabel")
+		var actions := HBoxContainer.new()
+		actions.add_theme_constant_override("separation", 12)
+		col.add_child(actions)
+		var see: Button = UI.button(actions, T.t("Voir les objets"), "SmallButton")
+		see.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		see.pressed.connect(func() -> void: _open_inventory(Session.game, pid))
+		var b: Button = UI.button(actions, T.t("Votre choix") if chosen else T.t("Voter"), "SuccessButton" if chosen else "PrimaryButton")
+		b.custom_minimum_size = Vector2(0, 88)
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		b.pressed.connect(_on_vote.bind(pid))
 	var voted: Array = vote["voted_ids"]
-	ItemCard.make_label(_box, T.t("%d / %d votes") % [voted.size(), game["players"].size()], "MutedLabel")
+	var vl: Label = ItemCard.make_label(_box, T.t("%d / %d votes") % [voted.size(), game["players"].size()], "MutedLabel")
+	vl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 
 
 func _on_vote(target: String) -> void:
@@ -400,7 +534,10 @@ func _add_purchase_lines(parent: Node, purchases: Array) -> void:
 
 
 func _render_results(game: Dictionary) -> void:
-	ItemCard.make_label(_box, T.t("Podium"), "TitleLabel").horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var banner: Label = ItemCard.make_label(_box, T.t("Victoire !") if _is_winner(game) else T.t("Podium"), "TitleLabel")
+	banner.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	if _anim_key != "finished_done":
+		Fx.pop(banner, 1.3)
 	var scenario: Variant = game.get("scenario")
 	if scenario is Dictionary:
 		var sc: Dictionary = scenario

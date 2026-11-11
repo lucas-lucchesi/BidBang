@@ -15,8 +15,13 @@ func _ready() -> void:
 	back.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	back.pressed.connect(func() -> void: UI.goto(self, "res://menu.tscn"))
 	UI.label(box, T.t("Rejoindre une partie"), "HeadingLabel")
-	_code = UI.field(box, T.t("Code du salon"), "", 6)
+	var card: VBoxContainer = UI.section(box, T.t("Code du salon"))
+	_code = UI.field(card, "", "", 6)
 	_code.placeholder_text = "ABC123"
+	_code.alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_code.add_theme_font_size_override("font_size", 60)
+	_code.custom_minimum_size = Vector2(0, 110)
+	UI.label(card, T.t("Demandez le code de 6 caractères à l'hôte de la partie."), "MutedLabel").horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_code.text_changed.connect(func(t: String) -> void:
 		var up: String = t.to_upper()
 		if up != t:

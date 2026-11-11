@@ -9,14 +9,27 @@
 [ext_resource type="Texture2D" path="res://assets/ui_real/primary_pressed.png" id="t_primary_pressed"]
 [ext_resource type="Texture2D" path="res://assets/ui_real/danger_normal.png" id="t_danger_normal"]
 [ext_resource type="Texture2D" path="res://assets/ui_real/danger_pressed.png" id="t_danger_pressed"]
+[ext_resource type="Texture2D" path="res://assets/ui_real/success_normal.png" id="t_success_normal"]
+[ext_resource type="Texture2D" path="res://assets/ui_real/success_pressed.png" id="t_success_pressed"]
 [ext_resource type="Texture2D" path="res://assets/ui_real/card.png" id="t_card"]
 [ext_resource type="Texture2D" path="res://assets/ui_real/hero.png" id="t_hero"]
+[ext_resource type="Texture2D" path="res://assets/ui_real/row.png" id="t_row"]
 [ext_resource type="Texture2D" path="res://assets/ui_real/chip_money.png" id="t_chip_money"]
 [ext_resource type="Texture2D" path="res://assets/ui_real/field.png" id="t_field"]
 [ext_resource type="Texture2D" path="res://assets/ui_real/field_focus.png" id="t_field_focus"]
-[ext_resource type="FontFile" path="res://assets/fonts/Lato-Regular.ttf" id="font"]
-[ext_resource type="FontFile" path="res://assets/fonts/Lato-Bold.ttf" id="font_bold"]
-[ext_resource type="FontFile" path="res://assets/fonts/Cinzel.ttf" id="font_title"]
+[ext_resource type="FontFile" path="res://assets/fonts/Fredoka.ttf" id="fredoka"]
+
+[sub_resource type="FontVariation" id="font"]
+base_font = ExtResource("fredoka")
+variation_opentype = { 2003265652: 400.0 }
+
+[sub_resource type="FontVariation" id="font_bold"]
+base_font = ExtResource("fredoka")
+variation_opentype = { 2003265652: 600.0 }
+
+[sub_resource type="FontVariation" id="font_title"]
+base_font = ExtResource("fredoka")
+variation_opentype = { 2003265652: 700.0 }
 
 [sub_resource type="StyleBoxTexture" id="btn_normal"]
 texture = ExtResource("t_btn_normal")
@@ -24,9 +37,9 @@ texture_margin_left = 30.0
 texture_margin_top = 30.0
 texture_margin_right = 30.0
 texture_margin_bottom = 30.0
-content_margin_left = 34.0
-content_margin_top = 20.0
-content_margin_right = 34.0
+content_margin_left = 30.0
+content_margin_top = 16.0
+content_margin_right = 30.0
 content_margin_bottom = 24.0
 
 
@@ -36,9 +49,9 @@ texture_margin_left = 30.0
 texture_margin_top = 30.0
 texture_margin_right = 30.0
 texture_margin_bottom = 30.0
-content_margin_left = 34.0
-content_margin_top = 20.0
-content_margin_right = 34.0
+content_margin_left = 30.0
+content_margin_top = 16.0
+content_margin_right = 30.0
 content_margin_bottom = 24.0
 
 
@@ -48,9 +61,9 @@ texture_margin_left = 30.0
 texture_margin_top = 30.0
 texture_margin_right = 30.0
 texture_margin_bottom = 30.0
-content_margin_left = 34.0
-content_margin_top = 24.0
-content_margin_right = 34.0
+content_margin_left = 30.0
+content_margin_top = 20.0
+content_margin_right = 30.0
 content_margin_bottom = 20.0
 
 
@@ -60,9 +73,9 @@ texture_margin_left = 30.0
 texture_margin_top = 30.0
 texture_margin_right = 30.0
 texture_margin_bottom = 30.0
-content_margin_left = 34.0
-content_margin_top = 20.0
-content_margin_right = 34.0
+content_margin_left = 30.0
+content_margin_top = 16.0
+content_margin_right = 30.0
 content_margin_bottom = 24.0
 
 
@@ -72,9 +85,9 @@ texture_margin_left = 30.0
 texture_margin_top = 30.0
 texture_margin_right = 30.0
 texture_margin_bottom = 30.0
-content_margin_left = 40.0
-content_margin_top = 24.0
-content_margin_right = 40.0
+content_margin_left = 36.0
+content_margin_top = 20.0
+content_margin_right = 36.0
 content_margin_bottom = 28.0
 
 
@@ -84,9 +97,9 @@ texture_margin_left = 30.0
 texture_margin_top = 30.0
 texture_margin_right = 30.0
 texture_margin_bottom = 30.0
-content_margin_left = 40.0
-content_margin_top = 24.0
-content_margin_right = 40.0
+content_margin_left = 36.0
+content_margin_top = 20.0
+content_margin_right = 36.0
 content_margin_bottom = 28.0
 
 
@@ -96,9 +109,9 @@ texture_margin_left = 30.0
 texture_margin_top = 30.0
 texture_margin_right = 30.0
 texture_margin_bottom = 30.0
-content_margin_left = 40.0
-content_margin_top = 28.0
-content_margin_right = 40.0
+content_margin_left = 36.0
+content_margin_top = 24.0
+content_margin_right = 36.0
 content_margin_bottom = 24.0
 
 
@@ -108,9 +121,9 @@ texture_margin_left = 30.0
 texture_margin_top = 30.0
 texture_margin_right = 30.0
 texture_margin_bottom = 30.0
-content_margin_left = 34.0
-content_margin_top = 20.0
-content_margin_right = 34.0
+content_margin_left = 30.0
+content_margin_top = 16.0
+content_margin_right = 30.0
 content_margin_bottom = 24.0
 
 
@@ -120,9 +133,33 @@ texture_margin_left = 30.0
 texture_margin_top = 30.0
 texture_margin_right = 30.0
 texture_margin_bottom = 30.0
-content_margin_left = 34.0
-content_margin_top = 24.0
-content_margin_right = 34.0
+content_margin_left = 30.0
+content_margin_top = 20.0
+content_margin_right = 30.0
+content_margin_bottom = 20.0
+
+
+[sub_resource type="StyleBoxTexture" id="success_normal"]
+texture = ExtResource("t_success_normal")
+texture_margin_left = 30.0
+texture_margin_top = 30.0
+texture_margin_right = 30.0
+texture_margin_bottom = 30.0
+content_margin_left = 30.0
+content_margin_top = 16.0
+content_margin_right = 30.0
+content_margin_bottom = 24.0
+
+
+[sub_resource type="StyleBoxTexture" id="success_pressed"]
+texture = ExtResource("t_success_pressed")
+texture_margin_left = 30.0
+texture_margin_top = 30.0
+texture_margin_right = 30.0
+texture_margin_bottom = 30.0
+content_margin_left = 30.0
+content_margin_top = 20.0
+content_margin_right = 30.0
 content_margin_bottom = 20.0
 
 
@@ -132,9 +169,9 @@ texture_margin_left = 30.0
 texture_margin_top = 30.0
 texture_margin_right = 30.0
 texture_margin_bottom = 30.0
-content_margin_left = 34.0
-content_margin_top = 28.0
-content_margin_right = 34.0
+content_margin_left = 30.0
+content_margin_top = 24.0
+content_margin_right = 30.0
 content_margin_bottom = 32.0
 
 
@@ -144,10 +181,22 @@ texture_margin_left = 30.0
 texture_margin_top = 30.0
 texture_margin_right = 30.0
 texture_margin_bottom = 30.0
-content_margin_left = 38.0
-content_margin_top = 30.0
-content_margin_right = 38.0
-content_margin_bottom = 34.0
+content_margin_left = 32.0
+content_margin_top = 24.0
+content_margin_right = 32.0
+content_margin_bottom = 32.0
+
+
+[sub_resource type="StyleBoxTexture" id="row"]
+texture = ExtResource("t_row")
+texture_margin_left = 30.0
+texture_margin_top = 30.0
+texture_margin_right = 30.0
+texture_margin_bottom = 30.0
+content_margin_left = 22.0
+content_margin_top = 12.0
+content_margin_right = 22.0
+content_margin_bottom = 20.0
 
 
 [sub_resource type="StyleBoxTexture" id="chip"]
@@ -156,10 +205,10 @@ texture_margin_left = 30.0
 texture_margin_top = 30.0
 texture_margin_right = 30.0
 texture_margin_bottom = 30.0
-content_margin_left = 26.0
-content_margin_top = 14.0
-content_margin_right = 26.0
-content_margin_bottom = 18.0
+content_margin_left = 22.0
+content_margin_top = 8.0
+content_margin_right = 22.0
+content_margin_bottom = 16.0
 
 
 [sub_resource type="StyleBoxTexture" id="chip_money"]
@@ -168,10 +217,10 @@ texture_margin_left = 30.0
 texture_margin_top = 30.0
 texture_margin_right = 30.0
 texture_margin_bottom = 30.0
-content_margin_left = 28.0
-content_margin_top = 14.0
-content_margin_right = 28.0
-content_margin_bottom = 18.0
+content_margin_left = 24.0
+content_margin_top = 8.0
+content_margin_right = 24.0
+content_margin_bottom = 16.0
 
 
 [sub_resource type="StyleBoxTexture" id="field"]
@@ -180,10 +229,10 @@ texture_margin_left = 30.0
 texture_margin_top = 30.0
 texture_margin_right = 30.0
 texture_margin_bottom = 30.0
-content_margin_left = 26.0
-content_margin_top = 18.0
-content_margin_right = 26.0
-content_margin_bottom = 20.0
+content_margin_left = 24.0
+content_margin_top = 16.0
+content_margin_right = 24.0
+content_margin_bottom = 16.0
 
 
 [sub_resource type="StyleBoxTexture" id="field_focus"]
@@ -192,10 +241,10 @@ texture_margin_left = 30.0
 texture_margin_top = 30.0
 texture_margin_right = 30.0
 texture_margin_bottom = 30.0
-content_margin_left = 26.0
-content_margin_top = 18.0
-content_margin_right = 26.0
-content_margin_bottom = 20.0
+content_margin_left = 24.0
+content_margin_top = 16.0
+content_margin_right = 24.0
+content_margin_bottom = 16.0
 
 
 [sub_resource type="StyleBoxTexture" id="small_normal"]
@@ -204,10 +253,10 @@ texture_margin_left = 30.0
 texture_margin_top = 30.0
 texture_margin_right = 30.0
 texture_margin_bottom = 30.0
-content_margin_left = 22.0
-content_margin_top = 10.0
-content_margin_right = 22.0
-content_margin_bottom = 14.0
+content_margin_left = 20.0
+content_margin_top = 8.0
+content_margin_right = 20.0
+content_margin_bottom = 16.0
 
 
 [sub_resource type="StyleBoxTexture" id="small_hover"]
@@ -216,10 +265,10 @@ texture_margin_left = 30.0
 texture_margin_top = 30.0
 texture_margin_right = 30.0
 texture_margin_bottom = 30.0
-content_margin_left = 22.0
-content_margin_top = 10.0
-content_margin_right = 22.0
-content_margin_bottom = 14.0
+content_margin_left = 20.0
+content_margin_top = 8.0
+content_margin_right = 20.0
+content_margin_bottom = 16.0
 
 
 [sub_resource type="StyleBoxTexture" id="small_pressed"]
@@ -228,10 +277,10 @@ texture_margin_left = 30.0
 texture_margin_top = 30.0
 texture_margin_right = 30.0
 texture_margin_bottom = 30.0
-content_margin_left = 22.0
-content_margin_top = 14.0
-content_margin_right = 22.0
-content_margin_bottom = 10.0
+content_margin_left = 20.0
+content_margin_top = 12.0
+content_margin_right = 20.0
+content_margin_bottom = 12.0
 
 
 [sub_resource type="StyleBoxTexture" id="choice_on"]
@@ -240,10 +289,10 @@ texture_margin_left = 30.0
 texture_margin_top = 30.0
 texture_margin_right = 30.0
 texture_margin_bottom = 30.0
-content_margin_left = 22.0
-content_margin_top = 10.0
-content_margin_right = 22.0
-content_margin_bottom = 14.0
+content_margin_left = 20.0
+content_margin_top = 8.0
+content_margin_right = 20.0
+content_margin_bottom = 16.0
 
 
 [sub_resource type="StyleBoxTexture" id="popup"]
@@ -277,64 +326,69 @@ content_margin_right = 8.0
 content_margin_bottom = 8.0
 
 [sub_resource type="StyleBoxFlat" id="bar_bg"]
-bg_color = Color(0.05, 0.03, 0.03, 0.9)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.55, 0.42, 0.2, 1)
+bg_color = Color(0.063, 0.149, 0.184, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.039, 0.098, 0.122, 1)
 
 [sub_resource type="StyleBoxFlat" id="bar_fill"]
-bg_color = Color(0.95, 0.78, 0.35, 1)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
+bg_color = Color(0.91, 0.627, 0.267, 1)
+corner_radius_top_left = 9
+corner_radius_top_right = 9
+corner_radius_bottom_right = 9
+corner_radius_bottom_left = 9
 
-[resource]default_font = ExtResource("font")
+[resource]default_font = SubResource("font")
 default_font_size = 28
-Label/colors/font_color = Color(0.96, 0.93, 0.86, 1)
-Label/colors/font_shadow_color = Color(0, 0, 0, 0.6)
+Label/colors/font_color = Color(0.953, 0.894, 0.788, 1)
+Label/colors/font_shadow_color = Color(0.04, 0.1, 0.13, 0.55)
 Label/constants/shadow_offset_x = 0
 Label/constants/shadow_offset_y = 2
-Button/colors/font_color = Color(0.96, 0.93, 0.86, 1)
-Button/colors/font_hover_color = Color(1, 0.97, 0.88, 1)
+Button/colors/font_color = Color(0.953, 0.894, 0.788, 1)
+Button/colors/font_hover_color = Color(1, 0.96, 0.88, 1)
 Button/colors/font_pressed_color = Color(0.85, 0.8, 0.7, 1)
-Button/colors/font_disabled_color = Color(0.55, 0.5, 0.45, 1)
-Button/fonts/font = ExtResource("font_bold")
+Button/colors/font_disabled_color = Color(0.55, 0.64, 0.66, 1)
+Button/colors/font_shadow_color = Color(0.04, 0.1, 0.13, 0.55)
+Button/constants/shadow_offset_y = 2
+Button/fonts/font = SubResource("font_bold")
 Button/font_sizes/font_size = 28
 Button/styles/normal = SubResource("btn_normal")
 Button/styles/hover = SubResource("btn_hover")
 Button/styles/pressed = SubResource("btn_pressed")
 Button/styles/disabled = SubResource("btn_disabled")
 Button/styles/focus = SubResource("back_normal")
-LineEdit/colors/font_color = Color(0.96, 0.93, 0.86, 1)
-LineEdit/colors/caret_color = Color(1, 0.82, 0.4, 1)
-LineEdit/colors/selection_color = Color(0.9, 0.68, 0.25, 0.5)
-LineEdit/colors/font_placeholder_color = Color(0.6, 0.54, 0.48, 1)
+LineEdit/colors/font_color = Color(0.953, 0.894, 0.788, 1)
+LineEdit/colors/caret_color = Color(0.91, 0.627, 0.267, 1)
+LineEdit/colors/selection_color = Color(0.91, 0.627, 0.267, 0.45)
+LineEdit/colors/font_placeholder_color = Color(0.5, 0.6, 0.62, 1)
 LineEdit/constants/caret_width = 3
-LineEdit/font_sizes/font_size = 28
+LineEdit/fonts/font = SubResource("font_bold")
+LineEdit/font_sizes/font_size = 30
 LineEdit/styles/normal = SubResource("field")
 LineEdit/styles/focus = SubResource("field_focus")
 OptionButton/styles/normal = SubResource("btn_normal")
 OptionButton/styles/hover = SubResource("btn_hover")
 OptionButton/styles/pressed = SubResource("btn_pressed")
 OptionButton/styles/focus = SubResource("back_normal")
-OptionButton/colors/font_color = Color(0.96, 0.93, 0.86, 1)
-OptionButton/fonts/font = ExtResource("font_bold")
+OptionButton/colors/font_color = Color(0.953, 0.894, 0.788, 1)
+OptionButton/fonts/font = SubResource("font_bold")
 OptionButton/font_sizes/font_size = 28
 PopupMenu/styles/panel = SubResource("popup")
 PopupMenu/styles/hover = SubResource("popup_hover")
-PopupMenu/colors/font_color = Color(0.96, 0.93, 0.86, 1)
+PopupMenu/colors/font_color = Color(0.953, 0.894, 0.788, 1)
 PopupMenu/colors/font_hover_color = Color(1, 1, 1, 1)
 PopupMenu/font_sizes/font_size = 28
 PanelContainer/styles/panel = SubResource("card")
 HeroPanel/base_type = &"PanelContainer"
 HeroPanel/styles/panel = SubResource("hero")
+RowPanel/base_type = &"PanelContainer"
+RowPanel/styles/panel = SubResource("row")
 ChipPanel/base_type = &"PanelContainer"
 ChipPanel/styles/panel = SubResource("chip")
 MoneyChip/base_type = &"PanelContainer"
@@ -342,64 +396,90 @@ MoneyChip/styles/panel = SubResource("chip_money")
 ProgressBar/styles/background = SubResource("bar_bg")
 ProgressBar/styles/fill = SubResource("bar_fill")
 PrimaryButton/base_type = &"Button"
-PrimaryButton/colors/font_color = Color(0.22, 0.12, 0.04, 1)
-PrimaryButton/colors/font_hover_color = Color(0.18, 0.09, 0.02, 1)
-PrimaryButton/colors/font_pressed_color = Color(0.22, 0.12, 0.04, 1)
-PrimaryButton/colors/font_disabled_color = Color(0.5, 0.4, 0.3, 1)
-PrimaryButton/font_sizes/font_size = 34
+PrimaryButton/colors/font_color = Color(0.227, 0.129, 0.043, 1)
+PrimaryButton/colors/font_hover_color = Color(0.227, 0.129, 0.043, 1)
+PrimaryButton/colors/font_pressed_color = Color(0.227, 0.129, 0.043, 1)
+PrimaryButton/colors/font_disabled_color = Color(0.5, 0.42, 0.32, 1)
+PrimaryButton/colors/font_shadow_color = Color(1, 0.9, 0.7, 0.35)
+PrimaryButton/constants/shadow_offset_y = 1
+PrimaryButton/fonts/font = SubResource("font_title")
+PrimaryButton/font_sizes/font_size = 36
 PrimaryButton/styles/normal = SubResource("primary_normal")
 PrimaryButton/styles/hover = SubResource("primary_hover")
 PrimaryButton/styles/pressed = SubResource("primary_pressed")
+PrimaryButton/styles/disabled = SubResource("btn_disabled")
 DangerButton/base_type = &"Button"
-DangerButton/colors/font_color = Color(1, 0.92, 0.88, 1)
+DangerButton/colors/font_color = Color(1, 0.94, 0.9, 1)
+DangerButton/fonts/font = SubResource("font_title")
+DangerButton/font_sizes/font_size = 30
 DangerButton/styles/normal = SubResource("danger_normal")
 DangerButton/styles/hover = SubResource("danger_normal")
 DangerButton/styles/pressed = SubResource("danger_pressed")
+SuccessButton/base_type = &"Button"
+SuccessButton/colors/font_color = Color(0.06, 0.16, 0.11, 1)
+SuccessButton/colors/font_hover_color = Color(0.06, 0.16, 0.11, 1)
+SuccessButton/colors/font_pressed_color = Color(0.06, 0.16, 0.11, 1)
+SuccessButton/colors/font_shadow_color = Color(1, 1, 1, 0.25)
+SuccessButton/fonts/font = SubResource("font_title")
+SuccessButton/font_sizes/font_size = 32
+SuccessButton/styles/normal = SubResource("success_normal")
+SuccessButton/styles/hover = SubResource("success_normal")
+SuccessButton/styles/pressed = SubResource("success_pressed")
 SmallButton/base_type = &"Button"
-SmallButton/font_sizes/font_size = 24
+SmallButton/font_sizes/font_size = 26
 SmallButton/styles/normal = SubResource("small_normal")
 SmallButton/styles/hover = SubResource("small_hover")
 SmallButton/styles/pressed = SubResource("small_pressed")
 ChoiceButton/base_type = &"Button"
-ChoiceButton/font_sizes/font_size = 24
-ChoiceButton/colors/font_pressed_color = Color(0.22, 0.12, 0.04, 1)
-ChoiceButton/colors/font_hover_pressed_color = Color(0.18, 0.09, 0.02, 1)
-ChoiceButton/colors/font_focus_color = Color(0.96, 0.93, 0.86, 1)
+ChoiceButton/font_sizes/font_size = 26
+ChoiceButton/colors/font_pressed_color = Color(0.227, 0.129, 0.043, 1)
+ChoiceButton/colors/font_hover_pressed_color = Color(0.227, 0.129, 0.043, 1)
+ChoiceButton/colors/font_focus_color = Color(0.953, 0.894, 0.788, 1)
+ChoiceButton/colors/font_shadow_color = Color(0.04, 0.1, 0.13, 0.55)
 ChoiceButton/styles/normal = SubResource("small_normal")
 ChoiceButton/styles/hover = SubResource("small_hover")
 ChoiceButton/styles/pressed = SubResource("choice_on")
 ChoiceButton/styles/hover_pressed = SubResource("choice_on")
 ChoiceButton/styles/focus = SubResource("back_normal")
 BackButton/base_type = &"Button"
-BackButton/colors/font_color = Color(0.9, 0.78, 0.55, 1)
+BackButton/colors/font_color = Color(0.91, 0.627, 0.267, 1)
+BackButton/colors/font_hover_color = Color(1, 0.78, 0.45, 1)
+BackButton/colors/font_pressed_color = Color(1, 0.78, 0.45, 1)
 BackButton/styles/normal = SubResource("back_normal")
 BackButton/styles/hover = SubResource("back_normal")
 BackButton/styles/pressed = SubResource("back_normal")
 TitleLabel/base_type = &"Label"
-TitleLabel/colors/font_color = Color(0.96, 0.8, 0.4, 1)
-TitleLabel/colors/font_shadow_color = Color(0, 0, 0, 0.75)
-TitleLabel/constants/shadow_offset_y = 4
-TitleLabel/fonts/font = ExtResource("font_title")
-TitleLabel/font_sizes/font_size = 80
+TitleLabel/colors/font_color = Color(0.91, 0.627, 0.267, 1)
+TitleLabel/colors/font_shadow_color = Color(0.04, 0.1, 0.13, 0.85)
+TitleLabel/constants/shadow_offset_y = 5
+TitleLabel/fonts/font = SubResource("font_title")
+TitleLabel/font_sizes/font_size = 84
 HeadingLabel/base_type = &"Label"
-HeadingLabel/fonts/font = ExtResource("font_bold")
-HeadingLabel/font_sizes/font_size = 36
+HeadingLabel/fonts/font = SubResource("font_title")
+HeadingLabel/font_sizes/font_size = 38
+SectionLabel/base_type = &"Label"
+SectionLabel/colors/font_color = Color(0.91, 0.627, 0.267, 1)
+SectionLabel/fonts/font = SubResource("font_title")
+SectionLabel/font_sizes/font_size = 28
 MutedLabel/base_type = &"Label"
-MutedLabel/colors/font_color = Color(0.78, 0.72, 0.64, 1)
+MutedLabel/colors/font_color = Color(0.69, 0.76, 0.76, 1)
 MutedLabel/font_sizes/font_size = 24
 ErrorLabel/base_type = &"Label"
-ErrorLabel/colors/font_color = Color(1, 0.52, 0.47, 1)
+ErrorLabel/colors/font_color = Color(0.96, 0.6, 0.54, 1)
+ErrorLabel/fonts/font = SubResource("font_bold")
 InfoLabel/base_type = &"Label"
-InfoLabel/colors/font_color = Color(0.65, 0.92, 0.6, 1)
+InfoLabel/colors/font_color = Color(0.62, 0.87, 0.72, 1)
+InfoLabel/fonts/font = SubResource("font_bold")
 FieldLabel/base_type = &"Label"
-FieldLabel/colors/font_color = Color(0.95, 0.8, 0.5, 1)
-FieldLabel/fonts/font = ExtResource("font_bold")
+FieldLabel/colors/font_color = Color(0.91, 0.627, 0.267, 1)
+FieldLabel/fonts/font = SubResource("font_bold")
 FieldLabel/font_sizes/font_size = 24
 MoneyLabel/base_type = &"Label"
-MoneyLabel/colors/font_color = Color(0.7, 0.98, 0.8, 1)
-MoneyLabel/fonts/font = ExtResource("font_bold")
-MoneyLabel/font_sizes/font_size = 32
+MoneyLabel/colors/font_color = Color(0.06, 0.16, 0.11, 1)
+MoneyLabel/colors/font_shadow_color = Color(1, 1, 1, 0.25)
+MoneyLabel/fonts/font = SubResource("font_title")
+MoneyLabel/font_sizes/font_size = 30
 BigMoneyLabel/base_type = &"Label"
-BigMoneyLabel/colors/font_color = Color(1, 0.83, 0.4, 1)
-BigMoneyLabel/fonts/font = ExtResource("font_bold")
-BigMoneyLabel/font_sizes/font_size = 64
+BigMoneyLabel/colors/font_color = Color(0.91, 0.627, 0.267, 1)
+BigMoneyLabel/fonts/font = SubResource("font_title")
+BigMoneyLabel/font_sizes/font_size = 72
