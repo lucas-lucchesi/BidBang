@@ -8,6 +8,8 @@ const Fx = preload("res://scripts/fx.gd")
 var _box: VBoxContainer
 var _players_box: VBoxContainer
 var _info: Label
+var _kind: Label
+var _situation: Label
 var _heading: Label
 var _seen: Dictionary = {}
 var _error: Label
@@ -36,6 +38,13 @@ func _ready() -> void:
 	code_button.pressed.connect(_on_copy_code)
 	_copy_hint = UI.label(ticket, T.t("Touchez le code pour le copier."), "MutedLabel")
 	_copy_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	# type de partie et situation (parties personnalisées / IA)
+	_kind = UI.label(_box, "", "HeadingLabel")
+	_kind.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_kind.visible = false
+	_situation = UI.label(_box, "", "InfoLabel")
+	_situation.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_situation.visible = false
 	_info = UI.label(_box, "", "MutedLabel")
 	_info.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_heading = UI.label(_box, T.t("Joueurs"), "HeadingLabel")
@@ -53,6 +62,7 @@ func _ready() -> void:
 	Session.game_updated.connect(_on_game)
 	Session.error_received.connect(_on_error)
 	Session.connection_lost.connect(_on_connection_lost)
+	Session.kicked.connect(func() -> void: UI.goto(self, "res://menu.tscn"))
 	_refresh(Session.room)
 	Fx.stagger_in(_box, 0.06)
 	if not Session.game.is_empty():
@@ -91,6 +101,9 @@ func _refresh(room: Dictionary) -> void:
 		dot.text = T.t("En ligne") if online else ""
 		dot.theme_type_variation = "InfoLabel"
 		row.add_child(dot)
+		if Session.is_host() and pid != Session.player_id:
+			var kick: Button = UI.button(row, T.t("Exclure"), "SmallButton")
+			kick.pressed.connect(_on_kick.bind(pid))
 		if not _seen.has(pid):
 			_seen[pid] = true
 			Fx.pop(row.get_parent() as Control, 1.06)
@@ -100,8 +113,21 @@ func _refresh(room: Dictionary) -> void:
 	_info.text = T.t("%s - %d objets - budget %d € - chrono %d s - %d/%d joueurs") % [
 		mode_text, int(s.get("item_count", 0)), int(s.get("budget", 0)),
 		int(s.get("bid_timer", 0)), players.size(), int(room.get("max_players", 4))]
+	var creation: String = str(s.get("creation_type", "classic"))
+	var custom: bool = creation != "classic"
+	var kinds := {"classic": "Partie classique", "custom": "Partie personnalisée", "ai": "Partie avec IA"}
+	_kind.visible = true
+	_kind.text = "%s - %s" % [T.t(str(kinds.get(creation, "Partie classique"))), mode_text]
+	_situation.visible = custom
+	var ready_to_start: bool = true
+	if custom:
+		var scenario: Dictionary = s.get("scenario", {})
+		_situation.text = str(scenario.get("description", ""))
+		var chosen: Array = s.get("item_ids", [])
+		_info.text += "\n" + T.t("%d objets sélectionnés, %d mis aux enchères") % [chosen.size(), int(s.get("item_count", 0))]
+		ready_to_start = bool(s.get("ready", true))
 	_start.visible = Session.is_host()
-	_start.disabled = players.size() < 2
+	_start.disabled = players.size() < 2 or not ready_to_start
 	_start.text = T.t("Lancer la partie") if players.size() >= 2 else T.t("En attente d'un autre joueur...")
 
 
@@ -127,6 +153,11 @@ func _on_copy_code() -> void:
 func _reset_copy_hint() -> void:
 	_copy_hint.text = T.t("Touchez le code pour le copier.")
 	_copy_hint.theme_type_variation = "MutedLabel"
+
+
+func _on_kick(target_id: String) -> void:
+	_error.text = ""
+	Session.send({"type": "kick", "target": target_id})
 
 
 func _on_start() -> void:

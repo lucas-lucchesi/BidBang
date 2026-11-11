@@ -2,8 +2,11 @@
 import asyncio
 import random
 import secrets
+import time
 from typing import Any
 
+from .ai import generator, limits
+from .ai.base import AIProvider
 from .errors import GameError
 from .game import Game, validate_settings
 
@@ -28,8 +31,15 @@ class Room:
         self.players: dict[str, dict] = {}  # id -> {id, pseudo, token, connected}
         self.sockets: dict[str, Any] = {}   # id -> WebSocket
         self.host_id: str | None = None
+        self.banned: set[str] = set()  # pseudos exclus par l'hôte (en minuscules)
         self.status = "lobby"  # lobby | playing | finished
         self.game: Game | None = None
+        # Partie `ai` : objets générés (validés) et épreuves ; JAMAIS la clé API.
+        self.ai_items: dict[str, dict] = {}
+        self.ai_trials: list[dict] | None = None
+        self.ai_busy = False
+        self.ai_count = 0
+        self.ai_last = 0.0
         self._timer: asyncio.Task | None = None
         self._cleanup: asyncio.Task | None = None
 
@@ -37,9 +47,11 @@ class Room:
     def add_player(self, pseudo: str) -> dict:
         if self.status != "lobby":
             raise GameError("La partie a déjà commencé.")
-        if len(self.players) >= MAX_PLAYERS:
+        if len(self.players) >= self.max_players:
             raise GameError("Le salon est complet.")
         pseudo = clean_pseudo(pseudo)
+        if pseudo.lower() in self.banned:
+            raise GameError("Vous avez été exclu de ce salon.", 403)
         if any(p["pseudo"].lower() == pseudo.lower() for p in self.players.values()):
             raise GameError("Ce pseudo est déjà pris dans ce salon.")
         pid = secrets.token_hex(4)
@@ -62,9 +74,16 @@ class Room:
         if self.host_id == pid:
             self.host_id = next(iter(self.players), None)
 
+    @property
+    def max_players(self) -> int:
+        return int(self.settings.get("max_players", MAX_PLAYERS))
+
+    def is_host(self, pid: str) -> bool:
+        return pid == self.host_id
+
     def room_state(self) -> dict:
         return {"code": self.code, "status": self.status, "host_id": self.host_id,
-                "settings": self.settings, "max_players": MAX_PLAYERS,
+                "settings": self.settings, "max_players": self.max_players,
                 "players": [{"id": p["id"], "pseudo": p["pseudo"],
                              "connected": p["connected"]}
                             for p in self.players.values()]}
@@ -144,11 +163,68 @@ class Room:
             raise GameError("La partie a déjà commencé.")
         if len(self.players) < 2:
             raise GameError("Il faut au moins 2 joueurs.")
+        if not self.settings.get("ready", True):
+            raise GameError("L'hôte doit d'abord valider la sélection d'objets.")
+        if self.ai_busy:
+            raise GameError("Une génération IA est en cours.")
+        trials = self.ai_trials if self.settings["mode"] == "survie" else None
         self.game = Game([(p["id"], p["pseudo"]) for p in self.players.values()],
-                         self.settings)
+                         self.settings, pool=list(self.ai_items.values()), trials=trials)
         self.status = "playing"
         await self.broadcast_room()
         await self.after_change()
+
+    # ------------------------------------------------------- partie IA
+    def _require_ai_lobby(self, pid: str) -> None:
+        if not self.is_host(pid):
+            raise GameError("Seul l'hôte peut faire cela.", 403)
+        if self.settings["creation_type"] != "ai":
+            raise GameError("Ce salon n'est pas une partie avec IA.")
+        if self.status != "lobby":
+            raise GameError("La partie a déjà commencé.", 409)
+
+    async def ai_generate(self, pid: str, provider: AIProvider, api_key: str) -> dict:
+        """Génère des objets via le fournisseur. La clé reste dans cet appel (non stockée)."""
+        self._require_ai_lobby(pid)
+        if self.ai_busy:
+            raise GameError("Une génération est déjà en cours.", 429)
+        if self.ai_count >= limits.MAX_GENERATIONS_PER_ROOM:
+            raise GameError("Nombre maximal de générations atteint pour ce salon.", 429)
+        if time.monotonic() - self.ai_last < limits.MIN_INTERVAL_SECONDS:
+            raise GameError("Patientez quelques secondes avant de relancer.", 429)
+        sem = limits.global_slot()
+        if sem.locked():
+            raise GameError("Le service de génération est occupé, réessayez.", 429)
+        self.ai_busy = True
+        self.ai_count += 1
+        self.ai_last = time.monotonic()
+        try:
+            async with sem:
+                result = await generator.generate(
+                    provider, api_key, self.settings["scenario"], self.settings["mode"],
+                    self.settings["item_count"], taken_ids=_catalog_ids())
+        finally:
+            self.ai_busy = False
+        if self.status != "lobby":  # la partie a démarré pendant l'appel
+            raise GameError("La partie a déjà commencé.", 409)
+        self.ai_items = {i["id"]: i for i in result.items}
+        self.ai_trials = result.trials or None
+        # une nouvelle génération invalide l'ancienne sélection : l'hôte doit revalider
+        self.settings = validate_settings({**self.settings, "item_ids": []},
+                                          extra_items=self.ai_items, require_selection=False)
+        await self.broadcast_room()
+        return {"items": result.items, "trials": result.trials,
+                "trials_source": result.trials_source,
+                "generations_left": limits.MAX_GENERATIONS_PER_ROOM - self.ai_count}
+
+    async def set_selection(self, pid: str, item_ids: Any) -> None:
+        """Valide la sélection d'objets (catalogue + objets générés) de l'hôte."""
+        self._require_ai_lobby(pid)
+        if self.ai_busy:
+            raise GameError("Une génération est en cours.", 409)
+        self.settings = validate_settings({**self.settings, "item_ids": item_ids},
+                                          extra_items=self.ai_items)
+        await self.broadcast_room()
 
     async def after_change(self) -> None:
         """Diffuse l'état, met à jour le statut et reprogramme le chronomètre."""
@@ -184,15 +260,44 @@ class Room:
         elif kind in ("bid", "fold", "vote"):
             if self.game is None:
                 raise GameError("La partie n'a pas commencé.")
-            if kind == "bid":
-                self.game.bid(pid, data.get("amount"))
-            elif kind == "fold":
-                self.game.fold(pid)
-            else:
-                self.game.vote(pid, data.get("target"))
+            version = self.game.version
+            try:
+                if kind == "bid":
+                    self.game.bid(pid, data.get("amount"))
+                elif kind == "fold":
+                    self.game.fold(pid)
+                else:
+                    self.game.vote(pid, data.get("target"))
+            except GameError:
+                if self.game.version != version:  # action tardive : l'échéance a clos l'étape
+                    await self.after_change()
+                raise
             await self.after_change()
+        elif kind == "kick":
+            await self.kick(pid, data.get("target"))
         else:
             raise GameError("Commande inconnue.")
+
+    async def kick(self, pid: str, target: Any) -> None:
+        """Exclut un joueur du salon d'attente (hôte seulement)."""
+        if not self.is_host(pid):
+            raise GameError("Seul l'hôte peut exclure un joueur.", 403)
+        if self.status != "lobby":
+            raise GameError("On ne peut exclure un joueur qu'avant le début de la partie.")
+        if not isinstance(target, str) or target not in self.players:
+            raise GameError("Joueur inconnu.")
+        if target == pid:
+            raise GameError("Vous ne pouvez pas vous exclure vous-même.")
+        self.banned.add(self.players[target]["pseudo"].lower())
+        ws = self.sockets.get(target)
+        self.remove_player(target)  # son jeton devient invalide
+        if ws is not None:
+            try:
+                await ws.send_json({"type": "kicked"})
+                await ws.close(code=4403)
+            except Exception:
+                pass
+        await self.broadcast_room()
 
     async def leave(self, pid: str) -> None:
         if self.status == "lobby":
@@ -203,6 +308,11 @@ class Room:
                 return
             await self.broadcast_room()
         # en partie : le joueur reste dans la partie, juste déconnecté
+
+
+def _catalog_ids() -> set[str]:
+    from .items import catalog_item_map
+    return set(catalog_item_map())
 
 
 class Registry:
@@ -216,7 +326,7 @@ class Registry:
                 return code
 
     def create(self, pseudo: str, settings: dict | None) -> tuple[Room, dict]:
-        settings = validate_settings(settings)
+        settings = validate_settings(settings, require_selection=False)
         room = Room(self.new_code(), settings)
         player = room.add_player(pseudo)
         self.rooms[room.code] = room

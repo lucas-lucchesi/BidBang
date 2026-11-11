@@ -35,10 +35,13 @@ scripts/net_client.gd      HTTP (créer/rejoindre) + WebSocketPeer + signaux
 scripts/lobby.gd           salon d'attente
 scripts/game.gd            écran de partie (enchères, vote, résultats), UI construite en code
 scripts/item_card.gd       carte d'objet (papier crème), fonctions statiques
+scripts/item_picker.gd     sélecteur d'objets réutilisable (recherche, filtres, ajouter / retirer)
 theme/main_theme.tres      thème commun (variations : PrimaryButton, TitleLabel, MutedLabel, ErrorLabel, InfoLabel, FieldLabel, HeadingLabel, BackButton)
-server/app/                main.py (routes, WebSocket), rooms.py (salons), game.py (moteur), catalog.py, models.py, errors.py
+server/app/                main.py (routes, WebSocket), rooms.py (salons), game.py (moteur), catalog.py, models.py, errors.py,
+                           creation.py (scénario / sélection), items.py (format commun des objets), trials.py (épreuves),
+                           ai/ (base.py interface fournisseur, anthropic_provider.py, generator.py, limits.py)
 server/data/catalog.json   6 lieux, 72 cartes, épreuves de survie (généré par tools/gen_catalog.py)
-server/tests/              56 tests pytest
+server/tests/              192 tests pytest
 server/tools/gen_catalog.py  génère data/catalog.json (le prototype web de référence n'est pas dans le dépôt)
 ```
 
@@ -79,11 +82,28 @@ Utilise `python -m uvicorn` (et non `uvicorn` seul : il peut pointer vers l'inst
 
 Jeu : ouvrir le dossier dans Godot 4.7, F5. Pour jouer seul : Déboguer → Personnaliser les instances d'exécution, 2 à 3 instances avec des pseudos différents. Adresse du serveur par défaut : `http://127.0.0.1:8000` (émulateur Android : `http://10.0.2.2:8000`).
 
+## Types de création de partie (indépendants du mode de jeu)
+
+```
+CRÉATION DE PARTIE
+  ├── Classique       : catalogue prédéfini (un lieu)
+  ├── Personnalisée   : objets sélectionnés par l'hôte
+  └── IA              : objets générés puis validés
+            │
+            ▼
+   MOTEUR D'ENCHÈRES (game.py, identique pour les 3)
+            │
+   Construction / Survie / Aveugle
+```
+
+`creation_type` : `classic` (lieu du catalogue, défaut si absent), `custom` (situation écrite + sélection libre d'objets de tous les lieux), `ai` (situation + objets générés par une IA externe avec la clé de l'hôte, puis validation). Écran `create_game.gd` : assistant en étapes (type, réglages / situation, sélection, clé API pour `ai`), les choix sont gardés dans `_state`. Pour `ai`, le salon est créé avant la génération ; la clé passe par `POST /rooms/{code}/ai/generate` (HTTPS, jamais stockée ni journalisée) et la sélection est validée par `PUT /rooms/{code}/selection`. Règles de sécurité, limites et validation des réponses IA : `server/README.md`. Le texte de la situation n'est jamais une règle ; en Survie les épreuves viennent de séries prédéfinies (`trials.py`) ou de l'IA validée.
+
 ## Protocole (détail dans server/README.md)
 
+- `GET /items` (catalogue au format commun), `PUT /rooms/{code}/selection`, `POST /rooms/{code}/ai/generate` : voir server/README.md.
 - `POST /rooms` {pseudo, settings} et `POST /rooms/{code}/join` {pseudo} répondent `{code, player_id, token, room}`.
 - `WS /ws/{code}?token=...` : le serveur envoie `room_state` (salon) et `game_state` (partie, état complet à chaque changement, y compris à la reconnexion), `error`, `pong`.
-- Le client envoie `start_game`, `bid` {amount}, `fold`, `vote` {target}, `leave`, `ping`.
+- Le client envoie `start_game`, `bid` {amount}, `fold`, `vote` {target}, `kick` {target} (hôte, salon d'attente), `leave`, `ping`. Le serveur compare son horloge à l'échéance avant de traiter une mise, un abandon ou un vote.
 - Réglages d'une partie : `mode`, `theme_id`, `budget` (1200/2200/3500), `item_count` (6/8/10), `bid_timer` (10/15/20/30 s).
 
 ## Règles de jeu implémentées (source : server/app/game.py)
@@ -106,7 +126,7 @@ Jeu : ouvrir le dossier dans Godot 4.7, F5. Pour jouer seul : Déboguer → Pers
 
 ## État actuel
 
-Fait : menu, créer / rejoindre un salon privé, salon d'attente temps réel, catalogue, enchères temps réel, votes, scores, classement, 46 tests serveur.
+Fait : menu, créer / rejoindre un salon privé, salon d'attente temps réel, catalogue, enchères temps réel, votes, scores, classement, 3 types de création (classique, personnalisée, IA) côté serveur (192 tests) et Godot (non exécuté dans le moteur).
 
 Non vérifié : **la partie Godot n'a jamais été exécutée dans le moteur** (écrite sans accès à Godot). Dernier problème signalé : l'écran de partie « charge en boucle » après « Lancer la partie », avec une erreur autour d'une fonction d'aide de `scripts/item_card.gd`. Les fonctions ont été renommées (`make_label`, `format_money`) et le salon affiche un message si la scène ne s'ouvre pas, mais la cause exacte reste à confirmer avec le message d'erreur de la sortie Godot. **Première tâche : lancer le jeu, lire les erreurs, corriger.**
 
