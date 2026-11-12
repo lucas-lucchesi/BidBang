@@ -25,7 +25,7 @@ Godot 4.7 (GDScript)  --HTTP + WebSocket-->  FastAPI (Python)
                                               └─ catalogue : server/data/catalog.json
 ```
 
-Version Web (bêta) : client Godot exporté dans `web_build/` (Vercel, statique, `vercel.json`) + serveur FastAPI sur Railway (`bid-bang/server/railway.json`, un seul processus, salons en mémoire). Tout est dans **DEPLOY_WEB.md** (installation des modèles d'export, `bid-bang/tools/export_web.sh`, test local, réglages Railway et Vercel, diagnostic 404 / CORS / WebSocket).
+Version Web (bêta) : client Godot exporté dans `web_build/` (Vercel, statique, `vercel.json`, build = copie de web_build vers public) + serveur FastAPI sur Railway (`bid-bang/server/railway.json`, un seul processus, salons en mémoire). Tout est dans **DEPLOY_WEB.md** (installation des modèles d'export, `bid-bang/tools/export_web.sh`, test local, réglages Railway et Vercel, diagnostic 404 / CORS / WebSocket).
 
 Prévu plus tard (pas encore fait) : PostgreSQL, Cloudflare R2 (illustrations), authentification, surveillance.
 

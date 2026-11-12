@@ -2,29 +2,44 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
   "installCommand": null,
-  "buildCommand": null,
-  "outputDirectory": "web_build",
+  "buildCommand": "echo 'web_build :' && ls -la web_build && mkdir -p public && cp -R web_build/. public/ && echo 'public :' && ls -la public",
+  "outputDirectory": "public",
   "cleanUrls": false,
   "trailingSlash": false,
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
-        { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
       ]
     },
     {
       "source": "/(.*)\\.wasm",
       "headers": [
-        { "key": "Content-Type", "value": "application/wasm" }
+        {
+          "key": "Content-Type",
+          "value": "application/wasm"
+        }
       ]
     },
     {
       "source": "/config.json",
       "headers": [
-        { "key": "Cache-Control", "value": "no-store" }
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        }
       ]
     }
   ]

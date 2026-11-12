@@ -14,7 +14,7 @@ Le même projet Godot (`bid-bang/`) sert aux trois cibles : navigateur, Android,
 
 ## 0. Pourquoi vous voyiez `{"detail":"Not Found"}`
 
-Cette réponse est celle de FastAPI (le serveur Python) quand on demande `/` : il n'a pas de page d'accueil. Votre déploiement Vercel exécutait donc le serveur Python, pas le jeu. Causes probables, à vérifier dans Vercel (Settings > General) : *Framework Preset* sur « FastAPI » ou « Python », ou *Root Directory* sur `bid-bang/server`. Le dépôt ne contenait de toute façon ni `vercel.json`, ni dossier `web_build` : même avec les bons réglages, Vercel n'aurait eu aucun client à servir. Un build « réussi » ne prouve pas que le jeu est déployé : cela prouve seulement que la commande de build n'a pas échoué.
+Cette réponse est celle de FastAPI (le serveur Python) quand on demande `/` : il n'a pas de page d'accueil. Votre déploiement Vercel exécutait donc le serveur Python, pas le jeu. Causes probables, à vérifier dans Vercel (Settings > General) : *Framework Preset* sur « FastAPI » ou « Python », ou *Root Directory* sur `bid-bang/server`. Le dépôt ne contenait de toute façon ni `vercel.json`, ni dossier `web_build` : même avec les bons réglages, Vercel n'aurait eu aucun client à servir. Un déploiement « Ready » ne prouve pas que le jeu est servi : un déploiement peut être réussi mais vide (cela est arrivé avec la première version de `vercel.json`).
 
 Correction : `web_build/` et `vercel.json` existent maintenant à la racine du dépôt, et le projet Vercel doit utiliser les réglages de la section 5.
 
@@ -145,12 +145,12 @@ Dans Vercel, importez le dépôt GitHub (ou corrigez le projet existant, sans le
 |---|---|
 | Framework Preset | **Other** |
 | Root Directory | *(vide)* : la racine du dépôt, **pas** `bid-bang/server` |
-| Build Command | *(vide)* |
-| Output Directory | `web_build` |
-| Install Command | *(vide)* |
+| Build Command, Output Directory, Install Command | *(laissez les valeurs par défaut)* : `vercel.json` les impose |
 | Environment Variables | aucune |
 
-`vercel.json` à la racine impose déjà : pas de framework, pas de build, sortie `web_build`, fichiers `.wasm` servis en `application/wasm`, pas de cache périmé (`max-age=0, must-revalidate`), `config.json` jamais mis en cache. Aucune fonction Python n'est configurée. Ne cochez pas « Include source files outside of the Root Directory ». Après avoir corrigé les réglages : *Deployments > ⋯ > Redeploy* (décochez « Use existing Build Cache »).
+`vercel.json` à la racine impose : pas de framework, pas d'installation, une commande de build qui **copie `web_build/` vers `public/`** (et affiche le contenu des deux dossiers dans le journal), sortie `public`, fichiers `.wasm` servis en `application/wasm`, pas de cache périmé (`max-age=0, must-revalidate`), `config.json` jamais mis en cache. Aucune fonction Python n'est configurée. Pourquoi cette copie : avec `outputDirectory: "web_build"` seul, Vercel a produit un déploiement « Ready » mais **vide** (« Build output contains no functions, static or services directory ») et toutes les pages répondaient 404 ; une commande de build explicite rend la sortie fiable, et un échec devient visible dans le journal. Après un changement de réglage : *Deployments > ⋯ > Redeploy* sur le dernier commit de `main` (décochez « Use existing Build Cache »).
+
+**Diagnostic d'un déploiement vide** : ouvrez *Build Logs* ; vous devez voir `web_build :` suivi de `index.wasm`, `index.pck`…, puis `public :` avec les mêmes fichiers. Si la liste `web_build` est absente ou le journal contient « no static directory », le client n'est pas déployé, même si le statut est « Ready ».
 
 Ensuite, reportez le domaine Vercel obtenu (`https://VOTRE-PROJET.vercel.app`) dans la variable `ALLOWED_ORIGINS` de Railway, et redéployez Railway si besoin.
 
