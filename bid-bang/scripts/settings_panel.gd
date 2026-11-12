@@ -56,11 +56,12 @@ func _ready() -> void:
 		labels.append("Illimité" if v == 0 else str(v))
 	var prefs: VBoxContainer = UI.section(content, T.t("Images par seconde (FPS)"), "RowPanel")
 	UI.choice_row(prefs, "", labels, FPS_VALUES, Session.max_fps, _on_fps)
-	# serveur
-	var srv: VBoxContainer = UI.section(content, T.t("Adresse du serveur"), "RowPanel")
-	_server = UI.field(srv, "", Session.server_url)
-	_server.text_changed.connect(_on_server_text)
-	UI.label(srv, "Émulateur Android : http://10.0.2.2:8000", "MutedLabel")
+	# serveur (masqué sur la version Web publique : l'adresse vient de config.json et ne se modifie pas)
+	if not Session.server_locked:
+		var srv: VBoxContainer = UI.section(content, T.t("Adresse du serveur"), "RowPanel")
+		_server = UI.field(srv, "", Session.server_url)
+		_server.text_changed.connect(_on_server_text)
+		UI.label(srv, "Émulateur Android : http://10.0.2.2:8000", "MutedLabel")
 	_error = UI.label(content, "", "ErrorLabel")
 
 
@@ -70,7 +71,7 @@ func get_meta_root(content: Control) -> Node:
 
 ## Appelé par le bouton « Fermer » : refuse la fermeture si l'adresse du serveur est invalide.
 func _can_close() -> bool:
-	if not Session.server_url_valid():
+	if not Session.server_locked and not Session.server_url_valid():
 		_error.text = T.t("L'adresse du serveur doit commencer par http:// ou https://.")
 		return false
 	Session.save_settings()

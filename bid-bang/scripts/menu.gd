@@ -61,9 +61,14 @@ func _validate() -> bool:
 	if name_text == "":
 		_error.text = T.t("Choisissez un pseudo.")
 		return false
+	var status: String = Session.server_status_text()
+	if status != "":
+		_error.text = T.t(status)
+		return false
 	if not Session.server_url_valid():
 		_error.text = T.t("L'adresse du serveur doit commencer par http:// ou https://.")
-		UI.open_settings(self)
+		if not Session.server_locked:
+			UI.open_settings(self)
 		return false
 	Session.pseudo = name_text
 	Session.save_settings()

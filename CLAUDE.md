@@ -25,7 +25,9 @@ Godot 4.7 (GDScript)  --HTTP + WebSocket-->  FastAPI (Python)
                                               └─ catalogue : server/data/catalog.json
 ```
 
-Prévu plus tard (pas encore fait) : PostgreSQL, Cloudflare R2 (illustrations), génération IA facultative avec la clé de l'hôte, hébergement en ligne.
+Version Web (bêta) : client Godot exporté dans `web_build/` (Vercel, statique, `vercel.json`) + serveur FastAPI sur Railway (`bid-bang/server/railway.json`, un seul processus, salons en mémoire). Tout est dans **DEPLOY_WEB.md** (installation des modèles d'export, `bid-bang/tools/export_web.sh`, test local, réglages Railway et Vercel, diagnostic 404 / CORS / WebSocket).
+
+Prévu plus tard (pas encore fait) : PostgreSQL, Cloudflare R2 (illustrations), authentification, surveillance.
 
 ## Structure du dépôt
 
@@ -41,13 +43,13 @@ scripts/item_card.gd       carte d'objet (papier crème : points, prix estimé, 
 scripts/results_view.gd    écran de résultats (podium, détail par joueur, bonnes affaires, distinctions)
 scripts/item_picker.gd     sélecteur d'objets réutilisable (recherche, filtres, ajouter / retirer)
 theme/main_theme.tres      thème commun (variations : PrimaryButton, TitleLabel, MutedLabel, ErrorLabel, InfoLabel, FieldLabel, HeadingLabel, BackButton)
-server/app/                main.py (routes, WebSocket), rooms.py (salons), game.py (moteur, résultats), catalog.py, models.py, errors.py,
+server/app/                main.py (routes, WebSocket, CORS), config.py (production, origines autorisées), rooms.py (salons), game.py (moteur, résultats), catalog.py, models.py, errors.py,
                            criteria.py (registre et validation des critères), scoring.py (formule des points, module pur),
                            creation.py (situation / sélection), items.py (format commun des objets),
                            ai/ (profile.py profil de génération, debug.py logs `BIDBANG_AI_DEBUG=1`, base.py interface fournisseur, anthropic/openai, gemini (SDK google-genai, sorties structurées, modèle `gemini-3.5-flash-lite`), mock_provider.py (BIDBANG_MOCK_AI=1), generator.py, limits.py)
 server/data/catalog.json   7 lieux (critères de situation inclus), 84 objets au format commun (généré par tools/gen_catalog.py)
 server/data/criteria.json  registre des critères (id, libellé) et modèles de critères (zombie, mariage, villa...)
-server/tests/              283 tests pytest
+server/tests/              299 tests pytest
 server/tools/gen_catalog.py  génère data/catalog.json (attributs et points de base écrits à la main par objet)
 ```
 
@@ -73,6 +75,12 @@ Style « soirée jeux entre amis » : formes très arrondies, boutons épais en 
 - Marges de sécurité : `UI.safe_insets()` lit `DisplayServer.get_display_safe_area()` (0 sur ordinateur). À vérifier sur un vrai téléphone ou un émulateur à encoche.
 - Images réelles à venir (déposer simplement les fichiers, le code les détecte) : `assets/backgrounds/main.png` et `assets/backgrounds/<id du lieu>.png` (fond), `assets/items/<id de la carte>.png` (illustration). Sans image : fond et médaillons dessinés en code. Voir les `README.txt` de ces dossiers.
 - `assets/legacy_pixel/` : ancienne version pixel art, conservée au cas où. Cinzel et Lato restent dans `assets/fonts/` mais ne sont plus utilisées.
+
+## Web : export et configuration
+
+- `bid-bang/tools/export_web.sh` régénère `web_build/` (Godot 4.7.2, profil « Web » de `bid-bang/export_presets.cfg`, Compatibility, sans threads, `server/` exclu) puis contrôle l'export (`tools/check_web_build.py` : tailles, pas de serveur ni de clé). Modèles d'export : `python3 bid-bang/tools/install_web_templates.py`. Ne jamais tester en `file://` : `python3 -m http.server 8080 --directory web_build`.
+- Adresse du serveur : application native = Paramètres (défaut `http://127.0.0.1:8000`) ; Web servi depuis localhost = idem (+ `?server=`) ; **Web public = `web_build/config.json` (`server_url` en https), non modifiable**, jamais 127.0.0.1 (`Session._init_web_server`).
+- Serveur public (`app/config.py`) : `BIDBANG_ENV=production`, `ALLOWED_ORIGINS` (CORS et WebSocket, pas de `*`), `ALLOWED_ORIGIN_REGEX`, `MAX_ROOMS` ; limites de créations de salons et d'essais de codes par adresse ; derrière Railway, uvicorn doit avoir `--proxy-headers`.
 
 ## Lancer et tester
 

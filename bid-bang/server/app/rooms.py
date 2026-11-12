@@ -8,7 +8,7 @@ from typing import Any
 from .ai import debug, generator, limits
 from .ai.base import AIProvider
 from .errors import GameError
-from . import criteria as criteria_mod
+from . import config, criteria as criteria_mod
 from .game import Game, preview_ai_cards, validate_settings
 
 CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"  # sans O/0/I/1
@@ -143,6 +143,12 @@ class Room:
             self.players[pid]["connected"] = False
         await self.broadcast_room()
         if not self.sockets:
+            self._cleanup = asyncio.create_task(self._expire())
+
+    def expire_if_unused(self) -> None:
+        """Programme la suppression du salon si personne ne s'y connecte (WebSocket) à temps ;
+        une connexion annule ce minuteur (voir `connect`)."""
+        if self._cleanup is None and not self.sockets:
             self._cleanup = asyncio.create_task(self._expire())
 
     async def _expire(self) -> None:
@@ -380,6 +386,8 @@ class Registry:
                 return code
 
     def create(self, pseudo: str, settings: dict | None) -> tuple[Room, dict]:
+        if len(self.rooms) >= config.max_rooms():
+            raise GameError("Le serveur est plein pour le moment, réessayez dans quelques minutes.", 503)
         settings = validate_settings(settings, require_selection=False)
         room = Room(self.new_code(), settings)
         player = room.add_player(pseudo)

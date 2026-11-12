@@ -30,6 +30,10 @@ static func _stat_line(parent: Node, caption: String, value: String, color: Colo
 	c.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var v: Label = ItemCard.make_label(line, value, "")
 	v.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	# jamais de retour à la ligne dans la valeur : sinon la colonne de gauche (qui s'étire) l'écrase
+	# jusqu'à un caractère de large
+	v.autowrap_mode = TextServer.AUTOWRAP_OFF
+	v.size_flags_horizontal = Control.SIZE_SHRINK_END
 	if color.a > 0.0:
 		v.add_theme_color_override("font_color", color)
 
