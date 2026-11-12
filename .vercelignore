@@ -1,3 +1,0 @@
-# Déploiement Vercel par la CLI (vercel deploy) : n'envoyer que le client Web.
-# Avec l'intégration GitHub, Vercel clone le dépôt ; le dossier du projet y est ignoré par la configuration.
-bid-bang/

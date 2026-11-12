@@ -25,7 +25,7 @@ Godot 4.7 (GDScript)  --HTTP + WebSocket-->  FastAPI (Python)
                                               └─ catalogue : server/data/catalog.json
 ```
 
-Version Web (bêta) : client Godot exporté dans `web_build/` (Vercel, statique, `vercel.json`) + serveur FastAPI sur Railway (`bid-bang/server/railway.json`, un seul processus, salons en mémoire). Tout est dans **DEPLOY_WEB.md** (installation des modèles d'export, `bid-bang/tools/export_web.sh`, test local, réglages Railway et Vercel, diagnostic 404 / CORS / WebSocket).
+Version Web (bêta) : client Godot exporté dans `web_build/` (Vercel, statique, `vercel.json`, build = copie de web_build vers public) + serveur FastAPI sur Railway (`bid-bang/server/railway.json`, un seul processus, salons en mémoire). Tout est dans **DEPLOY_WEB.md** (installation des modèles d'export, `bid-bang/tools/export_web.sh`, test local, réglages Railway et Vercel, diagnostic 404 / CORS / WebSocket).
 
 Prévu plus tard (pas encore fait) : PostgreSQL, Cloudflare R2 (illustrations), authentification, surveillance.
 
@@ -49,7 +49,7 @@ server/app/                main.py (routes, WebSocket, CORS), config.py (product
                            ai/ (profile.py profil de génération, debug.py logs `BIDBANG_AI_DEBUG=1`, base.py interface fournisseur, anthropic/openai, gemini (SDK google-genai, sorties structurées, modèle `gemini-3.5-flash-lite`), mock_provider.py (BIDBANG_MOCK_AI=1), generator.py, limits.py)
 server/data/catalog.json   7 lieux (critères de situation inclus), 84 objets au format commun (généré par tools/gen_catalog.py)
 server/data/criteria.json  registre des critères (id, libellé) et modèles de critères (zombie, mariage, villa...)
-server/tests/              299 tests pytest
+server/tests/              314 tests pytest
 server/tools/gen_catalog.py  génère data/catalog.json (attributs et points de base écrits à la main par objet)
 ```
 
@@ -80,6 +80,7 @@ Style « soirée jeux entre amis » : formes très arrondies, boutons épais en 
 
 - `bid-bang/tools/export_web.sh` régénère `web_build/` (Godot 4.7.2, profil « Web » de `bid-bang/export_presets.cfg`, Compatibility, sans threads, `server/` exclu) puis contrôle l'export (`tools/check_web_build.py` : tailles, pas de serveur ni de clé). Modèles d'export : `python3 bid-bang/tools/install_web_templates.py`. Ne jamais tester en `file://` : `python3 -m http.server 8080 --directory web_build`.
 - Adresse du serveur : application native = Paramètres (défaut `http://127.0.0.1:8000`) ; Web servi depuis localhost = idem (+ `?server=`) ; **Web public = `web_build/config.json` (`server_url` en https), non modifiable**, jamais 127.0.0.1 (`Session._init_web_server`).
+- Serveur sur l'ordinateur de l'hôte + client Vercel (sans Railway) : `python3 bid-bang/tools/serve_public.py --origin https://VOTRE-PROJET.vercel.app [--push]` (serveur en production + tunnel Cloudflare + mise à jour de `web_build/config.json`) ; voir DEPLOY_WEB.md, section 4 bis.
 - Serveur public (`app/config.py`) : `BIDBANG_ENV=production`, `ALLOWED_ORIGINS` (CORS et WebSocket, pas de `*`), `ALLOWED_ORIGIN_REGEX`, `MAX_ROOMS` ; limites de créations de salons et d'essais de codes par adresse ; derrière Railway, uvicorn doit avoir `--proxy-headers`.
 
 ## Lancer et tester

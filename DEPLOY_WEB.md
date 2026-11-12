@@ -14,7 +14,7 @@ Le même projet Godot (`bid-bang/`) sert aux trois cibles : navigateur, Android,
 
 ## 0. Pourquoi vous voyiez `{"detail":"Not Found"}`
 
-Cette réponse est celle de FastAPI (le serveur Python) quand on demande `/` : il n'a pas de page d'accueil. Votre déploiement Vercel exécutait donc le serveur Python, pas le jeu. Causes probables, à vérifier dans Vercel (Settings > General) : *Framework Preset* sur « FastAPI » ou « Python », ou *Root Directory* sur `bid-bang/server`. Le dépôt ne contenait de toute façon ni `vercel.json`, ni dossier `web_build` : même avec les bons réglages, Vercel n'aurait eu aucun client à servir. Un build « réussi » ne prouve pas que le jeu est déployé : cela prouve seulement que la commande de build n'a pas échoué.
+Cette réponse est celle de FastAPI (le serveur Python) quand on demande `/` : il n'a pas de page d'accueil. Votre déploiement Vercel exécutait donc le serveur Python, pas le jeu. Causes probables, à vérifier dans Vercel (Settings > General) : *Framework Preset* sur « FastAPI » ou « Python », ou *Root Directory* sur `bid-bang/server`. Le dépôt ne contenait de toute façon ni `vercel.json`, ni dossier `web_build` : même avec les bons réglages, Vercel n'aurait eu aucun client à servir. Un déploiement « Ready » ne prouve pas que le jeu est servi : un déploiement peut être réussi mais vide (cela est arrivé avec la première version de `vercel.json`).
 
 Correction : `web_build/` et `vercel.json` existent maintenant à la racine du dépôt, et le projet Vercel doit utiliser les réglages de la section 5.
 
@@ -78,6 +78,25 @@ git push -u origin <votre-branche>   # puis ouvrez une pull request vers main
 
 `web_build/` est versionné pour que Vercel le serve sans avoir besoin de Godot. Le fichier `index.wasm` (39,5 Mo) est sous l'avertissement de GitHub (50 Mo) et sous sa limite (100 Mo) ; il ne change qu'avec la version de Godot, donc il ne gonfle pas le dépôt à chaque export. `index.pck` (2,5 Mo) change à chaque export. Si le dépôt grossit trop plus tard, passez à Git LFS ou à un export fait par GitHub Actions.
 
+## 4 bis. Variante sans Railway : le serveur sur votre ordinateur, le client sur Vercel
+
+Votre ordinateur fait tourner le serveur Python ; un tunnel HTTPS gratuit le rend joignable par vos amis ; le client reste sur Vercel. **Votre ordinateur doit rester allumé** pendant les parties, avec le script lancé ; l'arrêter supprime les parties en cours.
+
+1. **Installer `cloudflared`** (une fois ; Linux x86-64, sans compte) :
+   ```bash
+   mkdir -p ~/.local/bin && curl -L -o ~/.local/bin/cloudflared \
+     https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 \
+     && chmod +x ~/.local/bin/cloudflared && cloudflared --version
+   ```
+2. **Lancer** (remplacez par le domaine de votre projet Vercel, sans `/` final) :
+   ```bash
+   python3 bid-bang/tools/serve_public.py --origin https://VOTRE-PROJET.vercel.app --push
+   ```
+   Le script démarre le serveur en mode production (CORS et WebSocket limités à votre site Vercel), ouvre le tunnel, vérifie que `https://xxxx.trycloudflare.com/health` répond, écrit l'adresse dans `web_build/config.json`, puis (avec `--push`) commite **seulement ce fichier** et le pousse : Vercel redéploie le client en environ une minute. Sans `--push`, le script affiche les trois commandes git à lancer vous-même. Vous pouvez aussi définir `BIDBANG_WEB_ORIGIN` au lieu de `--origin`.
+3. **Jouer** : ouvrez `https://VOTRE-PROJET.vercel.app` et envoyez ce lien à vos amis. Arrêtez avec Ctrl+C (serveur et tunnel s'arrêtent ensemble).
+
+Limites : l'adresse d'un tunnel rapide **change à chaque lancement**, donc relancez le script (et laissez-le pousser `config.json`) à chaque session ; attendez la fin du redéploiement Vercel avant d'inviter. Les tunnels rapides sont prévus pour des essais : pas de garantie de disponibilité. Pour une adresse fixe (tunnel nommé Cloudflare, ngrok avec un domaine fixe...), lancez votre tunnel vous-même puis `serve_public.py --origin ... --public-url https://votre-adresse-fixe --push` : le script ne lance alors pas de tunnel. Les parties du serveur local restent en mémoire, comme sur Railway.
+
 ## 5. Railway : le serveur de jeu
 
 1. Sur <https://railway.com>, *New Project > Deploy from GitHub repo* > `BidBang`. Railway est un service payant à l'usage, avec un essai limité : vérifiez leur tarification actuelle avant de créer le projet. Rien n'a été créé ni déployé sur votre compte.
@@ -126,12 +145,12 @@ Dans Vercel, importez le dépôt GitHub (ou corrigez le projet existant, sans le
 |---|---|
 | Framework Preset | **Other** |
 | Root Directory | *(vide)* : la racine du dépôt, **pas** `bid-bang/server` |
-| Build Command | *(vide)* |
-| Output Directory | `web_build` |
-| Install Command | *(vide)* |
+| Build Command, Output Directory, Install Command | *(laissez les valeurs par défaut)* : `vercel.json` les impose |
 | Environment Variables | aucune |
 
-`vercel.json` à la racine impose déjà : pas de framework, pas de build, sortie `web_build`, fichiers `.wasm` servis en `application/wasm`, pas de cache périmé (`max-age=0, must-revalidate`), `config.json` jamais mis en cache. Aucune fonction Python n'est configurée. Ne cochez pas « Include source files outside of the Root Directory ». Après avoir corrigé les réglages : *Deployments > ⋯ > Redeploy* (décochez « Use existing Build Cache »).
+`vercel.json` à la racine impose : pas de framework, pas d'installation, une commande de build qui **copie `web_build/` vers `public/`** (et affiche le contenu des deux dossiers dans le journal), sortie `public`, fichiers `.wasm` servis en `application/wasm`, pas de cache périmé (`max-age=0, must-revalidate`), `config.json` jamais mis en cache. Aucune fonction Python n'est configurée. Pourquoi cette copie : avec `outputDirectory: "web_build"` seul, Vercel a produit un déploiement « Ready » mais **vide** (« Build output contains no functions, static or services directory ») et toutes les pages répondaient 404 ; une commande de build explicite rend la sortie fiable, et un échec devient visible dans le journal. Après un changement de réglage : *Deployments > ⋯ > Redeploy* sur le dernier commit de `main` (décochez « Use existing Build Cache »).
+
+**Diagnostic d'un déploiement vide** : ouvrez *Build Logs* ; vous devez voir `web_build :` suivi de `index.wasm`, `index.pck`…, puis `public :` avec les mêmes fichiers. Si la liste `web_build` est absente ou le journal contient « no static directory », le client n'est pas déployé, même si le statut est « Ready ».
 
 Ensuite, reportez le domaine Vercel obtenu (`https://VOTRE-PROJET.vercel.app`) dans la variable `ALLOWED_ORIGINS` de Railway, et redéployez Railway si besoin.
 
