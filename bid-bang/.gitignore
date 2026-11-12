@@ -9,3 +9,6 @@ sprite/
 .env
 *.env
 server/.env
+
+# caches Python des scripts de tools/
+__pycache__/

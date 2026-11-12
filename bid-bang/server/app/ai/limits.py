@@ -23,6 +23,7 @@ def reset() -> None:
     global _semaphore
     _semaphore = None
     failures.clear()
+    creations.clear()
 
 
 class FailureLimiter:
@@ -50,3 +51,5 @@ class FailureLimiter:
 
 
 failures = FailureLimiter()
+MAX_ROOM_CREATIONS_PER_MINUTE = 10  # salons créés par adresse
+creations = FailureLimiter(limit=MAX_ROOM_CREATIONS_PER_MINUTE)

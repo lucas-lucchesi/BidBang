@@ -11,6 +11,7 @@ puis l'ajouter à `PROVIDERS`. Un fournisseur :
 import os
 from typing import Protocol
 
+from .. import config
 from ..errors import GameError
 
 
@@ -36,7 +37,7 @@ def _registry() -> dict[str, AIProvider]:
     from .gemini_provider import GeminiProvider
     from .openai_provider import OpenAIProvider
     providers = [AnthropicProvider(), OpenAIProvider(), GeminiProvider()]
-    if os.environ.get("BIDBANG_MOCK_AI") == "1":  # essais locaux uniquement
+    if os.environ.get("BIDBANG_MOCK_AI") == "1" and not config.is_production():  # essais locaux
         from .mock_provider import MockProvider
         providers.append(MockProvider())
     return {p.name: p for p in providers}

@@ -2,6 +2,10 @@
 
 FastAPI, salons et parties en mémoire. Le serveur fait autorité : le client envoie des intentions, jamais de résultats.
 
+## Déploiement public
+
+Voir `DEPLOY_WEB.md` à la racine du dépôt (Railway : Root Directory `bid-bang/server`, commande dans `railway.json`). Variables : `BIDBANG_ENV=production`, `ALLOWED_ORIGINS=https://votre-projet.vercel.app` (origines de navigateur autorisées pour CORS et WebSocket ; jamais de `*`), `ALLOWED_ORIGIN_REGEX` (facultatif), `MAX_ROOMS` (défaut 200), `PORT` (fourni par l'hébergeur). En production : pas de `/docs`, pas de fournisseur simulé, pas de clé lue dans l'environnement, clés API refusées en HTTP clair. Un redémarrage supprime les parties en cours (tout est en mémoire ; un seul processus, une seule instance). Limites par adresse : 10 salons créés par minute, 10 échecs (code inconnu, jeton invalide) par minute ; salon jamais ouvert en WebSocket supprimé après 5 minutes ; messages WebSocket de 8 Ko au plus. Derrière un proxy, lancez uvicorn avec `--proxy-headers --forwarded-allow-ips='*'` (déjà dans `railway.json`).
+
 ## Lancer
 
 ```bash

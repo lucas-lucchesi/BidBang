@@ -31,6 +31,7 @@ var _error: Label
 var _step: String = "type"
 var _pending: String = "type"
 var _locations: Array = []
+var _provider_list: Array = []  # fournisseurs IA proposés par le serveur (GET /ai/providers)
 var _catalog: Dictionary = {}
 var _ai_items: Array = []
 var _preview_items: Array = []
@@ -113,6 +114,9 @@ func _go(step: String) -> void:
 	_error.text = ""
 	if step == "classic" and _locations.is_empty():
 		_show_loading("locations", "/locations")
+		return
+	if step == "ai_key" and _provider_list.is_empty():
+		_show_loading("providers", "/ai/providers")
 		return
 	if (step == "scenario" or step == "picker" or step == "criteria") and _catalog.is_empty():
 		_show_loading("items", "/items")
@@ -661,8 +665,20 @@ func _build_ai_key() -> void:
 	var info: VBoxContainer = UI.section(_content, T.t("Votre clé API"))
 	UI.label(info, T.t("La clé est envoyée au serveur de jeu uniquement pour cette génération, en HTTPS. Elle n'est ni enregistrée, ni partagée avec les autres joueurs, ni conservée après l'appel."), "MutedLabel")
 	UI.label(info, T.t("Votre fournisseur peut facturer chaque génération. Utilisez de préférence une clé dédiée, avec un plafond de dépenses."), "MutedLabel")
-	_provider = UI.choice_row(info, "Fournisseur", ["Google Gemini (gratuit)", "OpenAI (GPT)", "Anthropic (Claude)"],
-		["gemini", "openai", "anthropic"], _state["provider"])
+	var provider_labels: Array = []
+	var provider_values: Array = []
+	for pid in ["gemini", "openai", "anthropic", "mock"]:  # ordre d'affichage ; le serveur décide de ce qui existe
+		for entry in _provider_list:
+			var pd: Dictionary = entry
+			if str(pd["id"]) == pid:
+				provider_labels.append(str(pd.get("label", pid)))
+				provider_values.append(pid)
+	if provider_values.is_empty():
+		provider_labels = ["Google Gemini (gratuit)", "OpenAI (GPT)", "Anthropic (Claude)"]
+		provider_values = ["gemini", "openai", "anthropic"]
+	if not provider_values.has(_state["provider"]):
+		_state["provider"] = provider_values[0]
+	_provider = UI.choice_row(info, "Fournisseur", provider_labels, provider_values, _state["provider"])
 	_key_edit = UI.field(info, "Clé API", "", 300)
 	_key_edit.secret = true
 	_key_edit.placeholder_text = T.t("Collez votre clé ici")
@@ -763,6 +779,10 @@ func _on_http_done(tag: String, ok: bool, data: Dictionary) -> void:
 				_fail(data)
 				return
 			_locations = data.get("locations", [])
+			_go(_pending)
+		"providers":
+			# en cas d'échec, l'écran utilise la liste par défaut (le serveur refusera un fournisseur inconnu)
+			_provider_list = data.get("providers", []) if ok else [{"id": "gemini", "label": "Google Gemini (gratuit)"}]
 			_go(_pending)
 		"items":
 			if not ok:

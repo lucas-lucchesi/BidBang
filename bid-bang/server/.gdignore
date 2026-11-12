@@ -1,0 +1,1 @@
+# Ce dossier est le serveur Python : Godot ne doit ni l'importer ni l'exporter (jamais distribué aux joueurs).
