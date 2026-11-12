@@ -1,8 +1,7 @@
 import pytest
 
 from app.errors import GameError
-from app.game import (OPENING_MIN, Game, item_points, min_step, synergy_points,
-                      validate_settings)
+from app.game import OPENING_MIN, Game, min_step, normalize_mode, validate_settings
 
 
 def test_min_step():
@@ -94,7 +93,7 @@ def test_timeout_awards_leader(make_game, clock):
     assert g.on_timeout(g.version)
     assert g.players["p1"]["budget"] == 2200 - price
     assert g.players["p1"]["items"] == [item]
-    assert g.players["p1"]["purchases"] == [{"item": item, "price": price}]
+    assert g.players["p1"]["purchases"] == [{"item": item, "purchase_price": price}]
     assert g.last_result["winner_id"] == "p1"
     assert g.index == 1
 
@@ -184,12 +183,12 @@ def test_budget_never_negative(make_game, clock):
     assert all(p["budget"] >= 0 for p in g.players.values())
 
 
-def test_item_points_and_synergies():
-    a = {"stats": {"x": 2, "y": 3}, "rarity": 2, "tags": ["t1", "t2"]}
-    b = {"stats": {"x": 1}, "rarity": 0, "tags": ["t1"]}
-    c = {"stats": {"x": 1}, "rarity": 0, "tags": ["t1", "t2"]}
-    assert item_points(a, "construction") == 5 + 4
-    assert item_points(a, "survie") == 5
-    assert synergy_points([a, b]) == 3
-    assert synergy_points([a, b, c]) == 3 * 2 + 3 * 1
-    assert synergy_points([a]) == 0
+def test_legacy_modes_are_migrated():
+    assert normalize_mode("construction") == "normal"
+    assert normalize_mode("survie") == "normal"
+    assert normalize_mode("aveugle") == "aveugle"
+    assert validate_settings({"mode": "survie"})["mode"] == "normal"
+    assert validate_settings({"mode": "construction", "trial_pack": "x"})["mode"] == "normal"
+    assert validate_settings(None)["mode"] == "normal"
+    with pytest.raises(GameError):
+        normalize_mode(None)

@@ -1,4 +1,4 @@
-"""Contrôle d'horloge serveur avant mise / abandon / vote, et exclusion d'un joueur du salon."""
+"""Contrôle d'horloge serveur avant mise / abandon, et exclusion d'un joueur du salon."""
 import pytest
 from starlette.testclient import TestClient
 
@@ -50,18 +50,15 @@ def test_blind_late_bid_rejected(make_game, clock):
     clock.advance(11)
     with pytest.raises(GameError, match="Temps écoulé"):
         g.bid("p2", 900)
-    assert g.last_result["winner_id"] == "p1" and g.last_result["price"] == 100
+    assert g.last_result["winner_id"] == "p1" and g.last_result["purchase_price"] == 100
 
 
-def test_late_vote_rejected_and_game_finishes(make_game, clock):
+def test_game_goes_straight_to_results_without_vote_phase(make_game):
     g = make_game(n=3)
     while g.phase == "auction":
         g.on_timeout(g.version)
-    assert g.phase == "voting"
-    clock.advance(46)
-    with pytest.raises(GameError, match="Temps écoulé"):
-        g.vote("p1", "p2")
-    assert g.phase == "finished"
+    assert g.phase == "finished" and g.results is not None
+    assert not hasattr(g, "vote") and "vote" not in g.snapshot("p1")
 
 
 def test_stale_timer_still_ignored(make_game, clock):

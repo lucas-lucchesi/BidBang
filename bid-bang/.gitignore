@@ -4,3 +4,8 @@
 
 # dossier source des sprites (copie utile dans assets/ui/)
 sprite/
+
+# clés API : jamais dans le dépôt
+.env
+*.env
+server/.env

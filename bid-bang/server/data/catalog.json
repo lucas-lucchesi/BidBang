@@ -1,185 +1,316 @@
 {
- "stats": [
-  "confort",
-  "style",
-  "utilite",
-  "securite",
-  "sante"
- ],
  "locations": [
   {
    "id": "cabane",
    "name": "Cabane en forêt",
    "description": "Une cabane isolée au milieu des bois, loin de tout.",
-   "survival": {
+   "situation": {
     "title": "Une semaine sans réseau",
-    "text": "La neige bloque la route. Il faut tenir jusqu'à l'arrivée des secours.",
-    "trials": [
-     {
-      "id": "froid",
-      "name": "Nuit glaciale",
-      "stat": "confort",
-      "threshold": 9
-     },
-     {
-      "id": "tempete",
-      "name": "Tempête de neige",
-      "stat": "securite",
-      "threshold": 8
-     },
-     {
-      "id": "faim",
-      "name": "Pénurie de vivres",
-      "stat": "utilite",
-      "threshold": 9
-     }
-    ]
-   }
+    "description": "La neige bloque la route. Il faut tenir jusqu'à l'arrivée des secours."
+   },
+   "criteria": [
+    {
+     "id": "abri",
+     "necessary": true,
+     "importance": 5
+    },
+    {
+     "id": "chaleur",
+     "necessary": true,
+     "importance": 5
+    },
+    {
+     "id": "nourriture",
+     "necessary": true,
+     "importance": 4
+    },
+    {
+     "id": "outils",
+     "necessary": true,
+     "importance": 4
+    },
+    {
+     "id": "soins",
+     "necessary": true,
+     "importance": 3
+    },
+    {
+     "id": "luxe",
+     "necessary": false,
+     "importance": 0
+    },
+    {
+     "id": "divertissement",
+     "necessary": false,
+     "importance": 0
+    }
+   ]
   },
   {
    "id": "appartement",
    "name": "Appartement en ville",
    "description": "Un trois-pièces lumineux au cinquième étage, en plein centre.",
-   "survival": {
+   "situation": {
     "title": "Coupure générale",
-    "text": "Plus d'électricité ni d'eau courante dans toute la ville pendant plusieurs jours.",
-    "trials": [
-     {
-      "id": "noir",
-      "name": "Plongée dans le noir",
-      "stat": "utilite",
-      "threshold": 9
-     },
-     {
-      "id": "chaleur",
-      "name": "Canicule",
-      "stat": "confort",
-      "threshold": 8
-     },
-     {
-      "id": "pillage",
-      "name": "Quartier agité",
-      "stat": "securite",
-      "threshold": 8
-     }
-    ]
-   }
+    "description": "Plus d'électricité ni d'eau courante dans toute la ville pendant plusieurs jours."
+   },
+   "criteria": [
+    {
+     "id": "confort",
+     "necessary": true,
+     "importance": 5
+    },
+    {
+     "id": "decoration",
+     "necessary": true,
+     "importance": 4
+    },
+    {
+     "id": "technologie",
+     "necessary": true,
+     "importance": 4
+    },
+    {
+     "id": "eau",
+     "necessary": true,
+     "importance": 3
+    },
+    {
+     "id": "energie",
+     "necessary": true,
+     "importance": 3
+    },
+    {
+     "id": "transport",
+     "necessary": false,
+     "importance": 0
+    }
+   ]
   },
   {
    "id": "plage",
    "name": "Plage tropicale",
    "description": "Sable blanc, cocotiers et une île à peine habitée.",
-   "survival": {
+   "situation": {
     "title": "Naufragés",
-    "text": "Le bateau est parti sans vous. Les secours passeront dans quelques jours.",
-    "trials": [
-     {
-      "id": "soleil",
-      "name": "Soleil de plomb",
-      "stat": "sante",
-      "threshold": 8
-     },
-     {
-      "id": "soif",
-      "name": "Soif",
-      "stat": "utilite",
-      "threshold": 9
-     },
-     {
-      "id": "orage",
-      "name": "Orage tropical",
-      "stat": "securite",
-      "threshold": 8
-     }
-    ]
-   }
+    "description": "Le bateau est parti sans vous. Les secours passeront dans quelques jours."
+   },
+   "criteria": [
+    {
+     "id": "eau",
+     "necessary": true,
+     "importance": 5
+    },
+    {
+     "id": "abri",
+     "necessary": true,
+     "importance": 4
+    },
+    {
+     "id": "nourriture",
+     "necessary": true,
+     "importance": 4
+    },
+    {
+     "id": "communication",
+     "necessary": true,
+     "importance": 4
+    },
+    {
+     "id": "confort",
+     "necessary": true,
+     "importance": 3
+    },
+    {
+     "id": "divertissement",
+     "necessary": true,
+     "importance": 2
+    },
+    {
+     "id": "luxe",
+     "necessary": false,
+     "importance": 0
+    }
+   ]
   },
   {
    "id": "montagne",
    "name": "Refuge de montagne",
    "description": "Un refuge à 2 500 mètres d'altitude, face aux glaciers.",
-   "survival": {
+   "situation": {
     "title": "Avalanche",
-    "text": "Le col est fermé. Il faut tenir en altitude jusqu'à la fin de la tempête.",
-    "trials": [
-     {
-      "id": "gel",
-      "name": "Gel extrême",
-      "stat": "confort",
-      "threshold": 9
-     },
-     {
-      "id": "alt",
-      "name": "Mal des montagnes",
-      "stat": "sante",
-      "threshold": 8
-     },
-     {
-      "id": "sauv",
-      "name": "Évacuation",
-      "stat": "securite",
-      "threshold": 9
-     }
-    ]
-   }
+    "description": "Le col est fermé. Il faut tenir en altitude jusqu'à la fin de la tempête."
+   },
+   "criteria": [
+    {
+     "id": "chaleur",
+     "necessary": true,
+     "importance": 5
+    },
+    {
+     "id": "abri",
+     "necessary": true,
+     "importance": 4
+    },
+    {
+     "id": "protection",
+     "necessary": true,
+     "importance": 4
+    },
+    {
+     "id": "communication",
+     "necessary": true,
+     "importance": 4
+    },
+    {
+     "id": "nourriture",
+     "necessary": true,
+     "importance": 3
+    },
+    {
+     "id": "soins",
+     "necessary": true,
+     "importance": 3
+    },
+    {
+     "id": "luxe",
+     "necessary": false,
+     "importance": 0
+    }
+   ]
   },
   {
    "id": "bureau",
    "name": "Bureau de start-up",
    "description": "Un open space branché avec baby-foot et machine à café.",
-   "survival": {
+   "situation": {
     "title": "Nuit de livraison",
-    "text": "Le produit doit sortir demain matin. L'équipe ne dormira pas.",
-    "trials": [
-     {
-      "id": "fatigue",
-      "name": "Fatigue extrême",
-      "stat": "confort",
-      "threshold": 8
-     },
-     {
-      "id": "bug",
-      "name": "Bug critique",
-      "stat": "utilite",
-      "threshold": 9
-     },
-     {
-      "id": "stress",
-      "name": "Pression du client",
-      "stat": "sante",
-      "threshold": 7
-     }
-    ]
-   }
+    "description": "Le produit doit sortir demain matin. L'équipe ne dormira pas."
+   },
+   "criteria": [
+    {
+     "id": "technologie",
+     "necessary": true,
+     "importance": 5
+    },
+    {
+     "id": "outils",
+     "necessary": true,
+     "importance": 4
+    },
+    {
+     "id": "confort",
+     "necessary": true,
+     "importance": 4
+    },
+    {
+     "id": "nourriture",
+     "necessary": true,
+     "importance": 3
+    },
+    {
+     "id": "energie",
+     "necessary": true,
+     "importance": 3
+    },
+    {
+     "id": "communication",
+     "necessary": true,
+     "importance": 3
+    },
+    {
+     "id": "luxe",
+     "necessary": false,
+     "importance": 0
+    }
+   ]
   },
   {
    "id": "station",
    "name": "Station spatiale",
    "description": "Un module orbital avec vue sur la Terre, loin de tout secours.",
-   "survival": {
+   "situation": {
     "title": "Dépressurisation",
-    "text": "Un module est touché par des débris. L'équipage attend la navette de relève.",
-    "trials": [
-     {
-      "id": "air",
-      "name": "Manque d'oxygène",
-      "stat": "sante",
-      "threshold": 9
-     },
-     {
-      "id": "panne",
-      "name": "Panne électrique",
-      "stat": "utilite",
-      "threshold": 10
-     },
-     {
-      "id": "radiation",
-      "name": "Tempête solaire",
-      "stat": "securite",
-      "threshold": 9
-     }
-    ]
-   }
+    "description": "Un module est touché par des débris. L'équipage attend la navette de relève."
+   },
+   "criteria": [
+    {
+     "id": "protection",
+     "necessary": true,
+     "importance": 5
+    },
+    {
+     "id": "energie",
+     "necessary": true,
+     "importance": 5
+    },
+    {
+     "id": "nourriture",
+     "necessary": true,
+     "importance": 5
+    },
+    {
+     "id": "soins",
+     "necessary": true,
+     "importance": 4
+    },
+    {
+     "id": "technologie",
+     "necessary": true,
+     "importance": 3
+    },
+    {
+     "id": "luxe",
+     "necessary": false,
+     "importance": 0
+    },
+    {
+     "id": "divertissement",
+     "necessary": false,
+     "importance": 0
+    }
+   ]
+  },
+  {
+   "id": "villa",
+   "name": "Villa luxueuse",
+   "description": "Une villa de rêve avec piscine, garage et vue sur la mer.",
+   "situation": {
+    "title": "Vacances de rêve",
+    "description": "Aménagez la villa la plus agréable possible pour recevoir vos invités."
+   },
+   "criteria": [
+    {
+     "id": "confort",
+     "necessary": true,
+     "importance": 5
+    },
+    {
+     "id": "luxe",
+     "necessary": true,
+     "importance": 5
+    },
+    {
+     "id": "divertissement",
+     "necessary": true,
+     "importance": 4
+    },
+    {
+     "id": "decoration",
+     "necessary": true,
+     "importance": 3
+    },
+    {
+     "id": "protection",
+     "necessary": false,
+     "importance": 0
+    },
+    {
+     "id": "outils",
+     "necessary": false,
+     "importance": 0
+    }
+   ]
   }
  ],
  "items": [
@@ -187,1359 +318,1403 @@
    "id": "cabane_01",
    "location_id": "cabane",
    "name": "Poêle à bois",
+   "description": "Un poêle en fonte qui chauffe toute la cabane.",
+   "category": "chaleur",
    "icon": "fire",
    "price": 220,
    "rarity": 1,
-   "stats": {
-    "confort": 4,
-    "style": 1,
-    "utilite": 4,
-    "securite": 2,
-    "sante": 0
+   "base_points": 22,
+   "attributes": {
+    "chaleur": 5,
+    "abri": 2,
+    "confort": 2
    },
-   "tags": [
-    "chaleur",
-    "bois"
-   ]
+   "image": null
   },
   {
    "id": "cabane_02",
    "location_id": "cabane",
    "name": "Hache de bûcheron",
+   "description": "Fendre le bois et se défendre au besoin.",
+   "category": "outils",
    "icon": "axe",
    "price": 90,
    "rarity": 0,
-   "stats": {
-    "confort": 0,
-    "style": 1,
-    "utilite": 4,
-    "securite": 2,
-    "sante": 0
+   "base_points": 18,
+   "attributes": {
+    "outils": 5,
+    "protection": 2
    },
-   "tags": [
-    "bois",
-    "outil"
-   ]
+   "image": null
   },
   {
    "id": "cabane_03",
    "location_id": "cabane",
    "name": "Fauteuil en cuir",
+   "description": "Profond, moelleux, un peu trop chic pour les bois.",
+   "category": "confort",
    "icon": "chair",
    "price": 180,
    "rarity": 1,
-   "stats": {
-    "confort": 5,
-    "style": 3,
-    "utilite": 0,
-    "securite": 0,
-    "sante": 0
+   "base_points": 10,
+   "attributes": {
+    "confort": 4,
+    "luxe": 2,
+    "decoration": 1
    },
-   "tags": [
-    "confort",
-    "cuir"
-   ]
+   "image": null
   },
   {
    "id": "cabane_04",
    "location_id": "cabane",
    "name": "Tapis en peau d'ours",
+   "description": "Imposant devant la cheminée.",
+   "category": "decoration",
    "icon": "rug",
    "price": 260,
    "rarity": 2,
-   "stats": {
-    "confort": 4,
-    "style": 4,
-    "utilite": 0,
-    "securite": 0,
-    "sante": 0
+   "base_points": 8,
+   "attributes": {
+    "chaleur": 3,
+    "decoration": 4,
+    "luxe": 3
    },
-   "tags": [
-    "chaleur",
-    "cuir"
-   ]
+   "image": null
   },
   {
    "id": "cabane_05",
    "location_id": "cabane",
    "name": "Lampe tempête",
+   "description": "Une lumière fiable quand le courant lâche.",
+   "category": "energie",
    "icon": "lamp",
    "price": 60,
    "rarity": 0,
-   "stats": {
-    "confort": 1,
-    "style": 1,
-    "utilite": 3,
-    "securite": 3,
-    "sante": 0
+   "base_points": 15,
+   "attributes": {
+    "energie": 2,
+    "outils": 2,
+    "protection": 1
    },
-   "tags": [
-    "lumiere",
-    "outil"
-   ]
+   "image": null
   },
   {
    "id": "cabane_06",
    "location_id": "cabane",
    "name": "Réserve de conserves",
+   "description": "De quoi tenir plusieurs semaines.",
+   "category": "nourriture",
    "icon": "can",
    "price": 120,
    "rarity": 0,
-   "stats": {
-    "confort": 0,
-    "style": 0,
-    "utilite": 4,
-    "securite": 0,
-    "sante": 4
+   "base_points": 25,
+   "attributes": {
+    "nourriture": 5
    },
-   "tags": [
-    "vivres"
-   ]
+   "image": null
   },
   {
    "id": "cabane_07",
    "location_id": "cabane",
    "name": "Couverture de laine",
+   "description": "Épaisse, rêche, efficace.",
+   "category": "chaleur",
    "icon": "blanket",
    "price": 70,
    "rarity": 0,
-   "stats": {
-    "confort": 4,
-    "style": 1,
-    "utilite": 1,
-    "securite": 0,
-    "sante": 1
+   "base_points": 18,
+   "attributes": {
+    "chaleur": 4,
+    "confort": 3
    },
-   "tags": [
-    "chaleur",
-    "confort"
-   ]
+   "image": null
   },
   {
    "id": "cabane_08",
    "location_id": "cabane",
    "name": "Fusil de chasse",
+   "description": "Pour se défendre et ramener du gibier.",
+   "category": "protection",
    "icon": "gun",
    "price": 340,
    "rarity": 2,
-   "stats": {
-    "confort": 0,
-    "style": 2,
-    "utilite": 3,
-    "securite": 5,
-    "sante": 0
+   "base_points": 20,
+   "attributes": {
+    "protection": 4,
+    "nourriture": 3,
+    "outils": 2
    },
-   "tags": [
-    "outil",
-    "securite"
-   ]
+   "image": null
   },
   {
    "id": "cabane_09",
    "location_id": "cabane",
    "name": "Trousse de secours",
+   "description": "Pansements, antiseptique et bandages.",
+   "category": "soins",
    "icon": "kit",
    "price": 100,
    "rarity": 0,
-   "stats": {
-    "confort": 0,
-    "style": 0,
-    "utilite": 2,
-    "securite": 2,
-    "sante": 5
+   "base_points": 25,
+   "attributes": {
+    "soins": 5
    },
-   "tags": [
-    "soin"
-   ]
+   "image": null
   },
   {
    "id": "cabane_10",
    "location_id": "cabane",
    "name": "Cheminée en pierre",
+   "description": "Un foyer monumental en pierre taillée.",
+   "category": "chaleur",
    "icon": "stone",
    "price": 420,
    "rarity": 3,
-   "stats": {
-    "confort": 5,
-    "style": 5,
-    "utilite": 3,
-    "securite": 1,
-    "sante": 0
+   "base_points": 15,
+   "attributes": {
+    "chaleur": 5,
+    "decoration": 3,
+    "luxe": 3,
+    "confort": 3
    },
-   "tags": [
-    "chaleur",
-    "bois"
-   ]
+   "image": null
   },
   {
    "id": "cabane_11",
    "location_id": "cabane",
    "name": "Serrure renforcée",
+   "description": "Une porte qui résiste à tout.",
+   "category": "protection",
    "icon": "lock",
    "price": 130,
    "rarity": 1,
-   "stats": {
-    "confort": 0,
-    "style": 0,
-    "utilite": 1,
-    "securite": 5,
-    "sante": 0
+   "base_points": 12,
+   "attributes": {
+    "protection": 4
    },
-   "tags": [
-    "securite"
-   ]
+   "image": null
   },
   {
    "id": "cabane_12",
    "location_id": "cabane",
    "name": "Lit en rondins",
+   "description": "Rustique, solide, étonnamment confortable.",
+   "category": "confort",
    "icon": "bed",
    "price": 200,
    "rarity": 1,
-   "stats": {
-    "confort": 5,
-    "style": 2,
-    "utilite": 1,
-    "securite": 0,
-    "sante": 2
+   "base_points": 12,
+   "attributes": {
+    "confort": 4,
+    "abri": 2,
+    "nature": 2
    },
-   "tags": [
-    "confort",
-    "bois"
-   ]
+   "image": null
   },
   {
    "id": "appartement_01",
    "location_id": "appartement",
    "name": "Canapé d'angle",
+   "description": "Un grand canapé moelleux pour six personnes.",
+   "category": "confort",
    "icon": "sofa",
    "price": 300,
    "rarity": 1,
-   "stats": {
+   "base_points": 12,
+   "attributes": {
     "confort": 5,
-    "style": 3,
-    "utilite": 0,
-    "securite": 0,
-    "sante": 0
+    "decoration": 3,
+    "divertissement": 2
    },
-   "tags": [
-    "confort",
-    "salon"
-   ]
+   "image": null
   },
   {
    "id": "appartement_02",
    "location_id": "appartement",
    "name": "Télévision 4K",
+   "description": "Image parfaite, tant qu'il y a du courant.",
+   "category": "divertissement",
    "icon": "tv",
    "price": 280,
    "rarity": 1,
-   "stats": {
-    "confort": 2,
-    "style": 3,
-    "utilite": 2,
-    "securite": 0,
-    "sante": 0
+   "base_points": 10,
+   "attributes": {
+    "divertissement": 5,
+    "technologie": 4,
+    "communication": 2
    },
-   "tags": [
-    "ecran",
-    "salon"
-   ]
+   "image": null
   },
   {
    "id": "appartement_03",
    "location_id": "appartement",
    "name": "Cafetière italienne",
+   "description": "Marche sur le gaz, sans électricité.",
+   "category": "nourriture",
    "icon": "coffee",
    "price": 40,
    "rarity": 0,
-   "stats": {
-    "confort": 1,
-    "style": 1,
-    "utilite": 3,
-    "securite": 0,
-    "sante": 1
+   "base_points": 10,
+   "attributes": {
+    "nourriture": 2,
+    "confort": 2,
+    "outils": 1
    },
-   "tags": [
-    "cuisine"
-   ]
+   "image": null
   },
   {
    "id": "appartement_04",
    "location_id": "appartement",
    "name": "Plantes d'intérieur",
+   "description": "Un petit coin de jungle au salon.",
+   "category": "decoration",
    "icon": "plant",
    "price": 50,
    "rarity": 0,
-   "stats": {
-    "confort": 2,
-    "style": 3,
-    "utilite": 0,
-    "securite": 0,
-    "sante": 3
+   "base_points": 8,
+   "attributes": {
+    "decoration": 4,
+    "nature": 4
    },
-   "tags": [
-    "deco",
-    "nature"
-   ]
+   "image": null
   },
   {
    "id": "appartement_05",
    "location_id": "appartement",
    "name": "Lampe de designer",
+   "description": "Une sculpture qui éclaire.",
+   "category": "decoration",
    "icon": "lamp",
    "price": 150,
    "rarity": 1,
-   "stats": {
-    "confort": 1,
-    "style": 5,
-    "utilite": 2,
-    "securite": 0,
-    "sante": 0
+   "base_points": 6,
+   "attributes": {
+    "decoration": 5,
+    "luxe": 3
    },
-   "tags": [
-    "deco",
-    "lumiere"
-   ]
+   "image": null
   },
   {
    "id": "appartement_06",
    "location_id": "appartement",
    "name": "Porte blindée",
+   "description": "Rien ne passe.",
+   "category": "protection",
    "icon": "door",
    "price": 380,
    "rarity": 2,
-   "stats": {
-    "confort": 0,
-    "style": 1,
-    "utilite": 1,
-    "securite": 5,
-    "sante": 0
+   "base_points": 15,
+   "attributes": {
+    "protection": 5
    },
-   "tags": [
-    "securite"
-   ]
+   "image": null
   },
   {
    "id": "appartement_07",
    "location_id": "appartement",
    "name": "Ventilateur silencieux",
+   "description": "Un souffle d'air frais dans l'été.",
+   "category": "confort",
    "icon": "fan",
    "price": 70,
    "rarity": 0,
-   "stats": {
+   "base_points": 10,
+   "attributes": {
     "confort": 4,
-    "style": 0,
-    "utilite": 3,
-    "securite": 0,
-    "sante": 1
+    "technologie": 1
    },
-   "tags": [
-    "confort"
-   ]
+   "image": null
   },
   {
    "id": "appartement_08",
    "location_id": "appartement",
    "name": "Réchaud de camping",
+   "description": "Cuire sans cuisinière ni électricité.",
+   "category": "nourriture",
    "icon": "stove",
    "price": 60,
    "rarity": 0,
-   "stats": {
-    "confort": 0,
-    "style": 0,
-    "utilite": 4,
-    "securite": 1,
-    "sante": 1
+   "base_points": 18,
+   "attributes": {
+    "nourriture": 3,
+    "outils": 3,
+    "chaleur": 2
    },
-   "tags": [
-    "cuisine",
-    "outil"
-   ]
+   "image": null
   },
   {
    "id": "appartement_09",
    "location_id": "appartement",
    "name": "Tableau de maître",
+   "description": "Une toile célèbre au-dessus du canapé.",
+   "category": "decoration",
    "icon": "art",
    "price": 450,
    "rarity": 3,
-   "stats": {
-    "confort": 0,
-    "style": 5,
-    "utilite": 0,
-    "securite": 0,
-    "sante": 0
+   "base_points": 6,
+   "attributes": {
+    "decoration": 5,
+    "luxe": 5
    },
-   "tags": [
-    "deco",
-    "luxe"
-   ]
+   "image": null
   },
   {
    "id": "appartement_10",
    "location_id": "appartement",
    "name": "Bureau en chêne",
+   "description": "Massif et élégant.",
+   "category": "outils",
    "icon": "desk",
    "price": 210,
    "rarity": 1,
-   "stats": {
+   "base_points": 10,
+   "attributes": {
+    "outils": 3,
     "confort": 2,
-    "style": 4,
-    "utilite": 3,
-    "securite": 0,
-    "sante": 0
+    "decoration": 2,
+    "technologie": 1
    },
-   "tags": [
-    "bureau",
-    "luxe"
-   ]
+   "image": null
   },
   {
    "id": "appartement_11",
    "location_id": "appartement",
    "name": "Réserve d'eau",
+   "description": "Des bidons d'eau potable.",
+   "category": "eau",
    "icon": "water",
    "price": 80,
    "rarity": 0,
-   "stats": {
-    "confort": 0,
-    "style": 0,
-    "utilite": 3,
-    "securite": 1,
-    "sante": 5
+   "base_points": 25,
+   "attributes": {
+    "eau": 5,
+    "soins": 1
    },
-   "tags": [
-    "vivres"
-   ]
+   "image": null
   },
   {
    "id": "appartement_12",
    "location_id": "appartement",
    "name": "Système d'alarme",
+   "description": "Capteurs, sirène et application.",
+   "category": "protection",
    "icon": "alarm",
    "price": 190,
    "rarity": 1,
-   "stats": {
-    "confort": 0,
-    "style": 0,
-    "utilite": 2,
-    "securite": 5,
-    "sante": 0
+   "base_points": 12,
+   "attributes": {
+    "protection": 4,
+    "technologie": 3,
+    "communication": 1
    },
-   "tags": [
-    "securite",
-    "ecran"
-   ]
+   "image": null
   },
   {
    "id": "plage_01",
    "location_id": "plage",
    "name": "Parasol géant",
+   "description": "Une ombre bienvenue sous le soleil.",
+   "category": "abri",
    "icon": "umbrella",
    "price": 80,
    "rarity": 0,
-   "stats": {
+   "base_points": 12,
+   "attributes": {
+    "abri": 3,
     "confort": 3,
-    "style": 2,
-    "utilite": 1,
-    "securite": 0,
-    "sante": 4
+    "soins": 1
    },
-   "tags": [
-    "ombre",
-    "plage"
-   ]
+   "image": null
   },
   {
    "id": "plage_02",
    "location_id": "plage",
    "name": "Hamac brodé",
+   "description": "Dormir entre deux palmiers.",
+   "category": "confort",
    "icon": "hammock",
    "price": 110,
    "rarity": 0,
-   "stats": {
+   "base_points": 8,
+   "attributes": {
     "confort": 5,
-    "style": 3,
-    "utilite": 0,
-    "securite": 0,
-    "sante": 1
+    "decoration": 2,
+    "nature": 1
    },
-   "tags": [
-    "confort",
-    "plage"
-   ]
+   "image": null
   },
   {
    "id": "plage_03",
    "location_id": "plage",
    "name": "Planche de surf",
+   "description": "Pour glisser sur les vagues.",
+   "category": "divertissement",
    "icon": "surf",
    "price": 260,
    "rarity": 1,
-   "stats": {
-    "confort": 0,
-    "style": 5,
-    "utilite": 2,
-    "securite": 0,
-    "sante": 1
+   "base_points": 8,
+   "attributes": {
+    "divertissement": 5,
+    "transport": 2,
+    "nature": 2
    },
-   "tags": [
-    "sport",
-    "plage"
-   ]
+   "image": null
   },
   {
    "id": "plage_04",
    "location_id": "plage",
    "name": "Filtre à eau",
+   "description": "Rend l'eau de mer ou de pluie buvable.",
+   "category": "eau",
    "icon": "filter",
    "price": 130,
    "rarity": 1,
-   "stats": {
-    "confort": 0,
-    "style": 0,
-    "utilite": 5,
-    "securite": 1,
-    "sante": 4
+   "base_points": 25,
+   "attributes": {
+    "eau": 5,
+    "soins": 2
    },
-   "tags": [
-    "eau",
-    "outil"
-   ]
+   "image": null
   },
   {
    "id": "plage_05",
    "location_id": "plage",
    "name": "Noix de coco",
+   "description": "À boire et à manger.",
+   "category": "nourriture",
    "icon": "coconut",
    "price": 20,
    "rarity": 0,
-   "stats": {
-    "confort": 1,
-    "style": 1,
-    "utilite": 2,
-    "securite": 0,
-    "sante": 3
+   "base_points": 12,
+   "attributes": {
+    "nourriture": 3,
+    "eau": 2,
+    "nature": 3
    },
-   "tags": [
-    "vivres",
-    "nature"
-   ]
+   "image": null
   },
   {
    "id": "plage_06",
    "location_id": "plage",
    "name": "Canot de sauvetage",
+   "description": "Pour quitter l'île.",
+   "category": "transport",
    "icon": "boat",
    "price": 400,
    "rarity": 2,
-   "stats": {
-    "confort": 1,
-    "style": 1,
-    "utilite": 3,
-    "securite": 5,
-    "sante": 0
+   "base_points": 22,
+   "attributes": {
+    "transport": 5,
+    "protection": 3
    },
-   "tags": [
-    "eau",
-    "securite"
-   ]
+   "image": null
   },
   {
    "id": "plage_07",
    "location_id": "plage",
    "name": "Crème solaire",
+   "description": "Indice 50, indispensable.",
+   "category": "soins",
    "icon": "sun",
    "price": 30,
    "rarity": 0,
-   "stats": {
-    "confort": 0,
-    "style": 0,
-    "utilite": 1,
-    "securite": 0,
-    "sante": 5
+   "base_points": 14,
+   "attributes": {
+    "soins": 4
    },
-   "tags": [
-    "soin"
-   ]
+   "image": null
   },
   {
    "id": "plage_08",
    "location_id": "plage",
    "name": "Bar à cocktails",
+   "description": "Parasols en papier inclus.",
+   "category": "divertissement",
    "icon": "bar",
    "price": 320,
    "rarity": 2,
-   "stats": {
-    "confort": 3,
-    "style": 5,
-    "utilite": 1,
-    "securite": 0,
-    "sante": 0
+   "base_points": 6,
+   "attributes": {
+    "divertissement": 4,
+    "luxe": 4,
+    "nourriture": 2
    },
-   "tags": [
-    "luxe",
-    "plage"
-   ]
+   "image": null
   },
   {
    "id": "plage_09",
    "location_id": "plage",
    "name": "Fusée de détresse",
+   "description": "Un signal visible à des kilomètres.",
+   "category": "communication",
    "icon": "flare",
    "price": 140,
    "rarity": 1,
-   "stats": {
-    "confort": 0,
-    "style": 0,
-    "utilite": 3,
-    "securite": 5,
-    "sante": 0
+   "base_points": 20,
+   "attributes": {
+    "communication": 5,
+    "protection": 2
    },
-   "tags": [
-    "securite",
-    "outil"
-   ]
+   "image": null
   },
   {
    "id": "plage_10",
    "location_id": "plage",
    "name": "Tente de toile",
+   "description": "Légère et rapide à monter.",
+   "category": "abri",
    "icon": "tent",
    "price": 150,
    "rarity": 0,
-   "stats": {
-    "confort": 4,
-    "style": 1,
-    "utilite": 2,
-    "securite": 3,
-    "sante": 1
+   "base_points": 18,
+   "attributes": {
+    "abri": 5,
+    "confort": 2,
+    "protection": 2
    },
-   "tags": [
-    "ombre",
-    "abri"
-   ]
+   "image": null
   },
   {
    "id": "plage_11",
    "location_id": "plage",
    "name": "Couteau suisse",
+   "description": "Vingt-sept outils en un.",
+   "category": "outils",
    "icon": "knife",
    "price": 60,
    "rarity": 0,
-   "stats": {
-    "confort": 0,
-    "style": 0,
-    "utilite": 5,
-    "securite": 2,
-    "sante": 0
+   "base_points": 15,
+   "attributes": {
+    "outils": 5,
+    "nourriture": 1
    },
-   "tags": [
-    "outil"
-   ]
+   "image": null
   },
   {
    "id": "plage_12",
    "location_id": "plage",
    "name": "Villa sur pilotis",
+   "description": "Le grand luxe au-dessus du lagon.",
+   "category": "abri",
    "icon": "villa",
    "price": 480,
    "rarity": 3,
-   "stats": {
+   "base_points": 15,
+   "attributes": {
+    "abri": 5,
+    "luxe": 5,
     "confort": 5,
-    "style": 5,
-    "utilite": 2,
-    "securite": 3,
-    "sante": 0
+    "decoration": 3,
+    "protection": 3
    },
-   "tags": [
-    "luxe",
-    "abri"
-   ]
+   "image": null
   },
   {
    "id": "montagne_01",
    "location_id": "montagne",
    "name": "Sac de couchage polaire",
+   "description": "Confort garanti jusqu'à -30 °C.",
+   "category": "chaleur",
    "icon": "bag",
    "price": 150,
    "rarity": 1,
-   "stats": {
-    "confort": 5,
-    "style": 0,
-    "utilite": 2,
-    "securite": 1,
-    "sante": 2
+   "base_points": 20,
+   "attributes": {
+    "chaleur": 5,
+    "confort": 3,
+    "abri": 2
    },
-   "tags": [
-    "chaleur",
-    "camp"
-   ]
+   "image": null
   },
   {
    "id": "montagne_02",
    "location_id": "montagne",
    "name": "Piolet",
+   "description": "Pour grimper et se rattraper.",
+   "category": "outils",
    "icon": "pick",
    "price": 90,
    "rarity": 0,
-   "stats": {
-    "confort": 0,
-    "style": 1,
-    "utilite": 3,
-    "securite": 3,
-    "sante": 0
+   "base_points": 12,
+   "attributes": {
+    "outils": 4,
+    "protection": 3,
+    "transport": 3
    },
-   "tags": [
-    "escalade",
-    "outil"
-   ]
+   "image": null
   },
   {
    "id": "montagne_03",
    "location_id": "montagne",
    "name": "Corde d'escalade",
+   "description": "Quarante mètres de sécurité.",
+   "category": "protection",
    "icon": "rope",
    "price": 70,
    "rarity": 0,
-   "stats": {
-    "confort": 0,
-    "style": 0,
-    "utilite": 3,
-    "securite": 4,
-    "sante": 0
+   "base_points": 14,
+   "attributes": {
+    "protection": 4,
+    "transport": 3,
+    "outils": 2
    },
-   "tags": [
-    "escalade",
-    "securite"
-   ]
+   "image": null
   },
   {
    "id": "montagne_04",
    "location_id": "montagne",
    "name": "Réchaud à gaz",
+   "description": "De l'eau chaude en deux minutes.",
+   "category": "chaleur",
    "icon": "stove",
    "price": 80,
    "rarity": 0,
-   "stats": {
-    "confort": 2,
-    "style": 0,
-    "utilite": 4,
-    "securite": 1,
-    "sante": 1
+   "base_points": 16,
+   "attributes": {
+    "chaleur": 3,
+    "nourriture": 3,
+    "outils": 2,
+    "energie": 2
    },
-   "tags": [
-    "chaleur",
-    "camp"
-   ]
+   "image": null
   },
   {
    "id": "montagne_05",
    "location_id": "montagne",
    "name": "Balise de détresse",
+   "description": "Alerte les secours par satellite.",
+   "category": "communication",
    "icon": "beacon",
    "price": 240,
    "rarity": 1,
-   "stats": {
-    "confort": 0,
-    "style": 0,
-    "utilite": 2,
-    "securite": 5,
-    "sante": 0
+   "base_points": 20,
+   "attributes": {
+    "communication": 5,
+    "technologie": 3,
+    "protection": 2
    },
-   "tags": [
-    "securite",
-    "tech"
-   ]
+   "image": null
   },
   {
    "id": "montagne_06",
    "location_id": "montagne",
    "name": "Doudoune en duvet",
+   "description": "Légère comme une plume, chaude comme un four.",
+   "category": "chaleur",
    "icon": "coat",
    "price": 170,
    "rarity": 1,
-   "stats": {
-    "confort": 5,
-    "style": 3,
-    "utilite": 1,
-    "securite": 0,
-    "sante": 2
+   "base_points": 14,
+   "attributes": {
+    "chaleur": 5,
+    "confort": 3
    },
-   "tags": [
-    "chaleur",
-    "style"
-   ]
+   "image": null
   },
   {
    "id": "montagne_07",
    "location_id": "montagne",
    "name": "Bouteille d'oxygène",
+   "description": "Contre le mal des montagnes.",
+   "category": "soins",
    "icon": "o2",
    "price": 300,
    "rarity": 2,
-   "stats": {
-    "confort": 0,
-    "style": 0,
-    "utilite": 2,
-    "securite": 2,
-    "sante": 5
+   "base_points": 20,
+   "attributes": {
+    "soins": 5,
+    "protection": 2,
+    "technologie": 2
    },
-   "tags": [
-    "soin",
-    "tech"
-   ]
+   "image": null
   },
   {
    "id": "montagne_08",
    "location_id": "montagne",
    "name": "Skis de randonnée",
+   "description": "Descendre la vallée en glissant.",
+   "category": "transport",
    "icon": "ski",
    "price": 280,
    "rarity": 1,
-   "stats": {
-    "confort": 0,
-    "style": 4,
-    "utilite": 3,
-    "securite": 1,
-    "sante": 0
+   "base_points": 10,
+   "attributes": {
+    "transport": 5,
+    "divertissement": 3
    },
-   "tags": [
-    "sport",
-    "escalade"
-   ]
+   "image": null
   },
   {
    "id": "montagne_09",
    "location_id": "montagne",
    "name": "Radio longue portée",
+   "description": "Joindre la vallée malgré la tempête.",
+   "category": "communication",
    "icon": "radio",
    "price": 200,
    "rarity": 1,
-   "stats": {
-    "confort": 0,
-    "style": 0,
-    "utilite": 3,
-    "securite": 4,
-    "sante": 0
+   "base_points": 16,
+   "attributes": {
+    "communication": 5,
+    "technologie": 3,
+    "energie": 1
    },
-   "tags": [
-    "tech",
-    "securite"
-   ]
+   "image": null
   },
   {
    "id": "montagne_10",
    "location_id": "montagne",
    "name": "Fondue en kit",
+   "description": "Réconfortant et convivial.",
+   "category": "nourriture",
    "icon": "cheese",
    "price": 60,
    "rarity": 0,
-   "stats": {
-    "confort": 3,
-    "style": 2,
-    "utilite": 1,
-    "securite": 0,
-    "sante": 2
+   "base_points": 12,
+   "attributes": {
+    "nourriture": 4,
+    "chaleur": 2,
+    "divertissement": 2
    },
-   "tags": [
-    "vivres",
-    "chaleur"
-   ]
+   "image": null
   },
   {
    "id": "montagne_11",
    "location_id": "montagne",
    "name": "Lunettes de glacier",
+   "description": "Évitent la cécité des neiges.",
+   "category": "protection",
    "icon": "glasses",
    "price": 50,
    "rarity": 0,
-   "stats": {
-    "confort": 0,
-    "style": 3,
-    "utilite": 1,
-    "securite": 0,
-    "sante": 3
+   "base_points": 10,
+   "attributes": {
+    "protection": 3,
+    "soins": 2
    },
-   "tags": [
-    "style",
-    "soin"
-   ]
+   "image": null
   },
   {
    "id": "montagne_12",
    "location_id": "montagne",
    "name": "Chalet panoramique",
+   "description": "Baies vitrées, sauna et cheminée.",
+   "category": "abri",
    "icon": "chalet",
    "price": 500,
    "rarity": 3,
-   "stats": {
+   "base_points": 15,
+   "attributes": {
+    "abri": 5,
     "confort": 5,
-    "style": 5,
-    "utilite": 2,
-    "securite": 3,
-    "sante": 1
+    "luxe": 4,
+    "chaleur": 4,
+    "decoration": 3
    },
-   "tags": [
-    "luxe",
-    "chaleur"
-   ]
+   "image": null
   },
   {
    "id": "bureau_01",
    "location_id": "bureau",
    "name": "Chaise ergonomique",
+   "description": "Le dos remercie.",
+   "category": "confort",
    "icon": "chair",
    "price": 250,
    "rarity": 1,
-   "stats": {
+   "base_points": 12,
+   "attributes": {
     "confort": 5,
-    "style": 2,
-    "utilite": 2,
-    "securite": 0,
-    "sante": 3
+    "soins": 2
    },
-   "tags": [
-    "confort",
-    "bureau"
-   ]
+   "image": null
   },
   {
    "id": "bureau_02",
    "location_id": "bureau",
    "name": "Double écran",
+   "description": "Deux fois plus de code visible.",
+   "category": "technologie",
    "icon": "screens",
    "price": 320,
    "rarity": 1,
-   "stats": {
-    "confort": 1,
-    "style": 3,
-    "utilite": 5,
-    "securite": 0,
-    "sante": 0
+   "base_points": 15,
+   "attributes": {
+    "technologie": 5,
+    "outils": 4
    },
-   "tags": [
-    "tech",
-    "bureau"
-   ]
+   "image": null
   },
   {
    "id": "bureau_03",
    "location_id": "bureau",
    "name": "Machine à café pro",
+   "description": "Le carburant de la nuit.",
+   "category": "nourriture",
    "icon": "coffee",
    "price": 180,
    "rarity": 1,
-   "stats": {
+   "base_points": 12,
+   "attributes": {
+    "nourriture": 3,
     "confort": 2,
-    "style": 1,
-    "utilite": 4,
-    "securite": 0,
-    "sante": 1
+    "energie": 2
    },
-   "tags": [
-    "vivres",
-    "cafe"
-   ]
+   "image": null
   },
   {
    "id": "bureau_04",
    "location_id": "bureau",
    "name": "Baby-foot",
+   "description": "Pour décompresser entre deux bugs.",
+   "category": "divertissement",
    "icon": "foot",
    "price": 200,
    "rarity": 1,
-   "stats": {
-    "confort": 2,
-    "style": 4,
-    "utilite": 0,
-    "securite": 0,
-    "sante": 2
+   "base_points": 6,
+   "attributes": {
+    "divertissement": 5,
+    "decoration": 2
    },
-   "tags": [
-    "jeu",
-    "deco"
-   ]
+   "image": null
   },
   {
    "id": "bureau_05",
    "location_id": "bureau",
    "name": "Casque anti-bruit",
+   "description": "Le silence en pleine open space.",
+   "category": "technologie",
    "icon": "headset",
    "price": 130,
    "rarity": 0,
-   "stats": {
+   "base_points": 10,
+   "attributes": {
+    "technologie": 3,
     "confort": 3,
-    "style": 1,
-    "utilite": 3,
-    "securite": 0,
-    "sante": 2
+    "communication": 2
    },
-   "tags": [
-    "tech",
-    "confort"
-   ]
+   "image": null
   },
   {
    "id": "bureau_06",
    "location_id": "bureau",
    "name": "Tableau blanc",
+   "description": "Schémas, flèches et post-its.",
+   "category": "outils",
    "icon": "board",
    "price": 60,
    "rarity": 0,
-   "stats": {
-    "confort": 0,
-    "style": 1,
-    "utilite": 4,
-    "securite": 0,
-    "sante": 0
+   "base_points": 10,
+   "attributes": {
+    "outils": 4,
+    "communication": 3
    },
-   "tags": [
-    "bureau",
-    "outil"
-   ]
+   "image": null
   },
   {
    "id": "bureau_07",
    "location_id": "bureau",
    "name": "Canapé de sieste",
+   "description": "Vingt minutes qui sauvent la journée.",
+   "category": "confort",
    "icon": "sofa",
    "price": 280,
    "rarity": 1,
-   "stats": {
+   "base_points": 8,
+   "attributes": {
     "confort": 5,
-    "style": 2,
-    "utilite": 0,
-    "securite": 0,
-    "sante": 3
+    "soins": 2,
+    "decoration": 1
    },
-   "tags": [
-    "confort",
-    "deco"
-   ]
+   "image": null
   },
   {
    "id": "bureau_08",
    "location_id": "bureau",
    "name": "Serveur de secours",
+   "description": "Quand la prod tombe, il prend le relais.",
+   "category": "technologie",
    "icon": "server",
    "price": 400,
    "rarity": 2,
-   "stats": {
-    "confort": 0,
-    "style": 0,
-    "utilite": 5,
-    "securite": 4,
-    "sante": 0
+   "base_points": 20,
+   "attributes": {
+    "technologie": 5,
+    "energie": 3,
+    "protection": 3,
+    "communication": 2
    },
-   "tags": [
-    "tech",
-    "securite"
-   ]
+   "image": null
   },
   {
    "id": "bureau_09",
    "location_id": "bureau",
    "name": "Distributeur de snacks",
+   "description": "Barres, chips et bonbons.",
+   "category": "nourriture",
    "icon": "snack",
    "price": 90,
    "rarity": 0,
-   "stats": {
-    "confort": 1,
-    "style": 1,
-    "utilite": 2,
-    "securite": 0,
-    "sante": 2
+   "base_points": 10,
+   "attributes": {
+    "nourriture": 4,
+    "divertissement": 1
    },
-   "tags": [
-    "vivres",
-    "cafe"
-   ]
+   "image": null
   },
   {
    "id": "bureau_10",
    "location_id": "bureau",
    "name": "Plante anti-stress",
+   "description": "Verte, calme, silencieuse.",
+   "category": "nature",
    "icon": "plant",
    "price": 40,
    "rarity": 0,
-   "stats": {
-    "confort": 1,
-    "style": 2,
-    "utilite": 0,
-    "securite": 0,
-    "sante": 4
+   "base_points": 6,
+   "attributes": {
+    "nature": 4,
+    "decoration": 3,
+    "soins": 2
    },
-   "tags": [
-    "deco",
-    "soin"
-   ]
+   "image": null
   },
   {
    "id": "bureau_11",
    "location_id": "bureau",
    "name": "Bureau assis-debout",
+   "description": "Se lève au bouton.",
+   "category": "confort",
    "icon": "desk",
    "price": 300,
    "rarity": 1,
-   "stats": {
-    "confort": 3,
-    "style": 3,
-    "utilite": 3,
-    "securite": 0,
-    "sante": 3
+   "base_points": 10,
+   "attributes": {
+    "outils": 3,
+    "confort": 4,
+    "soins": 2,
+    "technologie": 1
    },
-   "tags": [
-    "bureau",
-    "confort"
-   ]
+   "image": null
   },
   {
    "id": "bureau_12",
    "location_id": "bureau",
    "name": "Terrasse sur le toit",
+   "description": "Barbecue avec vue sur la ville.",
+   "category": "luxe",
    "icon": "roof",
    "price": 450,
    "rarity": 3,
-   "stats": {
+   "base_points": 12,
+   "attributes": {
+    "luxe": 4,
+    "decoration": 4,
     "confort": 4,
-    "style": 5,
-    "utilite": 1,
-    "securite": 1,
-    "sante": 4
+    "nature": 3,
+    "divertissement": 3
    },
-   "tags": [
-    "deco",
-    "luxe"
-   ]
+   "image": null
   },
   {
    "id": "station_01",
    "location_id": "station",
    "name": "Recycleur d'air",
+   "description": "Chaque souffle est recyclé.",
+   "category": "soins",
    "icon": "air",
    "price": 380,
    "rarity": 2,
-   "stats": {
-    "confort": 1,
-    "style": 0,
-    "utilite": 3,
-    "securite": 2,
-    "sante": 5
+   "base_points": 25,
+   "attributes": {
+    "soins": 4,
+    "eau": 3,
+    "protection": 3,
+    "technologie": 3
    },
-   "tags": [
-    "vie",
-    "tech"
-   ]
+   "image": null
   },
   {
    "id": "station_02",
    "location_id": "station",
    "name": "Panneaux solaires",
+   "description": "L'électricité vient du Soleil.",
+   "category": "energie",
    "icon": "solar",
    "price": 300,
    "rarity": 1,
-   "stats": {
-    "confort": 0,
-    "style": 1,
-    "utilite": 5,
-    "securite": 1,
-    "sante": 0
+   "base_points": 20,
+   "attributes": {
+    "energie": 5,
+    "technologie": 3
    },
-   "tags": [
-    "energie",
-    "tech"
-   ]
+   "image": null
   },
   {
    "id": "station_03",
    "location_id": "station",
    "name": "Combinaison pressurisée",
+   "description": "Survivre à l'extérieur du module.",
+   "category": "protection",
    "icon": "suit",
    "price": 340,
    "rarity": 1,
-   "stats": {
-    "confort": 2,
-    "style": 2,
-    "utilite": 2,
-    "securite": 4,
-    "sante": 2
+   "base_points": 18,
+   "attributes": {
+    "protection": 5,
+    "transport": 2,
+    "soins": 1
    },
-   "tags": [
-    "securite",
-    "vie"
-   ]
+   "image": null
   },
   {
    "id": "station_04",
    "location_id": "station",
    "name": "Bouclier anti-radiations",
+   "description": "Contre les tempêtes solaires.",
+   "category": "protection",
    "icon": "shield",
    "price": 420,
    "rarity": 2,
-   "stats": {
-    "confort": 0,
-    "style": 0,
-    "utilite": 2,
-    "securite": 5,
-    "sante": 3
+   "base_points": 20,
+   "attributes": {
+    "protection": 5,
+    "soins": 2
    },
-   "tags": [
-    "securite",
-    "tech"
-   ]
+   "image": null
   },
   {
    "id": "station_05",
    "location_id": "station",
    "name": "Kit de réparation",
+   "description": "Colmater une fuite en urgence.",
+   "category": "outils",
    "icon": "wrench",
    "price": 110,
    "rarity": 0,
-   "stats": {
-    "confort": 0,
-    "style": 0,
-    "utilite": 5,
-    "securite": 2,
-    "sante": 0
+   "base_points": 18,
+   "attributes": {
+    "outils": 5,
+    "technologie": 2
    },
-   "tags": [
-    "outil",
-    "energie"
-   ]
+   "image": null
   },
   {
    "id": "station_06",
    "location_id": "station",
    "name": "Rations lyophilisées",
+   "description": "Pas bon, mais énergétique.",
+   "category": "nourriture",
    "icon": "food",
    "price": 70,
    "rarity": 0,
-   "stats": {
-    "confort": 1,
-    "style": 0,
-    "utilite": 3,
-    "securite": 0,
-    "sante": 4
+   "base_points": 25,
+   "attributes": {
+    "nourriture": 5
    },
-   "tags": [
-    "vie",
-    "vivres"
-   ]
+   "image": null
   },
   {
    "id": "station_07",
    "location_id": "station",
    "name": "Hublot panoramique",
+   "description": "La Terre en grand.",
+   "category": "decoration",
    "icon": "window",
    "price": 260,
    "rarity": 1,
-   "stats": {
-    "confort": 3,
-    "style": 5,
-    "utilite": 0,
-    "securite": 0,
-    "sante": 1
+   "base_points": 6,
+   "attributes": {
+    "decoration": 4,
+    "luxe": 3,
+    "divertissement": 3
    },
-   "tags": [
-    "deco",
-    "luxe"
-   ]
+   "image": null
   },
   {
    "id": "station_08",
    "location_id": "station",
    "name": "Batterie de secours",
+   "description": "Quand tout le reste lâche.",
+   "category": "energie",
    "icon": "battery",
    "price": 150,
    "rarity": 0,
-   "stats": {
-    "confort": 0,
-    "style": 0,
-    "utilite": 4,
-    "securite": 2,
-    "sante": 0
+   "base_points": 18,
+   "attributes": {
+    "energie": 5,
+    "technologie": 1
    },
-   "tags": [
-    "energie",
-    "outil"
-   ]
+   "image": null
   },
   {
    "id": "station_09",
    "location_id": "station",
    "name": "Capsule d'évacuation",
+   "description": "Retour express sur Terre.",
+   "category": "transport",
    "icon": "pod",
    "price": 480,
    "rarity": 3,
-   "stats": {
-    "confort": 2,
-    "style": 2,
-    "utilite": 3,
-    "securite": 5,
-    "sante": 2
+   "base_points": 25,
+   "attributes": {
+    "transport": 5,
+    "protection": 5,
+    "communication": 2
    },
-   "tags": [
-    "securite",
-    "luxe"
-   ]
+   "image": null
   },
   {
    "id": "station_10",
    "location_id": "station",
    "name": "Couchette magnétique",
+   "description": "Dormir sans flotter.",
+   "category": "confort",
    "icon": "bunk",
    "price": 120,
    "rarity": 0,
-   "stats": {
-    "confort": 5,
-    "style": 1,
-    "utilite": 0,
-    "securite": 0,
-    "sante": 3
+   "base_points": 12,
+   "attributes": {
+    "confort": 4,
+    "abri": 2
    },
-   "tags": [
-    "confort"
-   ]
+   "image": null
   },
   {
    "id": "station_11",
    "location_id": "station",
    "name": "Robot assistant",
+   "description": "Répare, porte et raconte des blagues.",
+   "category": "technologie",
    "icon": "robot",
    "price": 360,
    "rarity": 2,
-   "stats": {
-    "confort": 2,
-    "style": 4,
-    "utilite": 5,
-    "securite": 1,
-    "sante": 0
+   "base_points": 12,
+   "attributes": {
+    "technologie": 5,
+    "outils": 3,
+    "divertissement": 2
    },
-   "tags": [
-    "tech",
-    "energie"
-   ]
+   "image": null
   },
   {
    "id": "station_12",
    "location_id": "station",
    "name": "Jardin hydroponique",
+   "description": "Des légumes frais en orbite.",
+   "category": "nourriture",
    "icon": "garden",
    "price": 220,
    "rarity": 1,
-   "stats": {
-    "confort": 2,
-    "style": 3,
-    "utilite": 1,
-    "securite": 0,
-    "sante": 5
+   "base_points": 18,
+   "attributes": {
+    "nourriture": 4,
+    "nature": 4,
+    "eau": 2,
+    "decoration": 2,
+    "soins": 1
    },
-   "tags": [
-    "vie",
-    "deco"
-   ]
+   "image": null
+  },
+  {
+   "id": "villa_01",
+   "location_id": "villa",
+   "name": "Jacuzzi",
+   "description": "Un bain à remous haut de gamme.",
+   "category": "confort",
+   "icon": "tub",
+   "price": 500,
+   "rarity": 2,
+   "base_points": 30,
+   "attributes": {
+    "confort": 5,
+    "luxe": 4,
+    "divertissement": 3
+   },
+   "image": null
+  },
+  {
+   "id": "villa_02",
+   "location_id": "villa",
+   "name": "Canapé de salon",
+   "description": "Le roi du salon.",
+   "category": "confort",
+   "icon": "sofa",
+   "price": 300,
+   "rarity": 1,
+   "base_points": 12,
+   "attributes": {
+    "confort": 5,
+    "decoration": 3,
+    "divertissement": 1
+   },
+   "image": null
+  },
+  {
+   "id": "villa_03",
+   "location_id": "villa",
+   "name": "Limousine",
+   "description": "Chauffeur en option.",
+   "category": "luxe",
+   "icon": "limo",
+   "price": 480,
+   "rarity": 3,
+   "base_points": 20,
+   "attributes": {
+    "luxe": 5,
+    "transport": 4,
+    "confort": 3,
+    "decoration": 1
+   },
+   "image": null
+  },
+  {
+   "id": "villa_04",
+   "location_id": "villa",
+   "name": "Fontaine de chocolat",
+   "description": "Une cascade gourmande.",
+   "category": "divertissement",
+   "icon": "fountain",
+   "price": 260,
+   "rarity": 2,
+   "base_points": 10,
+   "attributes": {
+    "divertissement": 4,
+    "luxe": 3,
+    "decoration": 3,
+    "nourriture": 2
+   },
+   "image": null
+  },
+  {
+   "id": "villa_05",
+   "location_id": "villa",
+   "name": "Piscine à débordement",
+   "description": "L'horizon se jette dans la mer.",
+   "category": "luxe",
+   "icon": "pool",
+   "price": 450,
+   "rarity": 3,
+   "base_points": 15,
+   "attributes": {
+    "luxe": 4,
+    "divertissement": 4,
+    "decoration": 3,
+    "eau": 2
+   },
+   "image": null
+  },
+  {
+   "id": "villa_06",
+   "location_id": "villa",
+   "name": "Home cinéma",
+   "description": "Écran géant et fauteuils inclinables.",
+   "category": "divertissement",
+   "icon": "cinema",
+   "price": 380,
+   "rarity": 2,
+   "base_points": 12,
+   "attributes": {
+    "divertissement": 5,
+    "technologie": 4,
+    "confort": 3
+   },
+   "image": null
+  },
+  {
+   "id": "villa_07",
+   "location_id": "villa",
+   "name": "Cave à vin",
+   "description": "Quelques grands crus.",
+   "category": "luxe",
+   "icon": "wine",
+   "price": 240,
+   "rarity": 1,
+   "base_points": 10,
+   "attributes": {
+    "luxe": 3,
+    "nourriture": 2,
+    "decoration": 2
+   },
+   "image": null
+  },
+  {
+   "id": "villa_08",
+   "location_id": "villa",
+   "name": "Générateur électrique",
+   "description": "Quand le courant disparaît.",
+   "category": "energie",
+   "icon": "generator",
+   "price": 320,
+   "rarity": 1,
+   "base_points": 25,
+   "attributes": {
+    "energie": 5
+   },
+   "image": null
+  },
+  {
+   "id": "villa_09",
+   "location_id": "villa",
+   "name": "Véhicule blindé",
+   "description": "Rien ne l'arrête.",
+   "category": "protection",
+   "icon": "armored",
+   "price": 420,
+   "rarity": 2,
+   "base_points": 22,
+   "attributes": {
+    "protection": 5,
+    "transport": 5
+   },
+   "image": null
+  },
+  {
+   "id": "villa_10",
+   "location_id": "villa",
+   "name": "Trousse médicale",
+   "description": "Un kit contenant du matériel de premiers secours.",
+   "category": "soins",
+   "icon": "medkit",
+   "price": 150,
+   "rarity": 0,
+   "base_points": 25,
+   "attributes": {
+    "soins": 5,
+    "protection": 1
+   },
+   "image": null
+  },
+  {
+   "id": "villa_11",
+   "location_id": "villa",
+   "name": "Réserve alimentaire",
+   "description": "Des mois de provisions.",
+   "category": "nourriture",
+   "icon": "pantry",
+   "price": 130,
+   "rarity": 0,
+   "base_points": 25,
+   "attributes": {
+    "nourriture": 5
+   },
+   "image": null
+  },
+  {
+   "id": "villa_12",
+   "location_id": "villa",
+   "name": "Œuvre d'art",
+   "description": "Une pièce de collection.",
+   "category": "decoration",
+   "icon": "art",
+   "price": 400,
+   "rarity": 3,
+   "base_points": 6,
+   "attributes": {
+    "decoration": 5,
+    "luxe": 5
+   },
+   "image": null
   }
  ]
 }

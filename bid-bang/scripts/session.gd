@@ -6,6 +6,7 @@ signal game_updated(game: Dictionary)
 signal error_received(message: String)
 signal connection_lost()
 signal kicked()
+signal rematch_started()
 
 const NetClient = preload("res://scripts/net_client.gd")
 const T = preload("res://scripts/texts.gd")
@@ -39,6 +40,7 @@ func _ready() -> void:
 	net.server_error.connect(func(m: String) -> void: error_received.emit(m))
 	net.socket_closed.connect(_on_socket_closed)
 	net.kicked.connect(_on_kicked)
+	net.rematch.connect(_on_rematch)
 	_load_settings()
 	apply_settings()
 	_setup_click_sound()
@@ -149,6 +151,13 @@ func _on_room_state(r: Dictionary) -> void:
 func _on_game_state(g: Dictionary) -> void:
 	game = g
 	game_updated.emit(g)
+
+
+## L'hôte relance une partie dans le même salon : l'ancien état de partie est oublié, sinon le
+## salon d'attente retournerait aussitôt à l'écran de partie.
+func _on_rematch() -> void:
+	game = {}
+	rematch_started.emit()
 
 
 func _on_kicked() -> void:

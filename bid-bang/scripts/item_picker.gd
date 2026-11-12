@@ -7,7 +7,7 @@ extends VBoxContainer
 ##   const ItemPicker = preload("res://scripts/item_picker.gd")
 ##   var picker: VBoxContainer = ItemPicker.new()
 ##   parent.add_child(picker)
-##   picker.call("setup", items, categories, selected_ids, required_count)
+##   picker.call("setup", items, locations, selected_ids, required_count)
 ##   picker.connect("selection_changed", _on_count)
 ##   var ids: Array = picker.call("selected_ids")
 
@@ -30,7 +30,8 @@ var _chosen_flow: HFlowContainer = null
 var _empty: Label = null
 
 
-func setup(items: Array, categories: Array, selected_ids: Array, required_count: int) -> void:
+## locations : liste de {id, name} (filtre par lieu du catalogue).
+func setup(items: Array, locations: Array, selected_ids: Array, required_count: int) -> void:
 	required = required_count
 	add_theme_constant_override("separation", 14)
 	for sid in selected_ids:
@@ -53,9 +54,10 @@ func setup(items: Array, categories: Array, selected_ids: Array, required_count:
 			has_ai = true
 	var labels: Array = ["Tous", "Choisis"]
 	var values: Array = ["all", "selected"]
-	for c in categories:
-		labels.append(str(c))
-		values.append("cat:" + str(c))
+	for loc in locations:
+		var ld: Dictionary = loc
+		labels.append(str(ld["name"]))
+		values.append("loc:" + str(ld["id"]))
 	if has_ai:
 		labels.insert(2, "Générés par l'IA")
 		values.insert(2, "ai")
@@ -98,7 +100,7 @@ func _build_row(item: Dictionary) -> void:
 	line.add_child(col)
 	# illustration seulement si une image existe (sinon le médaillon animé alourdit la liste)
 	col.add_child(ItemCard.make_card(item, true, _has_art(item_id), true, 96.0))
-	var sub: String = str(item.get("category", ""))
+	var sub: String = ItemCard.criterion_label(str(item.get("category", "")))
 	var desc: String = str(item.get("description", ""))
 	if desc != "":
 		sub += " - " + desc
@@ -146,12 +148,12 @@ func _matches(item: Dictionary, needle: String) -> bool:
 		return false
 	if _filter == "ai" and str(item.get("source", "")) != "ai":
 		return false
-	if _filter.begins_with("cat:") and str(item.get("category", "")) != _filter.substr(4):
+	if _filter.begins_with("loc:") and str(item.get("location_id", "")) != _filter.substr(4):
 		return false
 	if needle == "":
 		return true
-	var hay: String = "%s %s %s" % [str(item.get("name", "")), str(item.get("category", "")),
-		" ".join(PackedStringArray(item.get("tags", [])))]
+	var hay: String = "%s %s %s" % [str(item.get("name", "")),
+		ItemCard.criterion_label(str(item.get("category", ""))), str(item.get("description", ""))]
 	return hay.to_lower().contains(needle)
 
 

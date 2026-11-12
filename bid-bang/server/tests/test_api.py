@@ -20,7 +20,7 @@ def create(client, pseudo="Alice", **settings):
 
 def test_health_and_locations(client):
     assert client.get("/health").json() == {"status": "ok"}
-    assert len(client.get("/locations").json()["locations"]) == 6
+    assert len(client.get("/locations").json()["locations"]) == 7
 
 
 def test_create_and_join(client):

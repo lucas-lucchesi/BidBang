@@ -7,6 +7,7 @@ signal game_state(game: Dictionary)
 signal server_error(message: String)
 signal socket_closed()
 signal kicked()
+signal rematch()
 
 var _socket: WebSocketPeer = null
 var _socket_open: bool = false
@@ -105,5 +106,7 @@ func _handle_packet(text: String) -> void:
 			game_state.emit(msg["game"])
 		"kicked":
 			kicked.emit()
+		"rematch":
+			rematch.emit()
 		"error":
 			server_error.emit(str(msg.get("message", "Erreur.")))

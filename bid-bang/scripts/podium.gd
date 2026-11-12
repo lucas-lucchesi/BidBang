@@ -1,5 +1,6 @@
 extends RefCounted
-## Podium de fin de partie : les 3 premiers sur des marches qui montent une à une.
+## Podium de fin de partie : les 3 premiers sur des marches qui montent une à une ; un 4e joueur
+## éventuel apparaît dans une ligne sous le podium. Classement : points, puis budget restant.
 ## Usage : Podium.build(parent, results)  (results = game["results"], déjà triés)
 
 const ItemCard = preload("res://scripts/item_card.gd")
@@ -26,11 +27,34 @@ static func build(parent: Node, results: Array) -> void:
 	var row := HBoxContainer.new()
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	row.add_theme_constant_override("separation", 10)
-	row.custom_minimum_size = Vector2(0, 470)
+	row.custom_minimum_size = Vector2(0, 500)
 	parent.add_child(row)
 	for r in order:
 		var d: Dictionary = r
 		_column(row, d, order.size())
+	for r in results.slice(3):
+		var d: Dictionary = r
+		_extra_line(parent, d)
+
+
+static func _extra_line(parent: Node, d: Dictionary) -> void:
+	var panel := PanelContainer.new()
+	panel.theme_type_variation = "RowPanel"
+	parent.add_child(panel)
+	var h := HBoxContainer.new()
+	h.add_theme_constant_override("separation", 14)
+	panel.add_child(h)
+	h.add_child(Avatar.make(str(d["pseudo"]), 56.0, false))
+	var col := VBoxContainer.new()
+	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	col.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	col.add_theme_constant_override("separation", -2)
+	h.add_child(col)
+	var nm: Label = ItemCard.make_label(col, "%d. %s" % [int(d["rank"]), str(d["pseudo"])], "")
+	nm.autowrap_mode = TextServer.AUTOWRAP_OFF
+	nm.clip_text = true
+	ItemCard.make_label(col, "%s - %s" % [T.t("%d pts") % int(d["score"]),
+		T.t("reste %s") % ItemCard.format_money(int(d["budget"]))], "MutedLabel")
 
 
 static func _column(row: HBoxContainer, d: Dictionary, count: int) -> void:
@@ -50,6 +74,9 @@ static func _column(row: HBoxContainer, d: Dictionary, count: int) -> void:
 		name_label.add_theme_color_override("font_color", Color("#E8A044"))
 	var score: Label = ItemCard.make_label(col, T.t("%d pts") % int(d["score"]), "MutedLabel")
 	score.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var money: Label = ItemCard.make_label(col, T.t("reste %s") % ItemCard.format_money(int(d["budget"])), "MutedLabel")
+	money.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	money.add_theme_font_size_override("font_size", 20)
 	var block := PanelContainer.new()
 	var sb := StyleBoxFlat.new()
 	sb.bg_color = COLORS[rank]

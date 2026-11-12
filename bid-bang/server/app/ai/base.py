@@ -8,6 +8,7 @@ puis l'ajouter à `PROVIDERS`. Un fournisseur :
   - convertit toute erreur en `ProviderError` avec un message générique en français
     (jamais le texte brut de l'erreur : il pourrait contenir des informations sensibles).
 """
+import os
 from typing import Protocol
 
 from ..errors import GameError
@@ -34,7 +35,11 @@ def _registry() -> dict[str, AIProvider]:
     from .anthropic_provider import AnthropicProvider
     from .gemini_provider import GeminiProvider
     from .openai_provider import OpenAIProvider
-    return {p.name: p for p in (AnthropicProvider(), OpenAIProvider(), GeminiProvider())}
+    providers = [AnthropicProvider(), OpenAIProvider(), GeminiProvider()]
+    if os.environ.get("BIDBANG_MOCK_AI") == "1":  # essais locaux uniquement
+        from .mock_provider import MockProvider
+        providers.append(MockProvider())
+    return {p.name: p for p in providers}
 
 
 def get_provider(name: str) -> AIProvider:
