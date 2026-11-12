@@ -4,7 +4,7 @@ import json
 import httpx
 import pytest
 
-from app.ai import base, http_provider
+from app.ai import base, gemini_provider, http_provider
 from app.ai.base import ProviderError
 from app.ai.gemini_provider import GeminiProvider
 from app.ai.openai_provider import OpenAIProvider
@@ -21,6 +21,7 @@ def use(monkeypatch, handler):
         return handler(request)
 
     monkeypatch.setattr(http_provider, "TRANSPORT", httpx.MockTransport(wrapped))
+    monkeypatch.setattr(gemini_provider, "TRANSPORT", httpx.MockTransport(wrapped))
     return seen
 
 
@@ -32,8 +33,7 @@ def gemini_ok(_req):
     return httpx.Response(200, json={"candidates": [{"content": {"parts": [{"text": OK_TEXT}]}}]})
 
 
-CASES = [(OpenAIProvider, openai_ok, "api.openai.com"),
-         (GeminiProvider, gemini_ok, "generativelanguage.googleapis.com")]
+CASES = [(OpenAIProvider, openai_ok, "api.openai.com")]  # Gemini : voir tests/test_gemini.py
 
 
 async def call(provider, timeout=5):
@@ -112,33 +112,17 @@ async def test_openai_content_filter(monkeypatch):
         await call(OpenAIProvider())
 
 
-async def test_gemini_blocked_and_multipart(monkeypatch):
-    use(monkeypatch, lambda r: httpx.Response(200, json={"promptFeedback": {"blockReason": "SAFETY"}}))
-    with pytest.raises(ProviderError, match="refusé"):
-        await call(GeminiProvider())
-    use(monkeypatch, lambda r: httpx.Response(200, json={"candidates": [{"finishReason": "SAFETY"}]}))
-    with pytest.raises(ProviderError):
-        await call(GeminiProvider())
-    use(monkeypatch, lambda r: httpx.Response(200, json={"candidates": [{"content": {"parts": [{"text": "{"}, {"text": "}"}]}}]}))
-    assert await call(GeminiProvider()) == "{}"
-
-
-async def test_gemini_rejects_odd_model_name(monkeypatch):
-    monkeypatch.setenv("BIDBANG_GEMINI_MODEL", "x/../../evil?key=1")
-    seen = use(monkeypatch, gemini_ok)
-    with pytest.raises(ProviderError):
-        await call(GeminiProvider())
-    assert not seen
-
-
 @pytest.mark.parametrize("cls,ok,host", CASES)
 async def test_works_end_to_end_with_generator(monkeypatch, cls, ok, host):
     from app.ai import generator
-    item = {"name": "Objet", "category": "C", "rarity": 0, "tags": ["a"],
-            "stats": {"confort": 2, "style": 1, "utilite": 3, "securite": 2, "sante": 1}}
-    text = json.dumps({"items": [{**item, "name": f"Objet {i}"} for i in range(8)]})
+    item = {"name": "Carte", "category": "Milieu", "rarity": 0, "price": 100, "points": 40,
+            "description": "Une carte.", "entity_type": "job", "is_real": False}
+    profile = {"goal": "Recruter", "allowed_entity_types": ["job"], "real_entities_only": False,
+               "organization": None, "required_roles": [], "allow_unrelated_items": False}
+    text = json.dumps({"title": "Test", "description": "Une situation de test.", "profile": profile,
+                       "items": [{**item, "name": f"Carte {i}"} for i in range(8)]})
     use(monkeypatch, lambda r: httpx.Response(200, json=(
         {"choices": [{"finish_reason": "stop", "message": {"content": text}}]} if cls is OpenAIProvider
         else {"candidates": [{"content": {"parts": [{"text": text}]}}]})))
-    res = await generator.generate(cls(), KEY, {"description": "Une situation."}, "construction", 6, set())
+    res = await generator.generate(cls(), KEY, {"title": "T", "description": "Une situation."}, "normal", 6, set())
     assert len(res.items) == 8

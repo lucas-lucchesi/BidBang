@@ -23,8 +23,7 @@ func setup(item: Dictionary) -> void:
 	_font.variation_opentype = {2003265652: 700.0}
 	rarity = clampi(int(item.get("rarity", 0)), 0, 3)
 	title = str(item.get("name", "?"))
-	var tags: Array = item.get("tags", [])
-	tag = str(tags[0]) if tags.size() > 0 else ""
+	tag = str(item.get("category", ""))
 	custom_minimum_size = Vector2(0, 260)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	for ext in EXTENSIONS:

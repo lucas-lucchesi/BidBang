@@ -4,6 +4,7 @@ extends Control
 const UI = preload("res://scripts/ui.gd")
 const T = preload("res://scripts/texts.gd")
 const Fx = preload("res://scripts/fx.gd")
+const ItemCard = preload("res://scripts/item_card.gd")
 
 var _box: VBoxContainer
 var _players_box: VBoxContainer
@@ -108,8 +109,8 @@ func _refresh(room: Dictionary) -> void:
 			_seen[pid] = true
 			Fx.pop(row.get_parent() as Control, 1.06)
 	var s: Dictionary = room.get("settings", {})
-	var mode_names := {"construction": "Construction", "aveugle": "Enchère à l'aveugle", "survie": "Survie"}
-	var mode_text: String = T.t(str(mode_names.get(str(s.get("mode", "")), "Construction")))
+	var mode_names := {"normal": "Enchères normales", "aveugle": "Enchère à l'aveugle", "construction": "Enchères normales", "survie": "Enchères normales"}
+	var mode_text: String = T.t(str(mode_names.get(str(s.get("mode", "")), "Enchères normales")))
 	_info.text = T.t("%s - %d objets - budget %d € - chrono %d s - %d/%d joueurs") % [
 		mode_text, int(s.get("item_count", 0)), int(s.get("budget", 0)),
 		int(s.get("bid_timer", 0)), players.size(), int(room.get("max_players", 4))]
@@ -123,6 +124,13 @@ func _refresh(room: Dictionary) -> void:
 	if custom:
 		var scenario: Dictionary = s.get("scenario", {})
 		_situation.text = str(scenario.get("description", ""))
+		var needs: PackedStringArray = []
+		for c in scenario.get("criteria", []):
+			var cd: Dictionary = c
+			if bool(cd.get("necessary", false)):
+				needs.append("%s %d" % [ItemCard.criterion_label(str(cd["id"])), int(cd["importance"])])
+		if needs.size() > 0:
+			_situation.text += "\n" + T.t("Critères : ") + ", ".join(needs)
 		var chosen: Array = s.get("item_ids", [])
 		_info.text += "\n" + T.t("%d objets sélectionnés, %d mis aux enchères") % [chosen.size(), int(s.get("item_count", 0))]
 		ready_to_start = bool(s.get("ready", true))

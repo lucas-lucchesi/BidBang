@@ -5,15 +5,17 @@ import secrets
 import time
 from typing import Any
 
-from .ai import generator, limits
+from .ai import debug, generator, limits
 from .ai.base import AIProvider
 from .errors import GameError
-from .game import Game, validate_settings
+from . import criteria as criteria_mod
+from .game import Game, preview_ai_cards, validate_settings
 
 CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"  # sans O/0/I/1
 CODE_LENGTH = 6
 MAX_PLAYERS = 4
 MAX_PSEUDO = 16
+REMATCH_KEYS = {"mode", "budget", "bid_timer", "item_count"}  # modifiables à la revanche
 EMPTY_ROOM_TTL = 300  # secondes avant suppression d'un salon sans connexion
 
 
@@ -34,9 +36,9 @@ class Room:
         self.banned: set[str] = set()  # pseudos exclus par l'hôte (en minuscules)
         self.status = "lobby"  # lobby | playing | finished
         self.game: Game | None = None
-        # Partie `ai` : objets générés (validés) et épreuves ; JAMAIS la clé API.
+        # Partie `ai` : objets générés (validés) ; JAMAIS la clé API.
         self.ai_items: dict[str, dict] = {}
-        self.ai_trials: list[dict] | None = None
+        self.ai_profile: dict | None = None  # objectif validé de la dernière génération
         self.ai_busy = False
         self.ai_count = 0
         self.ai_last = 0.0
@@ -167,9 +169,9 @@ class Room:
             raise GameError("L'hôte doit d'abord valider la sélection d'objets.")
         if self.ai_busy:
             raise GameError("Une génération IA est en cours.")
-        trials = self.ai_trials if self.settings["mode"] == "survie" else None
+        # Les points des objets sont calculés et figés ici, à la création de la partie.
         self.game = Game([(p["id"], p["pseudo"]) for p in self.players.values()],
-                         self.settings, pool=list(self.ai_items.values()), trials=trials)
+                         self.settings, pool=list(self.ai_items.values()))
         self.status = "playing"
         await self.broadcast_room()
         await self.after_change()
@@ -202,29 +204,47 @@ class Room:
             async with sem:
                 result = await generator.generate(
                     provider, api_key, self.settings["scenario"], self.settings["mode"],
-                    self.settings["item_count"], taken_ids=_catalog_ids())
+                    self.settings["item_count"], taken_ids=_catalog_ids(),
+                    players=self.max_players)
         finally:
             self.ai_busy = False
         if self.status != "lobby":  # la partie a démarré pendant l'appel
             raise GameError("La partie a déjà commencé.", 409)
-        self.ai_items = {i["id"]: i for i in result.items}
-        self.ai_trials = result.trials or None
+        # remplace entièrement les anciennes propositions (jamais de fusion avec une génération précédente)
+        self.ai_items = {i["id"]: i for i in result.new_items}
+        self.ai_profile = result.profile
+        debug.cards("salon : propositions enregistrées", list(self.ai_items.values()))
         # une nouvelle génération invalide l'ancienne sélection : l'hôte doit revalider
-        self.settings = validate_settings({**self.settings, "item_ids": []},
-                                          extra_items=self.ai_items, require_selection=False)
+        self.settings = validate_settings(
+            {**self.settings, "scenario": result.situation, "item_ids": []},
+            extra_items=self.ai_items, require_selection=False)
         await self.broadcast_room()
-        return {"items": result.items, "trials": result.trials,
-                "trials_source": result.trials_source,
+        return {"situation": self._situation_view(), "profile": result.profile,
+                "corrected": result.corrected,
+                "items": preview_ai_cards(result.items),
                 "generations_left": limits.MAX_GENERATIONS_PER_ROOM - self.ai_count}
 
-    async def set_selection(self, pid: str, item_ids: Any) -> None:
-        """Valide la sélection d'objets (catalogue + objets générés) de l'hôte."""
+    def _situation_view(self) -> dict:
+        sc = self.settings["scenario"]
+        return {**sc, "criteria": criteria_mod.with_labels(sc["criteria"])}
+
+    async def set_selection(self, pid: str, item_ids: Any, new_criteria: Any = None) -> dict:
+        """Valide la sélection de cartes (uniquement celles générées par l'IA). Renvoie les cartes
+        choisies avec leurs points (attribués par l'IA)."""
         self._require_ai_lobby(pid)
         if self.ai_busy:
             raise GameError("Une génération est en cours.", 409)
-        self.settings = validate_settings({**self.settings, "item_ids": item_ids},
-                                          extra_items=self.ai_items)
+        scenario = self.settings["scenario"]
+        if new_criteria is not None:
+            raise GameError("Une partie avec IA n'a pas de critères : l'IA attribue les points.", 400)
+        self.settings = validate_settings(
+            {**self.settings, "scenario": scenario, "item_ids": item_ids},
+            extra_items=self.ai_items)
         await self.broadcast_room()
+        chosen = [self.ai_items[i] for i in self.settings["item_ids"]]
+        debug.cards("salon : sélection validée", chosen)
+        return {"situation": self._situation_view(),
+                "items": preview_ai_cards(chosen)}
 
     async def after_change(self) -> None:
         """Diffuse l'état, met à jour le statut et reprogramme le chronomètre."""
@@ -257,17 +277,15 @@ class Room:
             await self._send(pid, {"type": "pong"})
         elif kind == "start_game":
             await self.start_game(pid)
-        elif kind in ("bid", "fold", "vote"):
+        elif kind in ("bid", "fold"):
             if self.game is None:
                 raise GameError("La partie n'a pas commencé.")
             version = self.game.version
             try:
                 if kind == "bid":
                     self.game.bid(pid, data.get("amount"))
-                elif kind == "fold":
-                    self.game.fold(pid)
                 else:
-                    self.game.vote(pid, data.get("target"))
+                    self.game.fold(pid)
             except GameError:
                 if self.game.version != version:  # action tardive : l'échéance a clos l'étape
                     await self.after_change()
@@ -275,8 +293,44 @@ class Room:
             await self.after_change()
         elif kind == "kick":
             await self.kick(pid, data.get("target"))
+        elif kind == "rematch":
+            await self.rematch(pid, data.get("settings"))
         else:
             raise GameError("Commande inconnue.")
+
+    async def rematch(self, pid: str, changes: Any = None) -> None:
+        """Revanche : l'hôte relance une partie dans le même salon, avec les mêmes joueurs,
+        sans recréer de salon. Possible seulement quand la partie est terminée.
+
+        Les réglages sont conservés ; `changes` peut modifier le mode d'enchères, le budget, le
+        chrono et le nombre de cartes (validés comme à la création). Le salon revient à l'état
+        d'attente : l'hôte peut encore exclure quelqu'un, puis lance la partie. Une partie
+        classique retire de nouvelles cartes au hasard ; en partie personnalisée ou IA, la
+        sélection validée est conservée (aucune génération n'est refaite, aucun appel IA).
+        """
+        if not self.is_host(pid):
+            raise GameError("Seul l'hôte peut relancer une partie.", 403)
+        if self.status != "finished":
+            raise GameError("La partie n'est pas terminée.", 409)
+        new_settings = self.settings
+        if changes is not None:
+            if not isinstance(changes, dict):
+                raise GameError("Réglages invalides.")
+            unknown = set(changes) - REMATCH_KEYS
+            if unknown:
+                raise GameError("Seuls le mode, le budget, le chrono et le nombre de cartes peuvent changer.")
+            new_settings = validate_settings(
+                {**self.settings, **changes}, extra_items=self.ai_items,
+                require_selection=bool(self.settings.get("ready", True)))
+        self.settings = new_settings
+        if self._timer:
+            self._timer.cancel()
+            self._timer = None
+        self.game = None
+        self.status = "lobby"
+        await self.broadcast_room()
+        for p in list(self.sockets):  # les écrans de résultats reviennent au salon d'attente
+            await self._send(p, {"type": "rematch"})
 
     async def kick(self, pid: str, target: Any) -> None:
         """Exclut un joueur du salon d'attente (hôte seulement)."""

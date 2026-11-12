@@ -1,4 +1,4 @@
-"""Chargement du catalogue (lieux, cartes, épreuves de survie)."""
+"""Chargement du catalogue (lieux avec leurs critères de situation, objets)."""
 import json
 from functools import lru_cache
 from pathlib import Path
@@ -7,9 +7,14 @@ CATALOG_PATH = Path(__file__).resolve().parent.parent / "data" / "catalog.json"
 
 
 @lru_cache(maxsize=1)
-def load_catalog() -> dict:
+def _load() -> dict:
     with CATALOG_PATH.open(encoding="utf-8") as f:
         return json.load(f)
+
+
+def load_catalog() -> dict:
+    """Catalogue brut (partagé : ne pas modifier le résultat, copier avant d'adapter)."""
+    return _load()
 
 
 def get_location(location_id: str) -> dict | None:
@@ -24,5 +29,5 @@ def get_items(location_id: str) -> list[dict]:
 
 
 def list_locations() -> list[dict]:
-    return [{"id": l["id"], "name": l["name"], "description": l["description"]}
-            for l in load_catalog()["locations"]]
+    return [{"id": l["id"], "name": l["name"], "description": l["description"],
+             "criteria": l["criteria"]} for l in load_catalog()["locations"]]

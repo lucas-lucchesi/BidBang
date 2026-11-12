@@ -1,20 +1,27 @@
 extends Control
 ## Création d'un salon en plusieurs étapes. Trois types de création (indépendants du mode de jeu) :
 ##   classic : un lieu du catalogue (comportement historique)
-##   custom  : situation écrite par l'hôte + sélection libre d'objets
-##   ai      : situation + objets proposés par une IA externe (clé API de l'hôte), puis validation
+##   custom  : situation écrite par l'hôte + critères + sélection libre d'objets + aperçu des points
+##   ai      : une phrase -> cartes (objets, joueurs, métiers, personnalités...) et leurs points,
+##             attribués par une IA externe (clé API de l'hôte) ; pas de critères ; l'hôte choisit
+##             les cartes à garder
+## Classique / personnalisée : points calculés par le serveur. IA : points donnés par l'IA, validés
+## puis figés par le serveur. Jamais calculés ici.
 ## Les choix sont conservés dans _state quand on change d'étape ou qu'on revient en arrière.
 
 const UI = preload("res://scripts/ui.gd")
 const T = preload("res://scripts/texts.gd")
 const Fx = preload("res://scripts/fx.gd")
 const ItemPicker = preload("res://scripts/item_picker.gd")
+const ItemCard = preload("res://scripts/item_card.gd")
 
 ## Mode « Enchère à l'aveugle » : mettre à false pour le masquer de la création de salon.
 const ENABLE_BLIND_MODE := true
 const MAX_SCENARIO := 300
 const MAX_AI_PROMPT := 600
 const MIN_SCENARIO := 5
+const MIN_CARDS := 6
+const MAX_CARDS := 20  # nombre de cartes mises aux enchères, au choix de l'hôte (comme le serveur)
 const LOCAL_HOSTS := ["127.0.0.1", "localhost", "10.0.2.2", "[::1]"]
 const GENERATE_TIMEOUT := 75.0
 
@@ -26,16 +33,22 @@ var _pending: String = "type"
 var _locations: Array = []
 var _catalog: Dictionary = {}
 var _ai_items: Array = []
+var _preview_items: Array = []
+var _crit_box: VBoxContainer = null
+var _crit_add: OptionButton = null
+var _crit_next: Button = null
+var _loc_hint: Label = null
+var _count_label: Label = null
 var _ai_room: bool = false
 var _handed_off: bool = false
 var _busy: bool = false
 var _state: Dictionary = {
-	"creation_type": "", "mode": "construction", "theme_id": "", "budget": 2200,
-	"item_count": 8, "bid_timer": 15, "description": "", "trial_pack": "generique",
-	"selected": {}, "trials_source": "", "max_players": 4, "provider": "anthropic",
+	"creation_type": "", "mode": "normal", "theme_id": "", "budget": 2200,
+	"item_count": 8, "bid_timer": 15, "description": "", "criteria": [], "template": "polyvalent",
+	"selected": {}, "max_players": 4, "provider": "gemini",
 }
 ## Réglages imposés en partie IA (l'écran IA ne propose que le prompt et le nombre de joueurs).
-const AI_DEFAULTS := {"mode": "construction", "budget": 2200, "item_count": 8, "bid_timer": 15, "trial_pack": "generique"}
+const AI_DEFAULTS := {"mode": "normal", "budget": 2200, "item_count": 8, "bid_timer": 15}
 # contrôles de l'étape courante (remis à null quand l'étape change)
 var _mode: ButtonGroup = null
 var _mode_hint: Label = null
@@ -43,10 +56,8 @@ var _theme: ButtonGroup = null
 var _budget: ButtonGroup = null
 var _items: ButtonGroup = null
 var _timer: ButtonGroup = null
-var _packs: ButtonGroup = null
 var _players: ButtonGroup = null
 var _provider: ButtonGroup = null
-var _pack_box: VBoxContainer = null
 var _scenario_edit: TextEdit = null
 var _scenario_count: Label = null
 var _key_edit: LineEdit = null
@@ -84,13 +95,17 @@ func _on_back() -> void:
 			UI.goto(self, "res://menu.tscn")
 		"classic", "scenario":
 			_go("type")
-		"picker":
+		"criteria":
 			_go("scenario")
+		"picker":
+			_go("criteria")
+		"ai_picker":
+			_go("ai_key")
+		"preview":
+			_go("ai_picker" if str(_state["creation_type"]) == "ai" else "picker")
 		"ai_key":
 			_leave_ai_room()
 			_go("scenario")
-		"ai_picker":
-			_go("ai_key")
 
 
 func _go(step: String) -> void:
@@ -99,7 +114,7 @@ func _go(step: String) -> void:
 	if step == "classic" and _locations.is_empty():
 		_show_loading("locations", "/locations")
 		return
-	if (step == "scenario" or step == "picker") and _catalog.is_empty():
+	if (step == "scenario" or step == "picker" or step == "criteria") and _catalog.is_empty():
 		_show_loading("items", "/items")
 		return
 	_render(step)
@@ -121,10 +136,13 @@ func _clear_step() -> void:
 	_budget = null
 	_items = null
 	_timer = null
-	_packs = null
 	_players = null
 	_provider = null
-	_pack_box = null
+	_crit_box = null
+	_crit_add = null
+	_crit_next = null
+	_loc_hint = null
+	_count_label = null
 	_scenario_edit = null
 	_scenario_count = null
 	_key_edit = null
@@ -142,12 +160,16 @@ func _render(step: String) -> void:
 			_build_classic()
 		"scenario":
 			_build_scenario()
+		"criteria":
+			_build_criteria()
 		"picker":
 			_build_picker(false)
 		"ai_key":
 			_build_ai_key()
 		"ai_picker":
 			_build_picker(true)
+		"preview":
+			_build_preview()
 	Fx.stagger_in(_content, 0.05)
 
 
@@ -163,8 +185,6 @@ func _collect() -> void:
 		_state["item_count"] = UI.choice_value(_items)
 	if _timer != null:
 		_state["bid_timer"] = UI.choice_value(_timer)
-	if _packs != null:
-		_state["trial_pack"] = UI.choice_value(_packs)
 	if _players != null:
 		_state["max_players"] = UI.choice_value(_players)
 	if _provider != null:
@@ -182,7 +202,7 @@ func _collect() -> void:
 func _build_type() -> void:
 	UI.label(_content, T.t("Nouvelle partie"), "HeadingLabel")
 	_type_card("PARTIE CLASSIQUE", "Choisissez un thème existant et jouez immédiatement.", "classic")
-	_type_card("PARTIE PERSONNALISÉE", "Écrivez votre scénario et sélectionnez les objets.", "custom")
+	_type_card("PARTIE PERSONNALISÉE", "Écrivez votre situation, choisissez les critères et les objets.", "custom")
 	_type_card("PARTIE AVEC IA", "Décrivez votre idée et laissez l'IA proposer une partie.", "ai")
 
 
@@ -197,6 +217,7 @@ func _type_card(title: String, hint: String, kind: String) -> void:
 func _on_type_chosen(kind: String) -> void:
 	if str(_state["creation_type"]) != kind:
 		_state["selected"] = {}
+		_state["criteria"] = []
 		_ai_items = []
 	_state["creation_type"] = kind
 	if kind != "ai":
@@ -209,12 +230,12 @@ func _on_type_chosen(kind: String) -> void:
 
 # ------------------------------------------------- blocs de formulaire communs
 func _build_mode(parent: Control) -> void:
-	var mode_labels: Array = ["Construction", "Survie"]
-	var mode_values: Array = ["construction", "survie"]
+	var mode_labels: Array = ["Enchères normales"]
+	var mode_values: Array = ["normal"]
 	if ENABLE_BLIND_MODE:
-		mode_labels.insert(1, "Enchère à l'aveugle")
-		mode_values.insert(1, "aveugle")
-	var card: VBoxContainer = UI.section(parent, T.t("Mode"))
+		mode_labels.append("Enchère à l'aveugle")
+		mode_values.append("aveugle")
+	var card: VBoxContainer = UI.section(parent, T.t("Mode d'enchères"))
 	_mode = UI.choice_row(card, "", mode_labels, mode_values, _state["mode"], _on_mode_selected)
 	_mode_hint = UI.label(card, "", "MutedLabel")
 	_on_mode_selected(_state["mode"])
@@ -222,25 +243,52 @@ func _build_mode(parent: Control) -> void:
 
 func _on_mode_selected(mode: Variant) -> void:
 	var hints := {
-		"construction": "Enchères publiques : surenchérissez en temps réel, puis votez pour la meilleure collection.",
-		"aveugle": "Enchère à l'aveugle : chacun mise en secret une seule fois, la plus haute mise gagne.",
-		"survie": "Survie : achetez le matériel pour réussir 3 épreuves.",
+		"normal": "Enchères en temps réel : surenchérissez. Le gagnant est celui dont les objets rapportent le plus de points.",
+		"aveugle": "Enchère à l'aveugle : chacun mise en secret une seule fois, la plus haute mise gagne l'objet.",
 	}
 	if _mode_hint != null:
-		_mode_hint.text = T.t(str(hints[str(mode)]))
-	if _pack_box != null:
-		_pack_box.visible = str(mode) == "survie"
+		_mode_hint.text = T.t(str(hints.get(str(mode), hints["normal"])))
 
 
-func _build_settings(parent: Control) -> void:
+## Choix libre du nombre de cartes (6 à 20) : boutons - et +.
+func _build_count_stepper(parent: Control, caption: String) -> void:
+	UI.label(parent, caption, "FieldLabel")
+	var line := HBoxContainer.new()
+	line.add_theme_constant_override("separation", 14)
+	line.alignment = BoxContainer.ALIGNMENT_CENTER
+	parent.add_child(line)
+	var minus: TextureButton = UI.icon_button(line, UI.ICON_MINUS)
+	minus.custom_minimum_size = Vector2(76, 76)
+	minus.pressed.connect(_on_count_step.bind(-1))
+	_count_label = UI.label(line, "", "BigMoneyLabel")
+	_count_label.custom_minimum_size = Vector2(120, 0)
+	_count_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var plus: TextureButton = UI.icon_button(line, UI.ICON_PLUS)
+	plus.custom_minimum_size = Vector2(76, 76)
+	plus.pressed.connect(_on_count_step.bind(1))
+	UI.label(parent, T.t("De %d à %d cartes. L'IA en propose davantage pour que vous puissiez choisir.") % [MIN_CARDS, MAX_CARDS], "MutedLabel")
+	_on_count_step(0)
+
+
+func _on_count_step(delta: int) -> void:
+	_state["item_count"] = clampi(int(_state["item_count"]) + delta, MIN_CARDS, MAX_CARDS)
+	if _count_label != null:
+		_count_label.text = str(int(_state["item_count"]))
+
+
+func _build_settings(parent: Control, stepper: bool = false) -> void:
 	var rules: VBoxContainer = UI.section(parent, T.t("Réglages"))
 	_budget = UI.choice_row(rules, "Budget", ["1 200 €", "2 200 €", "3 500 €"], [1200, 2200, 3500], _state["budget"])
-	_items = UI.choice_row(rules, "Nombre d'objets", ["6", "8", "10"], [6, 8, 10], _state["item_count"])
+	if stepper:
+		_build_count_stepper(rules, T.t("Nombre d'objets"))
+	else:
+		_items = UI.choice_row(rules, "Nombre d'objets", ["6", "8", "10", "11", "12"], [6, 8, 10, 11, 12], _state["item_count"])
 	_timer = UI.choice_row(rules, "Chrono d'enchère", ["10 s", "15 s", "20 s", "30 s"], [10, 15, 20, 30], _state["bid_timer"])
 
 
 # ------------------------------------------------------ étape : partie classique
 func _build_classic() -> void:
+	_state["item_count"] = mini(int(_state["item_count"]), 12)  # un lieu propose 12 objets
 	UI.label(_content, T.t("Partie classique"), "HeadingLabel")
 	var names: Array = []
 	var ids: Array = []
@@ -251,10 +299,28 @@ func _build_classic() -> void:
 	_build_mode(_content)
 	var place_card: VBoxContainer = UI.section(_content, T.t("Lieu"))
 	var current: Variant = _state["theme_id"] if ids.has(_state["theme_id"]) else (ids[0] if ids.size() > 0 else "")
-	_theme = UI.choice_row(place_card, "", names, ids, current)
+	_theme = UI.choice_row(place_card, "", names, ids, current, _on_location_selected)
+	_loc_hint = UI.label(place_card, "", "MutedLabel")
+	_on_location_selected(current)
 	_build_settings(_content)
 	_action = UI.button(_content, T.t("Créer le salon"), "PrimaryButton")
 	_action.pressed.connect(_on_create_classic)
+
+
+## Critères de situation du lieu choisi (indication seulement : le serveur a les siens).
+func _on_location_selected(loc_id: Variant) -> void:
+	if _loc_hint == null:
+		return
+	var parts: PackedStringArray = []
+	for loc in _locations:
+		var d: Dictionary = loc
+		if str(d["id"]) != str(loc_id):
+			continue
+		for c in d.get("criteria", []):
+			var cd: Dictionary = c
+			if bool(cd.get("necessary", false)):
+				parts.append("%s %d" % [str(cd.get("label", cd["id"])), int(cd["importance"])])
+	_loc_hint.text = (T.t("Critères de la situation : ") + ", ".join(parts)) if parts.size() > 0 else ""
 
 
 func _on_create_classic() -> void:
@@ -271,14 +337,14 @@ func _build_scenario() -> void:
 	UI.label(_content, T.t("Partie avec IA") if is_ai else T.t("Partie personnalisée"), "HeadingLabel")
 	var sc: VBoxContainer = UI.section(_content, T.t("Prompt") if is_ai else T.t("Situation"))
 	if is_ai:
-		UI.label(sc, T.t("Voici le prompt : écrivez la situation, puis les objets à intégrer obligatoirement avec leur prix."), "MutedLabel")
+		UI.label(sc, T.t("Décrivez votre partie en une ou deux phrases en précisant l'objectif (ex. « le meilleur onze de l'histoire de l'OM »). L'IA crée les cartes qui conviennent : objets, joueurs, métiers, personnalités, personnages... et attribue leurs points. Vous gardez celles que vous voulez."), "MutedLabel")
 	else:
 		UI.label(sc, T.t("Décrivez la situation de la partie. Elle sera affichée à tous les joueurs."), "MutedLabel")
 	_scenario_edit = TextEdit.new()
 	_scenario_edit.custom_minimum_size = Vector2(0, 260 if is_ai else 190)
 	_scenario_edit.wrap_mode = TextEdit.LINE_WRAPPING_BOUNDARY
 	if is_ai:
-		_scenario_edit.placeholder_text = T.t("Ex. : Construisez une base sur Mars. Objets obligatoires : Rover spatial (400 €), Jacuzzi spatial (250 €).")
+		_scenario_edit.placeholder_text = T.t("Ex. : Composez un 11 de légende au football. Ou : recrutez l'équipe d'une startup (métiers). Ou : survivez 30 jours face à des zombies (objets).")
 	else:
 		_scenario_edit.placeholder_text = T.t("Ex. : Organisez le mariage le plus extravagant possible.")
 	_scenario_edit.text = str(_state["description"])
@@ -290,21 +356,13 @@ func _build_scenario() -> void:
 		# seul autre réglage : le nombre de joueurs (le reste est imposé par défaut)
 		var pl: VBoxContainer = UI.section(_content, T.t("Joueurs"))
 		_players = UI.choice_row(pl, "Nombre de joueurs maximum", ["2", "3", "4"], [2, 3, 4], _state["max_players"])
+		var cards: VBoxContainer = UI.section(_content, T.t("Cartes mises aux enchères"))
+		_build_count_stepper(cards, T.t("Nombre de cartes"))
 		_action = UI.button(_content, T.t("Suivant"), "PrimaryButton")
 		_action.pressed.connect(_on_scenario_next)
 		return
 	_build_mode(_content)
-	# série d'épreuves prédéfinies pour la Survie (le texte de la situation n'est jamais une règle)
-	_pack_box = UI.section(_content, T.t("Épreuves de Survie"))
-	var pack_labels: Array = []
-	var pack_values: Array = []
-	for p in _catalog.get("trial_packs", []):
-		var pd: Dictionary = p
-		pack_labels.append(str(pd["name"]))
-		pack_values.append(str(pd["id"]))
-	_packs = UI.choice_row(_pack_box, "", pack_labels, pack_values, _state["trial_pack"])
-	_pack_box.visible = str(_state["mode"]) == "survie"
-	_build_settings(_content)
+	_build_settings(_content, true)
 	_action = UI.button(_content, T.t("Suivant"), "PrimaryButton")
 	_action.pressed.connect(_on_scenario_next)
 
@@ -328,7 +386,7 @@ func _on_scenario_next() -> void:
 		_error.text = T.t("Écrivez une situation (au moins %d caractères).") % MIN_SCENARIO
 		return
 	if str(_state["creation_type"]) == "custom":
-		_go("picker")
+		_go("criteria")
 		return
 	# IA : le salon est créé maintenant (la génération et la sélection se font sur le serveur)
 	if _ai_room:
@@ -337,6 +395,9 @@ func _on_scenario_next() -> void:
 
 
 func _payload(with_items: bool) -> Dictionary:
+	var scenario: Dictionary = {"description": str(_state["description"]).strip_edges()}
+	if with_items:
+		scenario["criteria"] = _state["criteria"]
 	var ids: Array = []
 	if with_items:
 		for k in (_state["selected"] as Dictionary):
@@ -344,10 +405,8 @@ func _payload(with_items: bool) -> Dictionary:
 	return {
 		"creation_type": _state["creation_type"], "mode": _state["mode"],
 		"budget": _state["budget"], "item_count": _state["item_count"],
-		"bid_timer": _state["bid_timer"], "trial_pack": _state["trial_pack"],
-		"max_players": _state["max_players"],
-		"scenario": {"description": str(_state["description"]).strip_edges()},
-		"item_ids": ids,
+		"bid_timer": _state["bid_timer"], "max_players": _state["max_players"],
+		"scenario": scenario, "item_ids": ids,
 	}
 
 
@@ -356,12 +415,15 @@ func _build_picker(is_ai: bool) -> void:
 	UI.label(_content, T.t("Objets de la partie"), "HeadingLabel")
 	var items: Array = []
 	if is_ai:
-		items.append_array(_ai_items)
-	for it in _catalog.get("items", []):
-		items.append(it)
+		items.append_array(_ai_items)  # uniquement les cartes de l'IA (avec ses points)
+	else:
+		items.append_array(_catalog.get("items", []))
 	var need: int = int(_state["item_count"])
 	if is_ai:
-		UI.label(_content, T.t("Vérifiez les objets proposés par l'IA : retirez ceux dont vous ne voulez pas, ajoutez-en du catalogue, puis validez."), "MutedLabel")
+		var head: VBoxContainer = UI.section(_content, str(_state.get("ai_title", "")))
+		UI.label(head, str(_state.get("ai_description", "")), "MutedLabel")
+		_show_ai_profile(head)
+		UI.label(_content, T.t("L'IA a créé ces cartes et leur a attribué des points. Retirez celles dont vous ne voulez pas (il en faut au moins %d), puis validez.") % need, "MutedLabel")
 	else:
 		UI.label(_content, T.t("Choisissez librement des objets de tous les lieux. Le serveur en tirera %d au hasard.") % need, "MutedLabel")
 	_picker = ItemPicker.new()
@@ -369,7 +431,7 @@ func _build_picker(is_ai: bool) -> void:
 	var pre: Array = []
 	for k in (_state["selected"] as Dictionary):
 		pre.append(str(k))
-	_picker.call("setup", items, _catalog.get("categories", []), pre, need)
+	_picker.call("setup", items, [] if is_ai else _catalog.get("locations", []), pre, need)
 	_picker.connect("selection_changed", _on_selection_changed)
 	_action = UI.button(_content, "", "PrimaryButton")
 	if is_ai:
@@ -379,7 +441,7 @@ func _build_picker(is_ai: bool) -> void:
 			_collect()
 			_go("ai_key"))
 	else:
-		_action.pressed.connect(_on_create_custom)
+		_action.pressed.connect(_on_preview_custom)
 	_update_action_button(is_ai)
 
 
@@ -396,12 +458,201 @@ func _update_action_button(is_ai: bool) -> void:
 	if n < need:
 		_action.text = T.t("Choisissez au moins %d objets") % need
 	else:
-		_action.text = T.t("Valider la sélection") if is_ai else T.t("Créer le salon")
+		_action.text = T.t("Valider la sélection") if is_ai else T.t("Prévisualiser les points")
+
+
+## Objectif compris par l'IA (profil validé par le serveur) : l'hôte voit tout de suite si c'est le bon.
+func _show_ai_profile(parent: Control) -> void:
+	var prof: Variant = _state.get("ai_profile")
+	if not (prof is Dictionary):
+		return
+	var p: Dictionary = prof
+	UI.label(parent, T.t("Objectif compris : ") + str(p.get("goal", "")), "InfoLabel")
+	var org: Variant = p.get("organization")
+	if org != null and str(org) != "":
+		UI.label(parent, T.t("Univers : ") + str(org), "MutedLabel")
+	var roles: PackedStringArray = []
+	for r in p.get("required_roles", []):
+		roles.append(str(r))
+	if roles.size() > 0:
+		UI.label(parent, T.t("Rôles couverts : ") + ", ".join(roles), "MutedLabel")
+	if bool(p.get("real_entities_only", false)):
+		UI.label(parent, T.t("Cartes réelles : vérifiez-les, l'IA peut se tromper."), "MutedLabel")
+
+
+func _selected_ids() -> Array:
+	var ids: Array = []
+	for k in (_state["selected"] as Dictionary):
+		ids.append(str(k))
+	return ids
+
+
+## Aperçu des points : le serveur calcule (rien n'est créé ni figé à ce stade).
+func _on_preview_custom() -> void:
+	if _busy:
+		return
+	_collect()
+	_set_busy(true, T.t("Calcul des points..."))
+	Session.net.request("preview", Session.server_url, HTTPClient.METHOD_POST, "/scoring/preview",
+		{"criteria": _state["criteria"], "item_ids": _selected_ids()})
 
 
 func _on_create_custom() -> void:
-	_collect()
 	_post_create("create", _payload(true))
+
+
+# ------------------------------------------- étape : critères de la situation
+## Retire les libellés : le serveur ne reçoit que {id, necessary, importance}.
+func _plain_criteria(list: Array) -> Array:
+	var out: Array = []
+	for c in list:
+		var d: Dictionary = c
+		var necessary: bool = bool(d.get("necessary", false))
+		out.append({"id": str(d["id"]), "necessary": necessary, "importance": int(d.get("importance", 0)) if necessary else 0})
+	return out
+
+
+func _apply_template(template_id: String) -> void:
+	for t in _catalog.get("templates", []):
+		var td: Dictionary = t
+		if str(td["id"]) == template_id:
+			_state["criteria"] = _plain_criteria(td["criteria"])
+			_state["template"] = template_id
+
+
+func _build_criteria() -> void:
+	var is_ai: bool = false  # l'étape « critères » n'existe que pour les parties personnalisées
+	UI.label(_content, T.t("Critères de la situation"), "HeadingLabel")
+	if (_state["criteria"] as Array).is_empty():
+		_apply_template(str(_state["template"]))
+	var info: VBoxContainer = UI.section(_content, T.t("Ce dont les joueurs ont besoin"))
+	UI.label(info, T.t("Un objet rapporte des points s'il répond à un critère nécessaire, d'autant plus que son importance est grande. Choisissez « Non » pour un critère sans intérêt dans cette situation."), "MutedLabel")
+	var names: Array = []
+	var ids: Array = []
+	for t in _catalog.get("templates", []):
+		var td: Dictionary = t
+		names.append(str(td["name"]))
+		ids.append(str(td["id"]))
+	if names.size() > 0:
+		UI.label(info, T.t("Modèles"), "FieldLabel")
+		UI.choice_row(info, "", names, ids, "" if is_ai else _state["template"], _on_template_chosen)
+	_crit_box = VBoxContainer.new()
+	_crit_box.add_theme_constant_override("separation", 14)
+	_content.add_child(_crit_box)
+	var add_row := HBoxContainer.new()
+	add_row.add_theme_constant_override("separation", 12)
+	_content.add_child(add_row)
+	_crit_add = OptionButton.new()
+	_crit_add.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	add_row.add_child(_crit_add)
+	var add_btn: Button = UI.button(add_row, T.t("Ajouter un critère"), "SmallButton")
+	add_btn.pressed.connect(_on_add_criterion)
+	_crit_next = UI.button(_content, T.t("Suivant"), "PrimaryButton")
+	_crit_next.pressed.connect(_on_criteria_next)
+	_action = _crit_next
+	_refresh_criteria()
+
+
+func _on_template_chosen(template_id: Variant) -> void:
+	_apply_template(str(template_id))
+	_refresh_criteria()
+
+
+func _refresh_criteria() -> void:
+	if _crit_box == null:
+		return
+	for c in _crit_box.get_children():
+		_crit_box.remove_child(c)
+		c.queue_free()
+	var crit: Array = _state["criteria"]
+	var used: Dictionary = {}
+	var any_needed: bool = false
+	for entry in crit:
+		var d: Dictionary = entry
+		used[str(d["id"])] = true
+		var cid: String = str(d["id"])
+		var current: int = int(d["importance"]) if bool(d["necessary"]) else 0
+		any_needed = any_needed or current > 0
+		var card: VBoxContainer = UI.section(_crit_box, "")
+		var head := HBoxContainer.new()
+		card.add_child(head)
+		var nm: Label = UI.label(head, ItemCard.criterion_label(cid), "HeadingLabel")
+		nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var rm: Button = UI.button(head, T.t("Retirer"), "SmallButton")
+		rm.pressed.connect(_on_remove_criterion.bind(cid))
+		UI.choice_row(card, "", ["Non", "1", "2", "3", "4", "5"], [0, 1, 2, 3, 4, 5], current, _on_importance.bind(cid))
+	# critères restants
+	_crit_add.clear()
+	var registry: Array = _catalog.get("criteria", [])
+	for r in registry:
+		var rd: Dictionary = r
+		if not used.has(str(rd["id"])):
+			_crit_add.add_item(T.t(str(rd["label"])))
+			_crit_add.set_item_metadata(_crit_add.item_count - 1, str(rd["id"]))
+	_crit_add.disabled = _crit_add.item_count == 0
+	if _crit_next != null:
+		_crit_next.disabled = not any_needed
+		_crit_next.text = T.t("Suivant") if any_needed else T.t("Choisissez au moins un critère nécessaire")
+
+
+## Appelé avec (valeur, id du critère) : la valeur 0 = non nécessaire, 1 à 5 = importance.
+func _on_importance(value: Variant, cid: String) -> void:
+	for entry in (_state["criteria"] as Array):
+		var d: Dictionary = entry
+		if str(d["id"]) == cid:
+			d["necessary"] = int(value) > 0
+			d["importance"] = int(value)
+	var any_needed: bool = false
+	for entry in (_state["criteria"] as Array):
+		any_needed = any_needed or bool((entry as Dictionary)["necessary"])
+	if _crit_next != null:
+		_crit_next.disabled = not any_needed
+		_crit_next.text = T.t("Suivant") if any_needed else T.t("Choisissez au moins un critère nécessaire")
+
+
+func _on_remove_criterion(cid: String) -> void:
+	var kept: Array = []
+	for entry in (_state["criteria"] as Array):
+		if str((entry as Dictionary)["id"]) != cid:
+			kept.append(entry)
+	_state["criteria"] = kept
+	_refresh_criteria()
+
+
+func _on_add_criterion() -> void:
+	if _crit_add == null or _crit_add.item_count == 0 or _crit_add.selected < 0:
+		return
+	var cid: String = str(_crit_add.get_item_metadata(_crit_add.selected))
+	(_state["criteria"] as Array).append({"id": cid, "necessary": true, "importance": 3})
+	_refresh_criteria()
+
+
+func _on_criteria_next() -> void:
+	_go("picker")
+
+
+# ----------------------------------------- étape : aperçu des points
+func _build_preview() -> void:
+	var is_ai: bool = str(_state["creation_type"]) == "ai"
+	UI.label(_content, T.t("Aperçu des points"), "HeadingLabel")
+	var info: VBoxContainer = UI.section(_content, "")
+	UI.label(info, T.t("Voici ce que chaque carte rapportera. Les points sont figés au lancement de la partie.") if is_ai else T.t("Voici ce que chaque objet rapportera dans cette situation. Les points sont calculés par le serveur et figés au lancement de la partie."), "MutedLabel")
+	UI.label(info, T.t("%d objets sélectionnés, %d seront mis aux enchères.") % [_preview_items.size(), int(_state["item_count"])], "MutedLabel")
+	var sorted_items: Array = _preview_items.duplicate()
+	sorted_items.sort_custom(func(x: Dictionary, y: Dictionary) -> bool: return int(x.get("points", 0)) > int(y.get("points", 0)))
+	for it in sorted_items:
+		_content.add_child(ItemCard.make_card(it, true, false, true, 96.0))
+	if not is_ai:  # une partie IA n'a pas de critères
+		var edit_c: Button = UI.button(_content, T.t("Modifier les critères"), "SmallButton")
+		edit_c.pressed.connect(func() -> void: _go("criteria"))
+	var edit_i: Button = UI.button(_content, T.t("Modifier la sélection"), "SmallButton")
+	edit_i.pressed.connect(func() -> void: _go("ai_picker" if is_ai else "picker"))
+	if is_ai:
+		_action = UI.button(_content, T.t("Continuer vers le salon"), "PrimaryButton")
+		_action.pressed.connect(_open_lobby)
+	else:
+		_action = UI.button(_content, T.t("Créer le salon"), "PrimaryButton")
+		_action.pressed.connect(_on_create_custom)
 
 
 # --------------------------------------------------- étape : clé API (IA)
@@ -410,11 +661,12 @@ func _build_ai_key() -> void:
 	var info: VBoxContainer = UI.section(_content, T.t("Votre clé API"))
 	UI.label(info, T.t("La clé est envoyée au serveur de jeu uniquement pour cette génération, en HTTPS. Elle n'est ni enregistrée, ni partagée avec les autres joueurs, ni conservée après l'appel."), "MutedLabel")
 	UI.label(info, T.t("Votre fournisseur peut facturer chaque génération. Utilisez de préférence une clé dédiée, avec un plafond de dépenses."), "MutedLabel")
-	_provider = UI.choice_row(info, "Fournisseur", ["Anthropic (Claude)", "OpenAI (GPT)", "Google Gemini"],
-		["anthropic", "openai", "gemini"], _state["provider"])
+	_provider = UI.choice_row(info, "Fournisseur", ["Google Gemini (gratuit)", "OpenAI (GPT)", "Anthropic (Claude)"],
+		["gemini", "openai", "anthropic"], _state["provider"])
 	_key_edit = UI.field(info, "Clé API", "", 300)
 	_key_edit.secret = true
 	_key_edit.placeholder_text = T.t("Collez votre clé ici")
+	UI.label(info, T.t("Gemini : une clé gratuite se crée sur Google AI Studio (voir server/README.md). Pour un test en local, laissez vide si le serveur a GEMINI_API_KEY."), "MutedLabel")
 	UI.label(info, T.t("5 générations maximum par salon."), "MutedLabel")
 	_action = UI.button(_content, T.t("Générer les objets"), "PrimaryButton")
 	_action.pressed.connect(_on_generate)
@@ -440,16 +692,21 @@ func _on_generate() -> void:
 		return
 	_collect()
 	var api_key: String = _key_edit.text.strip_edges()
-	if api_key.length() < 10:
+	var payload: Dictionary = {"provider": str(_state["provider"])}
+	if api_key.length() >= 10:
+		if not _transport_ok():
+			_error.text = T.t("La clé API ne peut être envoyée qu'à un serveur en HTTPS.")
+			return
+		payload["api_key"] = api_key
+	elif str(_state["provider"]) == "gemini" and api_key == "":
+		payload["use_env_key"] = true  # essai local : clé GEMINI_API_KEY du serveur (refusée sinon)
+	else:
 		_error.text = T.t("Collez votre clé API.")
-		return
-	if not _transport_ok():
-		_error.text = T.t("La clé API ne peut être envoyée qu'à un serveur en HTTPS.")
 		return
 	_error.text = ""
 	_set_busy(true, T.t("Génération en cours (jusqu'à une minute)..."))
 	Session.net.request("generate", Session.server_url, HTTPClient.METHOD_POST,
-		"/rooms/%s/ai/generate" % Session.code, {"provider": str(_state["provider"]), "api_key": api_key},
+		"/rooms/%s/ai/generate" % Session.code, payload,
 		PackedStringArray(["Authorization: Bearer " + Session.token]), GENERATE_TIMEOUT)
 	api_key = ""
 	_key_edit.text = ""  # la clé ne reste pas à l'écran
@@ -459,9 +716,7 @@ func _on_validate_selection() -> void:
 	if _busy:
 		return
 	_collect()
-	var ids: Array = []
-	for k in (_state["selected"] as Dictionary):
-		ids.append(str(k))
+	var ids: Array = _selected_ids()
 	_set_busy(true, T.t("Validation..."))
 	Session.net.request("selection", Session.server_url, HTTPClient.METHOD_PUT,
 		"/rooms/%s/selection" % Session.code, {"item_ids": ids},
@@ -484,6 +739,7 @@ func _leave_ai_room() -> void:
 		Session.leave_room()
 	_ai_room = false
 	_ai_items = []
+	_state["selected"] = {}  # rien de la situation précédente ne reste sélectionné
 
 
 # ------------------------------------------------------------------ réseau
@@ -513,6 +769,7 @@ func _on_http_done(tag: String, ok: bool, data: Dictionary) -> void:
 				_fail(data)
 				return
 			_catalog = data
+			ItemCard.register_criteria(data.get("criteria", []))
 			_go(_pending)
 		"create":
 			_set_busy(false)
@@ -537,7 +794,9 @@ func _on_http_done(tag: String, ok: bool, data: Dictionary) -> void:
 				_fail(data)
 				return
 			_ai_items = data.get("items", [])
-			_state["trials_source"] = str(data.get("trials_source", ""))
+			_state["ai_profile"] = data.get("profile", {})
+			_state["ai_title"] = str((data.get("situation", {}) as Dictionary).get("title", ""))
+			_state["ai_description"] = str((data.get("situation", {}) as Dictionary).get("description", ""))
 			var chosen: Dictionary = {}
 			for it in _ai_items:
 				chosen[str((it as Dictionary)["id"])] = true
@@ -549,7 +808,15 @@ func _on_http_done(tag: String, ok: bool, data: Dictionary) -> void:
 				_fail(data)
 				return
 			Session.room = data["room"]
-			_open_lobby()
+			_preview_items = data.get("items", [])
+			_go("preview")
+		"preview":
+			_set_busy(false)
+			if not ok:
+				_fail(data)
+				return
+			_preview_items = data.get("items", [])
+			_go("preview")
 
 
 func _open_lobby() -> void:

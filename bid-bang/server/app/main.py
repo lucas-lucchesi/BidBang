@@ -6,11 +6,12 @@ from fastapi import FastAPI, Header, Query, Request, WebSocket, WebSocketDisconn
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
-from . import catalog, items, trials
+from . import catalog, criteria, items, scoring
 from .ai import base as ai_base
 from .ai import limits
 from .errors import GameError
-from .models import CreateRoomRequest, GenerateRequest, JoinRoomRequest, SelectionRequest
+from .models import (CreateRoomRequest, GenerateRequest, JoinRoomRequest, PreviewRequest,
+                     SelectionRequest)
 from .rooms import registry
 
 app = FastAPI(title="BidBang")
@@ -35,14 +36,28 @@ async def health():
 
 @app.get("/locations")
 async def locations():
-    return {"locations": catalog.list_locations()}
+    locs = catalog.list_locations()
+    for loc in locs:
+        loc["criteria"] = criteria.with_labels(loc["criteria"])
+    return {"locations": locs}
 
 
 @app.get("/items")
 async def list_items():
     """Objets du catalogue au format commun, pour la sélection d'une partie personnalisée."""
-    return {"items": items.catalog_items(), "categories": items.categories(),
-            "stats": list(items.STAT_KEYS), "trial_packs": trials.list_packs()}
+    return {"items": items.catalog_items(), "locations": items.locations_summary(),
+            "criteria": criteria.list_criteria(), "templates": criteria.templates()}
+
+
+@app.post("/scoring/preview")
+async def scoring_preview(body: PreviewRequest):
+    """Points des objets du catalogue pour des critères donnés (aperçu : rien n'est créé ni figé)."""
+    crit = criteria.clean_criteria(body.criteria)
+    known = items.catalog_item_map()
+    if len(set(body.item_ids)) != len(body.item_ids) or any(i not in known for i in body.item_ids):
+        raise GameError("Sélection d'objets invalide.")
+    return {"criteria": criteria.with_labels(crit),
+            "items": scoring.freeze_items([known[i] for i in body.item_ids], crit)}
 
 
 @app.get("/ai/providers")
@@ -77,6 +92,17 @@ def _secure_transport(request: Request) -> bool:
     if request.url.scheme == "https" or request.url.hostname in _LOOPBACK:
         return True
     return os.environ.get("BIDBANG_ALLOW_INSECURE_AI") == "1"
+
+
+def _env_key(request: Request, provider: str) -> str:
+    """Clé Gemini lue dans GEMINI_API_KEY, pour les essais locaux seulement : il faut
+    BIDBANG_ALLOW_ENV_KEY=1 et une requête venant de la machine locale. Ainsi un serveur
+    public ne dépense jamais la clé de son propriétaire pour un inconnu."""
+    key = os.environ.get("GEMINI_API_KEY", "").strip()
+    if provider != "gemini" or os.environ.get("BIDBANG_ALLOW_ENV_KEY") != "1" \
+            or request.url.hostname not in _LOOPBACK or not key:
+        raise GameError("Aucune clé serveur utilisable : collez votre clé API.", 400)
+    return key
 
 
 def _bearer(authorization: str | None) -> str:
@@ -115,7 +141,8 @@ async def ai_generate(code: str, body: GenerateRequest, request: Request,
         raise GameError("La clé API ne peut être envoyée qu'en HTTPS.", 400)
     room, player = _authenticate(request, code, authorization)
     provider = ai_base.get_provider(body.provider)
-    api_key = body.api_key.get_secret_value()
+    api_key = body.api_key.get_secret_value() if body.api_key is not None \
+        else _env_key(request, body.provider)
     try:
         return await room.ai_generate(player["id"], provider, api_key)
     finally:
@@ -126,8 +153,8 @@ async def ai_generate(code: str, body: GenerateRequest, request: Request,
 async def set_selection(code: str, body: SelectionRequest, request: Request,
                         authorization: str | None = Header(default=None)):
     room, player = _authenticate(request, code, authorization)
-    await room.set_selection(player["id"], body.item_ids)
-    return {"room": room.room_state()}
+    preview = await room.set_selection(player["id"], body.item_ids, body.criteria)
+    return {"room": room.room_state(), **preview}
 
 
 @app.websocket("/ws/{code}")

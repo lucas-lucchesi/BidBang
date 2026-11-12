@@ -1,0 +1,67 @@
+{
+ "criteria": [
+  {"id": "soins", "label": "Soins"},
+  {"id": "nourriture", "label": "Nourriture"},
+  {"id": "eau", "label": "Eau"},
+  {"id": "protection", "label": "Protection"},
+  {"id": "transport", "label": "Transport"},
+  {"id": "energie", "label": "Énergie"},
+  {"id": "abri", "label": "Abri"},
+  {"id": "chaleur", "label": "Chaleur"},
+  {"id": "communication", "label": "Communication"},
+  {"id": "outils", "label": "Outils"},
+  {"id": "confort", "label": "Confort"},
+  {"id": "decoration", "label": "Décoration"},
+  {"id": "luxe", "label": "Luxe"},
+  {"id": "divertissement", "label": "Divertissement"},
+  {"id": "nature", "label": "Nature"},
+  {"id": "technologie", "label": "Technologie"}
+ ],
+ "templates": [
+  {"id": "apocalypse_zombie", "name": "Apocalypse zombie",
+   "description": "Survivez pendant 30 jours dans une ville envahie par des zombies.",
+   "criteria": [
+    {"id": "soins", "necessary": true, "importance": 5},
+    {"id": "nourriture", "necessary": true, "importance": 5},
+    {"id": "eau", "necessary": true, "importance": 5},
+    {"id": "protection", "necessary": true, "importance": 5},
+    {"id": "transport", "necessary": true, "importance": 3},
+    {"id": "confort", "necessary": false},
+    {"id": "luxe", "necessary": false}]},
+  {"id": "mariage", "name": "Mariage extravagant",
+   "description": "Organisez le mariage le plus impressionnant possible.",
+   "criteria": [
+    {"id": "luxe", "necessary": true, "importance": 5},
+    {"id": "decoration", "necessary": true, "importance": 5},
+    {"id": "divertissement", "necessary": true, "importance": 4},
+    {"id": "nourriture", "necessary": true, "importance": 4},
+    {"id": "confort", "necessary": true, "importance": 3},
+    {"id": "protection", "necessary": false},
+    {"id": "soins", "necessary": false}]},
+  {"id": "villa_luxueuse", "name": "Villa luxueuse",
+   "description": "Aménagez la villa de vacances la plus agréable du monde.",
+   "criteria": [
+    {"id": "confort", "necessary": true, "importance": 5},
+    {"id": "luxe", "necessary": true, "importance": 5},
+    {"id": "divertissement", "necessary": true, "importance": 4},
+    {"id": "decoration", "necessary": true, "importance": 3},
+    {"id": "protection", "necessary": false},
+    {"id": "outils", "necessary": false}]},
+  {"id": "expedition", "name": "Expédition en terrain hostile",
+   "description": "Tenir une semaine loin de toute civilisation.",
+   "criteria": [
+    {"id": "abri", "necessary": true, "importance": 5},
+    {"id": "nourriture", "necessary": true, "importance": 4},
+    {"id": "eau", "necessary": true, "importance": 4},
+    {"id": "outils", "necessary": true, "importance": 4},
+    {"id": "communication", "necessary": true, "importance": 3},
+    {"id": "luxe", "necessary": false}]},
+  {"id": "polyvalent", "name": "Polyvalent",
+   "description": "Un peu de tout : se débrouiller et rester à l'aise.",
+   "criteria": [
+    {"id": "confort", "necessary": true, "importance": 3},
+    {"id": "outils", "necessary": true, "importance": 3},
+    {"id": "nourriture", "necessary": true, "importance": 3},
+    {"id": "protection", "necessary": true, "importance": 3}]}
+ ]
+}

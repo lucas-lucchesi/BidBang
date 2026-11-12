@@ -30,7 +30,7 @@ def test_resolves_when_everyone_played_highest_wins_pays_own_bid(blind):
     assert g.players["p2"]["items"] == [item]
     assert g.players["p2"]["budget"] == 2200 - 350
     assert g.players["p1"]["budget"] == 2200
-    assert g.last_result["winner_id"] == "p2" and g.last_result["price"] == 350
+    assert g.last_result["winner_id"] == "p2" and g.last_result["purchase_price"] == 350
     amounts = {b["player_id"]: b["amount"] for b in g.last_result["bids"]}
     assert amounts == {"p1": 200, "p2": 350, "p3": 0}
 
@@ -93,18 +93,13 @@ def test_broke_player_auto_passes(blind):
     assert g.last_result["winner_id"] == "p1"
 
 
-def test_full_game_with_votes_uses_building_scoring(blind):
+def test_full_blind_game_scores_sum_of_points_only(blind):
     g = blind(n=3, item_count=6)
     for _ in range(6):
         g.bid("p1", 50)
         g.fold("p2")
         g.fold("p3")
-    assert g.phase == "voting"
-    g.vote("p1", "p2")
-    g.vote("p2", "p1")
-    g.vote("p3", "p1")
-    assert g.phase == "finished"
+    assert g.phase == "finished"  # pas de phase de vote
     row = next(r for r in g.results if r["player_id"] == "p1")
-    assert row["votes"] == 2 and row["trials"] == []
-    assert row["items_points"] == sum(
-        sum(i["stats"].values()) + [0, 2, 4, 7][i["rarity"]] for i in g.players["p1"]["items"])
+    assert row["score"] == sum(i["points"] for i in g.players["p1"]["items"])
+    assert row["total_spent"] == 300 and g.players["p1"]["budget"] == 2200 - 300

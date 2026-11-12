@@ -1,5 +1,8 @@
 """Partie générée par IA : validation des réponses, sécurité de la clé, limites. Fournisseur simulé :
-aucune vraie clé, aucun appel réseau, aucune dépense."""
+aucune vraie clé, aucun appel réseau, aucune dépense.
+
+Une partie IA n'a pas de critères : l'IA attribue directement les points (1 à 100) de chaque carte
+(objet, joueur, métier, personnalité...), que le serveur valide puis fige au lancement."""
 import json
 import logging
 
@@ -16,29 +19,28 @@ from app.errors import GameError
 from app.items import compute_price, normalize_ai_item
 from app.main import app
 from app.rooms import registry
-from app.trials import normalize_ai_trials
 
 KEY = "sk-ant-TESTSECRET-0123456789abcdef"
-SCENARIO = "Vous êtes des milliardaires qui doivent construire une base sur Mars."
+SCENARIO = "Composez un onze de légende au football."
+
+
+PROFILE = {"goal": "Composer un onze de légende", "allowed_entity_types": ["football_player"],
+           "real_entities_only": False, "organization": None, "required_roles": [],
+           "allow_unrelated_items": False}
 
 
 def good_item(n=0, **over):
-    d = {"name": f"Objet martien {n}", "description": "Un objet utile.", "category": "Énergie",
-         "rarity": n % 2, "stats": {"confort": 2, "style": 1, "utilite": 3, "securite": 2, "sante": 1},
-         "tags": ["energie", "mars"]}
+    d = {"name": f"Légende {n}", "description": "Un joueur de légende.", "category": "Milieu",
+         "entity_type": "football_player", "is_real": False, "rarity": n % 4, "price": 150, "points": 5 + n * 6}
     d.update(over)
     return d
 
 
-def good_trials():
-    return [{"name": "Tempête de poussière", "description": "Survivre.", "stat": "securite", "threshold": 8},
-            {"name": "Manque d'oxygène", "description": "Respirer.", "stat": "sante", "threshold": 9},
-            {"name": "Panne", "description": "Réparer.", "stat": "utilite", "threshold": 7}]
-
-
-def response(items=None, trials=None):
-    return json.dumps({"items": items if items is not None else [good_item(i) for i in range(12)],
-                       "trials": trials if trials is not None else good_trials()})
+def response(items=None, **extra):
+    data = {"title": "Onze de légende", "description": "Les meilleurs joueurs de l'histoire.",
+            "profile": PROFILE, "items": items if items is not None else [good_item(i) for i in range(14)]}
+    data.update(extra)
+    return json.dumps(data)
 
 
 class FakeProvider:
@@ -80,7 +82,7 @@ def client():
 
 
 def ai_settings(**over):
-    s = {"creation_type": "ai", "mode": "construction", "item_count": 6,
+    s = {"creation_type": "ai", "mode": "normal", "item_count": 6,
          "scenario": {"description": SCENARIO}}
     s.update(over)
     return s
@@ -101,55 +103,57 @@ def generate(client, s, key=KEY, headers=None):
                        headers=headers if headers is not None else auth(s))
 
 
-# ------------------------------------------------------ validation des objets
-def test_valid_item_converted_and_price_computed_by_server():
+# ------------------------------------------------------ validation des cartes
+def test_valid_card_converted_with_server_generated_id():
     taken: set[str] = set()
-    it = normalize_ai_item(good_item(1, price=1, id="catalogue_01", icon="http://evil"), taken)
-    assert it["id"] == "ai_objet_martien_1" and it["source"] == "ai"
-    assert it["price"] == compute_price(it["stats"], it["rarity"]) != 1  # prix hors bornes : calcul serveur
-    assert it["icon"] == "box" and "ai_objet_martien_1" in taken
+    it = normalize_ai_item(good_item(1, id="catalogue_01", icon="http://evil", winner="p1"), taken)
+    assert it["id"] == "ai_legende_1" and it["source"] == "ai" and "ai_legende_1" in taken
+    assert it["icon"] == "box" and it["image"] is None
+    assert it["points"] == 11 and it["category"] == "Milieu" and it["price"] == 150
+    assert "winner" not in it and it["attributes"] == {}  # pas de critères en partie IA
+
+
+def test_points_are_given_by_the_ai_within_bounds():
+    for ok in (1, 50, 100):
+        assert normalize_ai_item(good_item(1, points=ok), set())["points"] == ok
+
+
+@pytest.mark.parametrize("bad", [0, -5, 101, 1000, "50", 50.5, True, None])
+def test_invalid_points_reject_the_card(bad):
+    assert normalize_ai_item(good_item(1, points=bad), set()) is None
 
 
 def test_proposed_price_kept_only_within_bounds():
-    ok = normalize_ai_item(good_item(1, price=254), set())
-    assert ok["price"] == 250
+    assert normalize_ai_item(good_item(1, price=254), set())["price"] == 250
     for bad in (19, 601, -5, "100", 99.5, True, None):
         it = normalize_ai_item(good_item(1, price=bad), set())
-        assert it["price"] == compute_price(it["stats"], it["rarity"])
+        assert it["price"] == compute_price(it["points"], it["rarity"])
+
+
+def test_category_is_free_text_with_default():
+    assert normalize_ai_item(good_item(1, category="Gardien de but"), set())["category"] == "Gardien de but"
+    assert normalize_ai_item(good_item(1, category=""), set())["category"] == "Divers"
+    assert normalize_ai_item(good_item(1, category="x" * 31), set()) is None
 
 
 @pytest.mark.parametrize("over", [
-    {"stats": {"confort": 9, "style": 1, "utilite": 3, "securite": 2, "sante": 1}},   # stat > 5
-    {"stats": {"confort": -1, "style": 1, "utilite": 3, "securite": 2, "sante": 1}},  # négative
-    {"stats": {"confort": 2, "style": 1, "utilite": 3, "securite": 2}},                # stat manquante
-    {"stats": {"confort": 2, "style": 1, "utilite": 3, "securite": 2, "sante": 1, "x": 1}},
-    {"stats": {"confort": "5", "style": 1, "utilite": 3, "securite": 2, "sante": 1}},
-    {"stats": {"confort": 0, "style": 0, "utilite": 0, "securite": 0, "sante": 0}},    # somme nulle
-    {"stats": {"confort": 5, "style": 5, "utilite": 5, "securite": 5, "sante": 5}},    # somme trop haute
     {"rarity": 4}, {"rarity": -1}, {"rarity": "rare"}, {"rarity": 1.5}, {"rarity": True},
-    {"name": ""}, {"name": "x" * 41}, {"category": ""}, {"description": "d" * 141},
-    {"tags": []}, {"tags": ["a"] * 5}, {"tags": [""]}, {"tags": "energie"},
+    {"name": ""}, {"name": "x" * 41}, {"description": "d" * 141},
 ])
-def test_invalid_items_rejected(over):
+def test_invalid_cards_rejected(over):
     assert normalize_ai_item(good_item(1, **over), set()) is None
 
 
 def test_missing_fields_rejected():
-    for field in ("name", "category", "rarity", "stats", "tags"):
+    for field in ("name", "rarity", "points"):
         d = good_item(1)
         del d[field]
         assert normalize_ai_item(d, set()) is None
-    assert normalize_ai_item("pas un objet", set()) is None
+    assert normalize_ai_item("pas une carte", set()) is None
     assert normalize_ai_item(None, set()) is None
 
 
-def test_legendary_may_have_higher_total_but_capped():
-    big = {"confort": 5, "style": 5, "utilite": 3, "securite": 1, "sante": 0}  # 14
-    assert normalize_ai_item(good_item(1, rarity=3, stats=big), set()) is not None
-    assert normalize_ai_item(good_item(1, rarity=1, stats=big), set()) is None
-
-
-def test_duplicate_ids_get_suffix_and_never_collide_with_catalog():
+def test_duplicate_ids_get_suffix_and_never_collide():
     taken = {"ai_objet"}
     a = normalize_ai_item(good_item(1, name="Objet"), taken)
     b = normalize_ai_item(good_item(2, name="Objet"), taken)
@@ -157,100 +161,121 @@ def test_duplicate_ids_get_suffix_and_never_collide_with_catalog():
 
 
 def test_control_chars_removed_from_text():
-    it = normalize_ai_item(good_item(1, name="Gén\x00é\x1brateur"), set())
-    assert it["name"] == "Générateur"
+    assert normalize_ai_item(good_item(1, name="Gén\x00é\x1brateur"), set())["name"] == "Générateur"
 
 
 # ------------------------------------------------------------ parse_response
+FALLBACK = {"title": "Titre hôte", "description": "Description de l'hôte pour la partie."}
+
+
+def parse(text, min_items=6, taken=None):
+    return generator.parse_response(text, min_items, taken if taken is not None else set(), FALLBACK)
+
+
 def test_parse_valid_response_with_code_fence():
-    res = generator.parse_response("```json\n" + response() + "\n```", "survie", 6, set())
-    assert len(res.items) == 12 and res.trials_source == "ai" and len(res.trials) == 3
-    assert [t["id"] for t in res.trials] == ["epreuve_1", "epreuve_2", "epreuve_3"]
+    res = parse("```json\n" + response() + "\n```")
+    assert len(res.items) == 14 and res.new_items == res.items
+    assert res.situation == {"title": "Onze de légende",
+                             "description": "Les meilleurs joueurs de l'histoire.", "criteria": []}
+    assert [i["points"] for i in res.items][:3] == [5, 11, 17]
+
+
+def test_criteria_in_response_are_ignored():
+    res = parse(response(criteria=[{"id": "soins", "necessary": True, "importance": 5}]))
+    assert res.situation["criteria"] == [] and len(res.items) == 14
 
 
 @pytest.mark.parametrize("text", ["", "pas du json", "[1,2,3]", "{", '{"items": "x"}',
                                   '{"items": []}', '{"items": [1,2,3]}', "x" * 50_000])
 def test_malformed_responses_rejected(text):
     with pytest.raises(GameError):
-        generator.parse_response(text, "construction", 6, set())
+        parse(text)
 
 
-def test_too_few_valid_items_rejected():
-    items = [good_item(i) for i in range(4)] + [good_item(9, rarity=9)] * 10
+def test_too_few_valid_cards_rejected():
+    items = [good_item(i) for i in range(4)] + [good_item(9, points=999)] * 10
     with pytest.raises(GameError, match="valide"):
-        generator.parse_response(response(items), "construction", 6, set())
+        parse(response(items))
 
 
 def test_duplicate_names_dropped():
-    items = [good_item(i) for i in range(7)] + [good_item(0)] * 3  # 3 doublons du nom « Objet martien 0 »
-    res = generator.parse_response(response(items), "construction", 6, set())
+    items = [good_item(i) for i in range(7)] + [good_item(0)] * 3
+    res = parse(response(items))
     assert len(res.items) == 7 and len({i["id"] for i in res.items}) == 7
 
 
 def test_item_count_capped():
-    items = [good_item(i) for i in range(100)]
-    res = generator.parse_response(response(items), "construction", 6, set())
+    res = parse(response([good_item(i % 90, name=f"Carte {i}") for i in range(100)]))
     assert len(res.items) <= generator.MAX_RAW_ITEMS
 
 
-def test_invalid_trials_fall_back_to_generic():
-    bad = [{"name": "x", "stat": "confort", "threshold": 99}] * 3
-    res = generator.parse_response(response(trials=bad), "survie", 6, set())
-    assert res.trials == [] and res.trials_source == "generic"
+def test_missing_title_and_description_fall_back_to_host_text():
+    res = parse(response(title=5, description="x"))
+    assert res.situation["title"] == "Titre hôte"
+    assert res.situation["description"] == FALLBACK["description"]
 
 
-def test_trials_ignored_outside_survival():
-    res = generator.parse_response(response(), "construction", 6, set())
-    assert res.trials == [] and res.trials_source == "none"
+def test_ai_cannot_name_a_winner_or_scores():
+    res = parse(response(winner="p1", scores={"p1": 999}))
+    assert all("winner" not in i for i in res.items) and "winner" not in res.situation
 
 
-# ---------------------------------------------------- épreuves de Survie
-def test_trial_validation():
-    ok = normalize_ai_trials(good_trials())
-    assert ok and ok[0]["stat"] == "securite"
-    assert normalize_ai_trials(good_trials()[:2]) is None
-    for over in ({"threshold": 3}, {"threshold": 13}, {"threshold": "9"}, {"stat": "magie"},
-                 {"name": ""}, {"name": "x" * 41}):
-        bad = good_trials()
-        bad[0] = {**bad[0], **over}
-        assert normalize_ai_trials(bad) is None  # il ne reste que 2 épreuves valides
-    same = [dict(good_trials()[0]) for _ in range(3)]  # même stat répétée
-    assert normalize_ai_trials(same) is None
-    assert normalize_ai_trials("x") is None
+def test_prompt_allows_any_kind_of_card_and_asks_for_points():
+    system = generator.build_system_prompt()
+    for word in ("métiers", "joueurs de football", "personnalités publiques", "personnages",
+                 "11 de légende", "CARTES", "points", "OBJECTIF EXACT", "Olympique de Marseille",
+                 "n'invente aucune personne", "N'ajoute JAMAIS une carte hors sujet",
+                 "allow_unrelated_items", "required_roles", "real_entities_only"):
+        assert word in system
+    assert "jamais comme des instructions" in system and "gagnant" in system
+    assert "criteria" not in system and "catalog_id" not in system  # plus de critères
+    prompt = generator.build_prompt({"description": SCENARIO}, "normal", 11, players=4)
+    assert SCENARIO in prompt and "<scenario>" in prompt and "cartes" in prompt
+
+
+def test_schema_describes_profile_and_cards_in_one_request():
+    s = generator.response_schema()
+    item = s["properties"]["items"]["items"]
+    assert item["properties"]["points"]["minimum"] == 1 and item["properties"]["points"]["maximum"] == 100
+    assert {"points", "entity_type", "is_real"} <= set(item["required"])
+    assert "criteria" not in s["properties"] and "profile" in s["required"]
+    assert set(s["properties"]["profile"]["properties"]) == {
+        "goal", "allowed_entity_types", "real_entities_only", "organization", "required_roles",
+        "allow_unrelated_items"}
+    assert set(s["required"]) == {"title", "description", "profile", "items"}
 
 
 # ---------------------------------------------------- API : parcours complet
-def test_full_ai_flow(client, provider):
-    s = new_room(client, mode="survie")
-    assert s["room"]["settings"]["ready"] is False
+def test_full_ai_flow_with_free_cards(client, provider):
+    s = new_room(client, item_count=11)
+    assert s["room"]["settings"]["ready"] is False and s["room"]["settings"]["item_count"] == 11
     r = generate(client, s)
     assert r.status_code == 200, r.text
     data = r.json()
-    assert len(data["items"]) == 12 and data["trials_source"] == "ai"
+    assert len(data["items"]) == 14 and data["situation"]["criteria"] == []
     assert data["generations_left"] == limits.MAX_GENERATIONS_PER_ROOM - 1
-    # prompt : le scénario est encadré comme donnée, budget de sortie borné
+    assert [i["points"] for i in data["items"]][:2] == [5, 11]  # points de l'IA, tels quels
+    assert all(i["usefulness"] in ("high", "medium", "low", "none") for i in data["items"])
     call = provider.calls[0]
     assert "<scenario>" in call["prompt"] and SCENARIO in call["prompt"]
     assert call["max_tokens"] == generator.MAX_TOKENS and call["timeout"] == generator.TIMEOUT_SECONDS
-    # la partie ne peut pas démarrer sans validation de l'hôte
     b = client.post(f"/rooms/{s['code']}/join", json={"pseudo": "Bob"}).json()
-    ids = [i["id"] for i in data["items"]][:8]
+    ids = [i["id"] for i in data["items"]][:11]
     with client.websocket_connect(f"/ws/{s['code']}?token={s['token']}") as wa, \
          client.websocket_connect(f"/ws/{s['code']}?token={b['token']}"):
         wa.send_json({"type": "start_game"})
-        msg = _wait(wa, "error")
-        assert "valider" in msg["message"]
-        # validation : mélange d'objets IA et d'objets du catalogue
-        sel = client.put(f"/rooms/{s['code']}/selection", headers=auth(s),
-                         json={"item_ids": ids[:6] + ["plage_01", "cabane_01"]})
+        assert "valider" in _wait(wa, "error")["message"]
+        sel = client.put(f"/rooms/{s['code']}/selection", headers=auth(s), json={"item_ids": ids})
         assert sel.status_code == 200 and sel.json()["room"]["settings"]["ready"] is True
         wa.send_json({"type": "start_game"})
         game = _wait(wa, "game_state")["game"]
-        assert game["creation_type"] == "ai" and game["phase"] == "auction"
-        assert game["auction"]["item"]["id"] in ids[:6] + ["plage_01", "cabane_01"]
-        assert [t["id"] for t in game["scenario"]["trials"]] == ["epreuve_1", "epreuve_2", "epreuve_3"]
-        # plus de génération après le lancement
-        assert generate(client, s).status_code == 409
+        assert game["creation_type"] == "ai" and game["phase"] == "auction" and game["item_total"] == 11
+        item = game["auction"]["item"]
+        assert item["id"] in ids
+        expected = next(i["points"] for i in data["items"] if i["id"] == item["id"])
+        assert item["points"] == expected  # points de l'IA, figés au lancement
+        assert game["situation"]["title"] == "Onze de légende" and game["situation"]["criteria"] == []
+        assert generate(client, s).status_code == 409  # plus de génération après le lancement
 
 
 def _wait(ws, kind):
@@ -258,6 +283,35 @@ def _wait(ws, kind):
         m = ws.receive_json()
         if m["type"] == kind:
             return m
+
+
+def test_ai_game_has_no_criteria_and_rejects_them(client, provider):
+    s = new_room(client)
+    ids = [i["id"] for i in generate(client, s).json()["items"]][:6]
+    base = f"/rooms/{s['code']}/selection"
+    r = client.put(base, headers=auth(s), json={"item_ids": ids, "criteria": [
+        {"id": "soins", "necessary": True, "importance": 5}]})
+    assert r.status_code == 400 and "critères" in r.json()["detail"]
+    assert client.put(base, headers=auth(s), json={"item_ids": ids}).status_code == 200
+
+
+def test_catalog_items_are_not_selectable_in_ai_games(client, provider):
+    s = new_room(client)
+    ids = [i["id"] for i in generate(client, s).json()["items"]]
+    base = f"/rooms/{s['code']}/selection"
+    assert client.put(base, headers=auth(s), json={"item_ids": ids[:5] + ["plage_01"]}).status_code == 400
+
+
+def test_points_are_frozen_copies_in_game(client, provider):
+    from app.game import Game
+    s = new_room(client)
+    ids = [i["id"] for i in generate(client, s).json()["items"]][:6]
+    client.put(f"/rooms/{s['code']}/selection", headers=auth(s), json={"item_ids": ids})
+    room = registry.get(s["code"])
+    g = Game([("a", "A"), ("b", "B")], room.settings, pool=list(room.ai_items.values()))
+    before = {i["id"]: i["points"] for i in g.items}
+    room.ai_items[ids[0]]["points"] = 100  # même si la source change ensuite
+    assert {i["id"]: i["points"] for i in g.items} == before
 
 
 def test_selection_rules(client, provider):
@@ -268,12 +322,36 @@ def test_selection_rules(client, provider):
     ids = [i["id"] for i in generate(client, s).json()["items"]]
     assert client.put(base, headers=auth(s), json={"item_ids": ids[:3]}).status_code == 400  # insuffisant
     assert client.put(base, headers=auth(s), json={"item_ids": ids[:6] + ids[:1]}).status_code == 400  # doublon
-    # une régénération invalide la sélection précédente
     assert client.put(base, headers=auth(s), json={"item_ids": ids[:6]}).status_code == 200
-    r = generate(client, s)
-    assert r.status_code == 200
-    ready = client.put(base, headers=auth(s), json={"item_ids": ["plage_01"] * 1})
-    assert ready.status_code == 400
+    assert generate(client, s).status_code == 200  # une régénération invalide la sélection
+    assert registry.get(s["code"]).settings["ready"] is False
+
+
+def test_card_count_is_chosen_by_the_host_up_to_20():
+    from app.game import validate_settings
+    for n in (6, 11, 12, 20):
+        assert validate_settings({"creation_type": "ai", "item_count": n, "scenario": {"description": SCENARIO}},
+                                 require_selection=False)["item_count"] == n
+    for bad in (5, 21, 100, 0, -3, "8", 8.5, True, None):
+        with pytest.raises(GameError):
+            validate_settings({"item_count": bad})
+    with pytest.raises(GameError, match="au plus 12"):  # un lieu classique n'a que 12 objets
+        validate_settings({"theme_id": "cabane", "item_count": 20})
+
+
+def test_mock_provider_generates_football_cards_without_key(client, monkeypatch):
+    monkeypatch.setenv("BIDBANG_MOCK_AI", "1")
+    assert "mock" in [p["id"] for p in client.get("/ai/providers").json()["providers"]]
+    s = new_room(client, item_count=11, scenario={"description": "Un 11 de légende au football."})
+    r = client.post(f"/rooms/{s['code']}/ai/generate",
+                    json={"provider": "mock", "api_key": "0123456789"}, headers=auth(s))
+    assert r.status_code == 200, r.text
+    data = r.json()
+    assert data["situation"]["title"] == "Onze de légende" and len(data["items"]) >= 12
+    assert {i["category"] for i in data["items"]} >= {"Gardien", "Défenseur", "Milieu", "Attaquant"}
+    assert all(1 <= i["points"] <= 100 for i in data["items"])
+    monkeypatch.delenv("BIDBANG_MOCK_AI")
+    assert "mock" not in [p["id"] for p in client.get("/ai/providers").json()["providers"]]
 
 
 # ------------------------------------------------------ autorisation
